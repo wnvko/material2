@@ -59,6 +59,11 @@ export class OverlayConfig {
    */
   disposeOnNavigation?: boolean = false;
 
+  /**
+   * Whether the overlay should be detached on outside click
+   */
+  detachOnOutsideClick?: boolean = false;
+
   constructor(config?: OverlayConfig) {
     if (config) {
       Object.keys(config).forEach(k => {
