@@ -13,6 +13,7 @@ import {Location} from '@angular/common';
 import {Observable, Subject, merge, SubscriptionLike, Subscription, Observer} from 'rxjs';
 import {take, takeUntil} from 'rxjs/operators';
 import {OverlayKeyboardDispatcher} from './keyboard/overlay-keyboard-dispatcher';
+import {OverlayMouseClickDispatcher} from './mouse/overlay-mouse-click-dispatcher';
 import {OverlayConfig} from './overlay-config';
 import {coerceCssPixelValue, coerceArray} from '@angular/cdk/coercion';
 import {OverlayReference} from './overlay-reference';
@@ -71,7 +72,9 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
       private _keyboardDispatcher: OverlayKeyboardDispatcher,
       private _document: Document,
       // @breaking-change 8.0.0 `_location` parameter to be made required.
-      private _location?: Location) {
+      private _location?: Location,
+      // @breaking-change 9.0.0 `_mouseClickDispatcher` parameter to be made required.
+      private _mouseClickDispatcher?: OverlayMouseClickDispatcher) {
 
     if (_config.scrollStrategy) {
       this._scrollStrategy = _config.scrollStrategy;
@@ -167,6 +170,11 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
       this._locationChanges = this._location.subscribe(() => this.dispose());
     }
 
+    // @breaking-change 9.0.0 remove the null check for `_mouseClickDispatcher`
+    if (this._mouseClickDispatcher) {
+      this._mouseClickDispatcher.add(this);
+    }
+
     return attachResult;
   }
 
@@ -209,6 +217,11 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
     // Stop listening for location changes.
     this._locationChanges.unsubscribe();
 
+    // @breaking-change 9.0.0 remove the null check for `_mouseClickDispatcher`
+    if (this._mouseClickDispatcher) {
+      this._mouseClickDispatcher.remove(this);
+    }
+
     return detachmentResult;
   }
 
@@ -228,6 +241,11 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
     this._attachments.complete();
     this._backdropClick.complete();
     this._keydownEvents.complete();
+
+    // @breaking-change 9.0.0 remove the null check for `_mouseClickDispatcher`
+    if (this._mouseClickDispatcher) {
+      this._mouseClickDispatcher.remove(this);
+    }
 
     if (this._host && this._host.parentNode) {
       this._host.parentNode.removeChild(this._host);

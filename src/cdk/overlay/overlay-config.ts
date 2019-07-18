@@ -64,6 +64,11 @@ export class OverlayConfig {
    */
   detachOnOutsideClick?: boolean = false;
 
+  /**
+   * Array of HTML elements clicking on which should not be considered as outside click
+   */
+  excludeFromOutsideClick?: HTMLElement[] = [];
+
   constructor(config?: OverlayConfig) {
     if (config) {
       Object.keys(config).forEach(k => {

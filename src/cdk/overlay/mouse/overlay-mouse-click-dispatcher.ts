@@ -78,12 +78,13 @@ export class OverlayMouseClickDispatcher implements OnDestroy {
 
     for (let i = overlays.length - 1; i > -1; i--) {
       const overlayRef: OverlayRef = overlays[i];
-      const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
-
-      
-      const isOutsideClick =
-        event.clientX < overlayRect.left && overlayRect.right < event.clientX &&
-        event.clientY < overlayRect.top && overlayRect.bottom < event.clientY
+      const config = overlayRef.getConfig();
+      const elements = [...config.excludeFromOutsideClick!];
+      elements.push(overlayRef.overlayElement);
+      let isOutsideClick: boolean = false;
+      isOutsideClick = elements.reduce((v: boolean, e: HTMLElement) => {
+          return v || !this._ClickInsideElement(event.clientX, event.clientY, e);
+        }, isOutsideClick);
 
       // If is outside click check if we should detach overlay. If so detach it
       // If not outside click return - the click is on overlay and we should do nothing
@@ -95,5 +96,11 @@ export class OverlayMouseClickDispatcher implements OnDestroy {
         return;
       }
     }
+  }
+
+  _ClickInsideElement(clickX: number, clickY: number, element: HTMLElement): boolean {
+    const elementRect = element.getBoundingClientRect();
+    return elementRect.left < clickX && clickX < elementRect.right &&
+    elementRect.top < clickY && clickY < elementRect.bottom;
   }
 }
