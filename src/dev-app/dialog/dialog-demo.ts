@@ -14,7 +14,6 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angula
 const defaultDialogConfig = new MatDialogConfig();
 
 @Component({
-  moduleId: module.id,
   selector: 'dialog-demo',
   templateUrl: 'dialog-demo.html',
   styleUrls: ['dialog-demo.css'],
@@ -47,13 +46,13 @@ export class DialogDemo {
   };
   numTemplateOpens = 0;
 
-  @ViewChild(TemplateRef, {static: false}) template: TemplateRef<any>;
+  @ViewChild(TemplateRef) template: TemplateRef<any>;
 
   constructor(public dialog: MatDialog, @Inject(DOCUMENT) doc: any) {
     // Possible useful example for the open and closeAll events.
     // Adding a class to the body if a dialog opens and
     // removing it after all open dialogs are closed
-    dialog.afterOpen.subscribe(() => {
+    dialog.afterOpened.subscribe(() => {
       if (!doc.body.classList.contains('no-scroll')) {
         doc.body.classList.add('no-scroll');
       }
@@ -175,7 +174,7 @@ export class JazzDialog {
 
       <button
         mat-button
-        color="secondary"
+        color="accent"
         (click)="showInStackedDialog()">
         Show in Dialog</button>
     </mat-dialog-actions>

@@ -3,9 +3,13 @@
   "version": "0.0.0-PLACEHOLDER",
   "description": "Angular Material",
   "main": "./bundles/material.umd.js",
-  "module": "./esm5/material.es5.js",
-  "es2015": "./esm2015/material.js",
-  "typings": "./material.d.ts",
+  "fesm5": "./fesm5/material.js",
+  "fesm2015": "./fesm2015/material.js",
+  "esm5": "./esm5/index.js",
+  "esm2015": "./esm2015/index.js",
+  "typings": "./index.d.ts",
+  "module": "./fesm5/material.js",
+  "es2015": "./fesm2015/material.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/angular/components.git"
@@ -26,10 +30,8 @@
     "@angular/cdk": "0.0.0-PLACEHOLDER",
     "@angular/core": "0.0.0-NG",
     "@angular/common": "0.0.0-NG",
-    "@angular/forms": "0.0.0-NG"
-  },
-  "dependencies": {
-    "tslib": "^1.7.1"
+    "@angular/forms": "0.0.0-NG",
+    "tslib": "^1.9.0"
   },
   "schematics": "./schematics/collection.json",
   "ng-update": {
@@ -40,6 +42,9 @@
       "@angular/material-moment-adapter"
     ]
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "publishConfig":{
+    "registry":"https://wombat-dressing-room.appspot.com"
+  }
 }
 

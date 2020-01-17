@@ -1,7 +1,7 @@
 import {async, ComponentFixture, TestBed, inject, tick, fakeAsync} from '@angular/core/testing';
 import {Component, ViewChild} from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {dispatchMouseEvent} from '@angular/cdk/testing';
+import {dispatchMouseEvent} from '@angular/cdk/testing/private';
 import {ThemePalette} from '@angular/material/core';
 import {MatSelect} from '@angular/material/select';
 import {By} from '@angular/platform-browser';
@@ -47,14 +47,14 @@ describe('MatPaginator', () => {
       component.pageSize = 10;
       component.pageIndex = 1;
       fixture.detectChanges();
-      expect(rangeElement.innerText).toBe('11 - 20 of 100');
+      expect(rangeElement.innerText).toBe('11 – 20 of 100');
 
       // View third page of list of 200, each page contains 20 items.
       component.length = 200;
       component.pageSize = 20;
       component.pageIndex = 2;
       fixture.detectChanges();
-      expect(rangeElement.innerText).toBe('41 - 60 of 200');
+      expect(rangeElement.innerText).toBe('41 – 60 of 200');
 
       // View first page of list of 0, each page contains 5 items.
       component.length = 0;
@@ -68,21 +68,21 @@ describe('MatPaginator', () => {
       component.pageSize = 5;
       component.pageIndex = 2;
       fixture.detectChanges();
-      expect(rangeElement.innerText).toBe('11 - 12 of 12');
+      expect(rangeElement.innerText).toBe('11 – 12 of 12');
 
       // View third page of list of 10, each page contains 5 items.
       component.length = 10;
       component.pageSize = 5;
       component.pageIndex = 2;
       fixture.detectChanges();
-      expect(rangeElement.innerText).toBe('11 - 15 of 10');
+      expect(rangeElement.innerText).toBe('11 – 15 of 10');
 
       // View third page of list of -5, each page contains 5 items.
       component.length = -5;
       component.pageSize = 5;
       component.pageIndex = 2;
       fixture.detectChanges();
-      expect(rangeElement.innerText).toBe('11 - 15 of 0');
+      expect(rangeElement.innerText).toBe('11 – 15 of 0');
     });
 
     it('should show right aria-labels for select and buttons', () => {
@@ -164,7 +164,7 @@ describe('MatPaginator', () => {
   });
 
   it('should not allow a negative pageIndex', () => {
-    paginator.pageSize = -42;
+    paginator.pageIndex = -42;
     expect(paginator.pageIndex).toBeGreaterThanOrEqual(0);
   });
 
@@ -247,19 +247,19 @@ describe('MatPaginator', () => {
   it('should mark for check when inputs are changed directly', () => {
     const rangeElement = fixture.nativeElement.querySelector('.mat-paginator-range-label');
 
-    expect(rangeElement.innerText).toBe('1 - 10 of 100');
+    expect(rangeElement.innerText).toBe('1 – 10 of 100');
 
     paginator.length = 99;
     fixture.detectChanges();
-    expect(rangeElement.innerText).toBe('1 - 10 of 99');
+    expect(rangeElement.innerText).toBe('1 – 10 of 99');
 
     paginator.pageSize = 6;
     fixture.detectChanges();
-    expect(rangeElement.innerText).toBe('1 - 6 of 99');
+    expect(rangeElement.innerText).toBe('1 – 6 of 99');
 
     paginator.pageIndex = 1;
     fixture.detectChanges();
-    expect(rangeElement.innerText).toBe('7 - 12 of 99');
+    expect(rangeElement.innerText).toBe('7 – 12 of 99');
 
     // Having one option and the same page size should remove the select menu
     expect(fixture.nativeElement.querySelector('.mat-select')).not.toBeNull();
@@ -391,7 +391,8 @@ describe('MatPaginator', () => {
   });
 
   it('should be able to disable all the controls in the paginator via the binding', () => {
-    const select: MatSelect = fixture.debugElement.query(By.directive(MatSelect)).componentInstance;
+    const select: MatSelect =
+        fixture.debugElement.query(By.directive(MatSelect))!.componentInstance;
 
     fixture.componentInstance.pageIndex = 1;
     fixture.componentInstance.showFirstLastButtons = true;
@@ -456,7 +457,7 @@ class MatPaginatorApp {
   pageEvent = jasmine.createSpy('page event');
   color: ThemePalette;
 
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 
   goToLastPage() {
     this.pageIndex = Math.ceil(this.length / this.pageSize) - 1;
@@ -469,7 +470,7 @@ class MatPaginatorApp {
   `,
 })
 class MatPaginatorWithoutInputsApp {
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 }
 
 @Component({
@@ -478,7 +479,7 @@ class MatPaginatorWithoutInputsApp {
   `,
 })
 class MatPaginatorWithoutPageSizeApp {
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 }
 
 @Component({
@@ -487,7 +488,7 @@ class MatPaginatorWithoutPageSizeApp {
   `,
 })
 class MatPaginatorWithoutOptionsApp {
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 }
 
 @Component({
@@ -500,5 +501,5 @@ class MatPaginatorWithoutOptionsApp {
   `
   })
 class MatPaginatorWithStringValues {
-  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
 }

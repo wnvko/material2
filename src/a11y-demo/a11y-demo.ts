@@ -11,7 +11,6 @@ import {NavigationEnd, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 
 @Component({
-  moduleId: module.id,
   templateUrl: 'a11y-demo.html',
   styleUrls: ['a11y-demo.css'],
 })
@@ -21,8 +20,8 @@ export class AccessibilityDemoRoot implements OnDestroy {
 
   private _routerSubscription = Subscription.EMPTY;
 
-  @ViewChild('maincontent', {static: false}) mainContent: ElementRef<HTMLElement>;
-  @ViewChild('header', {static: false}) sectionHeader: ElementRef<HTMLElement>;
+  @ViewChild('maincontent') mainContent: ElementRef<HTMLElement>;
+  @ViewChild('header') sectionHeader: ElementRef<HTMLElement>;
 
   navItems = [
     {name: 'Home', route: '.'},
@@ -82,7 +81,6 @@ export class AccessibilityDemoRoot implements OnDestroy {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'accessibility-home',
   template: `<p>Welcome to the accessibility examples for Angular Material!</p>`,
 })

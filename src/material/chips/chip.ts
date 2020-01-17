@@ -22,6 +22,7 @@ import {
   OnDestroy,
   Optional,
   Output,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   CanColor,
@@ -151,13 +152,13 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
   _chipListMultiple: boolean = false;
 
   /** The chip avatar */
-  @ContentChild(MatChipAvatar, {static: false}) avatar: MatChipAvatar;
+  @ContentChild(MatChipAvatar) avatar: MatChipAvatar;
 
   /** The chip's trailing icon. */
-  @ContentChild(MatChipTrailingIcon, {static: false}) trailingIcon: MatChipTrailingIcon;
+  @ContentChild(MatChipTrailingIcon) trailingIcon: MatChipTrailingIcon;
 
   /** The chip's remove toggler. */
-  @ContentChild(forwardRef(() => MatChipRemove), {static: false}) removeIcon: MatChipRemove;
+  @ContentChild(forwardRef(() => MatChipRemove)) removeIcon: MatChipRemove;
 
   /** Whether the chip is selected. */
   @Input()
@@ -175,7 +176,7 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
   /** The value of the chip. Defaults to the content inside `<mat-chip>` tags. */
   @Input()
   get value(): any {
-    return this._value != undefined
+    return this._value !== undefined
       ? this._value
       : this._elementRef.nativeElement.textContent;
   }
@@ -235,13 +236,15 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
               @Optional() @Inject(MAT_RIPPLE_GLOBAL_OPTIONS)
               globalRippleOptions: RippleGlobalOptions | null,
               // @breaking-change 8.0.0 `animationMode` parameter to become required.
-              @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
+              @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string,
+              // @breaking-change 9.0.0 `_changeDetectorRef` parameter to become required.
+              private _changeDetectorRef?: ChangeDetectorRef) {
     super(_elementRef);
 
     this._addHostClassName();
 
     this._chipRipple = new RippleRenderer(this, _ngZone, _elementRef, platform);
-    this._chipRipple.setupTriggerEvents(_elementRef.nativeElement);
+    this._chipRipple.setupTriggerEvents(_elementRef);
     this.rippleConfig = globalRippleOptions || {};
     this._animationsDisabled = animationMode === 'NoopAnimations';
   }
@@ -269,6 +272,7 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
     if (!this._selected) {
       this._selected = true;
       this._dispatchSelectionChange();
+      this._markForCheck();
     }
   }
 
@@ -277,6 +281,7 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
     if (this._selected) {
       this._selected = false;
       this._dispatchSelectionChange();
+      this._markForCheck();
     }
   }
 
@@ -285,6 +290,7 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
     if (!this._selected) {
       this._selected = true;
       this._dispatchSelectionChange(true);
+      this._markForCheck();
     }
   }
 
@@ -292,6 +298,7 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
   toggleSelected(isUserInput: boolean = false): boolean {
     this._selected = !this.selected;
     this._dispatchSelectionChange(isUserInput);
+    this._markForCheck();
     return this.selected;
   }
 
@@ -374,6 +381,19 @@ export class MatChip extends _MatChipMixinBase implements FocusableOption, OnDes
       selected: this._selected
     });
   }
+
+  private _markForCheck() {
+    // @breaking-change 9.0.0 Remove this method once the _changeDetectorRef is a required param.
+    if (this._changeDetectorRef) {
+      this._changeDetectorRef.markForCheck();
+    }
+  }
+
+  static ngAcceptInputType_selected: boolean | string | null | undefined;
+  static ngAcceptInputType_selectable: boolean | string | null | undefined;
+  static ngAcceptInputType_removable: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
 

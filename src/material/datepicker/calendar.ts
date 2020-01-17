@@ -47,7 +47,6 @@ export type MatCalendarView = 'month' | 'year' | 'multi-year';
 
 /** Default header for MatCalendar */
 @Component({
-  moduleId: module.id,
   selector: 'mat-calendar-header',
   templateUrl: 'calendar-header.html',
   exportAs: 'matCalendarHeader',
@@ -82,7 +81,11 @@ export class MatCalendarHeader<D> {
     const minYearOfPage = activeYear - getActiveOffset(
       this._dateAdapter, this.calendar.activeDate, this.calendar.minDate, this.calendar.maxDate);
     const maxYearOfPage = minYearOfPage + yearsPerPage - 1;
-    return `${minYearOfPage} \u2013 ${maxYearOfPage}`;
+    const minYearName =
+      this._dateAdapter.getYearName(this._dateAdapter.createDate(minYearOfPage, 0, 1));
+    const maxYearName =
+      this._dateAdapter.getYearName(this._dateAdapter.createDate(maxYearOfPage, 0, 1));
+    return this._intl.formatYearRange(minYearName, maxYearName);
   }
 
   get periodButtonLabel(): string {
@@ -167,7 +170,6 @@ export class MatCalendarHeader<D> {
  * @docs-private
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-calendar',
   templateUrl: 'calendar.html',
   styleUrls: ['calendar.css'],
@@ -254,13 +256,13 @@ export class MatCalendar<D> implements AfterContentInit, AfterViewChecked, OnDes
   @Output() readonly _userSelection: EventEmitter<void> = new EventEmitter<void>();
 
   /** Reference to the current month view component. */
-  @ViewChild(MatMonthView, {static: false}) monthView: MatMonthView<D>;
+  @ViewChild(MatMonthView) monthView: MatMonthView<D>;
 
   /** Reference to the current year view component. */
-  @ViewChild(MatYearView, {static: false}) yearView: MatYearView<D>;
+  @ViewChild(MatYearView) yearView: MatYearView<D>;
 
   /** Reference to the current multi-year view component. */
-  @ViewChild(MatMultiYearView, {static: false}) multiYearView: MatMultiYearView<D>;
+  @ViewChild(MatMultiYearView) multiYearView: MatMultiYearView<D>;
 
   /**
    * The current active date. This determines which time period is shown and which date is
@@ -358,8 +360,8 @@ export class MatCalendar<D> implements AfterContentInit, AfterViewChecked, OnDes
   }
 
   /** Handles date selection in the month view. */
-  _dateSelected(date: D): void {
-    if (!this._dateAdapter.sameDate(date, this.selected)) {
+  _dateSelected(date: D | null): void {
+    if (date && !this._dateAdapter.sameDate(date, this.selected)) {
       this.selectedChange.emit(date);
     }
   }

@@ -36,7 +36,6 @@ ts_library(
         "@npm//glob",
         "@npm//parse5",
         "@npm//typescript",
-        "@npm//chalk",
     ],
 )
 
@@ -89,5 +88,5 @@ filegroup(
     srcs = glob([
         "ng-update/test-cases/**/*_input.ts",
         "ng-update/test-cases/**/*_expected_output.ts",
-    ]),
+    ]) + ["ng-update/test-cases/misc/global-stylesheets-test.scss"],
 )

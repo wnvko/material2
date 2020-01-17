@@ -7,7 +7,7 @@ import {
   dispatchKeyboardEvent,
   createKeyboardEvent,
   dispatchEvent,
-} from '@angular/cdk/testing';
+} from '@angular/cdk/testing/private';
 import {CommonModule} from '@angular/common';
 import {Component, ViewChild} from '@angular/core';
 import {
@@ -268,7 +268,7 @@ describe('MatTabHeader', () => {
 
         expect(appComponent.tabHeader._showPaginationControls).toBe(true);
 
-        const buttonAfter = fixture.debugElement.query(By.css('.mat-tab-header-pagination-after'));
+        const buttonAfter = fixture.debugElement.query(By.css('.mat-tab-header-pagination-after'))!;
 
         expect(fixture.nativeElement.querySelectorAll('.mat-ripple-element').length)
           .toBe(0, 'Expected no ripple to show up initially.');
@@ -287,7 +287,7 @@ describe('MatTabHeader', () => {
 
         expect(appComponent.tabHeader._showPaginationControls).toBe(true);
 
-        const buttonAfter = fixture.debugElement.query(By.css('.mat-tab-header-pagination-after'));
+        const buttonAfter = fixture.debugElement.query(By.css('.mat-tab-header-pagination-after'))!;
 
         expect(fixture.nativeElement.querySelectorAll('.mat-ripple-element').length)
           .toBe(0, 'Expected no ripple to show up initially.');
@@ -523,6 +523,40 @@ describe('MatTabHeader', () => {
 
     });
 
+    describe('disabling pagination', () => {
+      it('should not show the pagination controls if pagination is disabled', () => {
+        fixture = TestBed.createComponent(SimpleTabHeaderApp);
+        appComponent = fixture.componentInstance;
+        appComponent.disablePagination = true;
+        fixture.detectChanges();
+        expect(appComponent.tabHeader._showPaginationControls).toBe(false);
+
+        // Add enough tabs that it will obviously exceed the width
+        appComponent.addTabsForScrolling();
+        fixture.detectChanges();
+
+        expect(appComponent.tabHeader._showPaginationControls).toBe(false);
+      });
+
+      it('should not change the scroll position if pagination is disabled', () => {
+        fixture = TestBed.createComponent(SimpleTabHeaderApp);
+        appComponent = fixture.componentInstance;
+        appComponent.disablePagination = true;
+        fixture.detectChanges();
+        appComponent.addTabsForScrolling();
+        fixture.detectChanges();
+        expect(appComponent.tabHeader.scrollDistance).toBe(0);
+
+        appComponent.tabHeader.focusIndex = appComponent.tabs.length - 1;
+        fixture.detectChanges();
+        expect(appComponent.tabHeader.scrollDistance).toBe(0);
+
+        appComponent.tabHeader.focusIndex = 0;
+        fixture.detectChanges();
+        expect(appComponent.tabHeader.scrollDistance).toBe(0);
+      });
+    });
+
     it('should re-align the ink bar when the direction changes', fakeAsync(() => {
       fixture = TestBed.createComponent(SimpleTabHeaderApp);
 
@@ -617,7 +651,8 @@ interface Tab {
   <div [dir]="dir">
     <mat-tab-header [selectedIndex]="selectedIndex" [disableRipple]="disableRipple"
                (indexFocused)="focusedIndex = $event"
-               (selectFocusedIndex)="selectedIndex = $event">
+               (selectFocusedIndex)="selectedIndex = $event"
+               [disablePagination]="disablePagination">
       <div matTabLabelWrapper class="label-content" style="min-width: 30px; width: 30px"
            *ngFor="let tab of tabs; let i = index"
            [disabled]="!!tab.disabled"
@@ -637,6 +672,7 @@ class SimpleTabHeaderApp {
   disableRipple: boolean = false;
   selectedIndex: number = 0;
   focusedIndex: number;
+  disablePagination: boolean;
   disabledTabIndex = 1;
   tabs: Tab[] = [{label: 'tab one'}, {label: 'tab one'}, {label: 'tab one'}, {label: 'tab one'}];
   dir: Direction = 'ltr';

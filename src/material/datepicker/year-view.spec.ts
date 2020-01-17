@@ -9,7 +9,7 @@ import {
   RIGHT_ARROW,
   UP_ARROW,
 } from '@angular/cdk/keycodes';
-import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing';
+import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing/private';
 import {Component, ViewChild} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatNativeDateModule} from '@angular/material/core';
@@ -51,7 +51,7 @@ describe('MatYearView', () => {
       fixture = TestBed.createComponent(StandardYearView);
       fixture.detectChanges();
 
-      let yearViewDebugElement = fixture.debugElement.query(By.directive(MatYearView));
+      let yearViewDebugElement = fixture.debugElement.query(By.directive(MatYearView))!;
       yearViewNativeElement = yearViewDebugElement.nativeElement;
       testComponent = fixture.componentInstance;
     });
@@ -108,7 +108,7 @@ describe('MatYearView', () => {
       testComponent.date = new Date(2017, JUL, 31);
       fixture.detectChanges();
 
-      expect(testComponent.yearView._monthSelected(JUN));
+      testComponent.yearView._monthSelected(JUN);
       fixture.detectChanges();
 
       expect(testComponent.selected).toEqual(new Date(2017, JUN, 30));
@@ -304,7 +304,7 @@ describe('MatYearView', () => {
       fixture = TestBed.createComponent(YearViewWithDateFilter);
       fixture.detectChanges();
 
-      const yearViewDebugElement = fixture.debugElement.query(By.directive(MatYearView));
+      const yearViewDebugElement = fixture.debugElement.query(By.directive(MatYearView))!;
       yearViewNativeElement = yearViewDebugElement.nativeElement;
     });
 
@@ -327,7 +327,7 @@ class StandardYearView {
   selected = new Date(2017, MAR, 10);
   selectedMonth: Date;
 
-  @ViewChild(MatYearView, {static: false}) yearView: MatYearView<Date>;
+  @ViewChild(MatYearView) yearView: MatYearView<Date>;
 }
 
 

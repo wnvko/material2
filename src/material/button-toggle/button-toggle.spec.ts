@@ -1,5 +1,6 @@
-import {dispatchMouseEvent} from '@angular/cdk/testing';
+import {dispatchMouseEvent} from '@angular/cdk/testing/private';
 import {Component, DebugElement, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 import {FormControl, FormsModule, NgModel, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -15,10 +16,11 @@ describe('MatButtonToggle with forms', () => {
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
-      imports: [MatButtonToggleModule, FormsModule, ReactiveFormsModule],
+      imports: [MatButtonToggleModule, FormsModule, ReactiveFormsModule, CommonModule],
       declarations: [
         ButtonToggleGroupWithNgModel,
         ButtonToggleGroupWithFormControl,
+        ButtonToggleGroupWithIndirectDescendantToggles,
       ],
     });
 
@@ -37,7 +39,7 @@ describe('MatButtonToggle with forms', () => {
 
       testComponent = fixture.debugElement.componentInstance;
 
-      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup));
+      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
       groupInstance = groupDebugElement.injector.get<MatButtonToggleGroup>(MatButtonToggleGroup);
     }));
 
@@ -86,14 +88,14 @@ describe('MatButtonToggle with forms', () => {
       fixture.detectChanges();
       testComponent = fixture.debugElement.componentInstance;
 
-      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup));
+      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
       groupInstance = groupDebugElement.injector.get<MatButtonToggleGroup>(MatButtonToggleGroup);
       groupNgModel = groupDebugElement.injector.get<NgModel>(NgModel);
 
       buttonToggleDebugElements = fixture.debugElement.queryAll(By.directive(MatButtonToggle));
       buttonToggleInstances = buttonToggleDebugElements.map(debugEl => debugEl.componentInstance);
       innerButtons = buttonToggleDebugElements.map(
-        debugEl => debugEl.query(By.css('button')).nativeElement);
+        debugEl => debugEl.query(By.css('button'))!.nativeElement);
 
       fixture.detectChanges();
     }));
@@ -232,6 +234,24 @@ describe('MatButtonToggle with forms', () => {
       }));
 
   });
+
+  it('should be able to pick up toggles that are not direct descendants', fakeAsync(() => {
+    const fixture = TestBed.createComponent(ButtonToggleGroupWithIndirectDescendantToggles);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('.mat-button-toggle button');
+    const groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
+    const groupInstance =
+        groupDebugElement.injector.get<MatButtonToggleGroup>(MatButtonToggleGroup);
+
+    button.click();
+    fixture.detectChanges();
+    tick();
+
+    expect(groupInstance.value).toBe('red');
+    expect(fixture.componentInstance.control.value).toBe('red');
+    expect(groupInstance._buttonToggles.length).toBe(3);
+  }));
 });
 
 describe('MatButtonToggle without forms', () => {
@@ -274,7 +294,7 @@ describe('MatButtonToggle without forms', () => {
 
       testComponent = fixture.debugElement.componentInstance;
 
-      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup));
+      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
       groupNativeElement = groupDebugElement.nativeElement;
       groupInstance = groupDebugElement.injector.get<MatButtonToggleGroup>(MatButtonToggleGroup);
 
@@ -377,7 +397,7 @@ describe('MatButtonToggle without forms', () => {
       fixture.detectChanges();
 
       expect(buttonToggleInstances[0].checked).toBe(true);
-      expect(groupInstance.value);
+      expect(groupInstance.value).toBe('test1');
     });
 
     it('should change the vertical state', () => {
@@ -478,7 +498,7 @@ describe('MatButtonToggle without forms', () => {
     it('should not fire an initial change event', () => {
       let fixture = TestBed.createComponent(ButtonToggleGroupWithInitialValue);
       let testComponent = fixture.debugElement.componentInstance;
-      let groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup));
+      let groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
       let groupInstance: MatButtonToggleGroup = groupDebugElement.injector
           .get<MatButtonToggleGroup>(MatButtonToggleGroup);
 
@@ -515,7 +535,7 @@ describe('MatButtonToggle without forms', () => {
 
       testComponent = fixture.debugElement.componentInstance;
 
-      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup));
+      groupDebugElement = fixture.debugElement.query(By.directive(MatButtonToggleGroup))!;
       groupNativeElement = groupDebugElement.nativeElement;
       groupInstance = groupDebugElement.injector.get<MatButtonToggleGroup>(MatButtonToggleGroup);
 
@@ -538,7 +558,7 @@ describe('MatButtonToggle without forms', () => {
     it('should check a button toggle when clicked', () => {
       expect(buttonToggleInstances.every(buttonToggle => !buttonToggle.checked)).toBe(true);
 
-      let nativeCheckboxLabel = buttonToggleDebugElements[0].query(By.css('button')).nativeElement;
+      let nativeCheckboxLabel = buttonToggleDebugElements[0].query(By.css('button'))!.nativeElement;
 
       nativeCheckboxLabel.click();
 
@@ -562,7 +582,8 @@ describe('MatButtonToggle without forms', () => {
     });
 
     it('should check a button toggle upon interaction with underlying native checkbox', () => {
-      let nativeCheckboxButton = buttonToggleDebugElements[0].query(By.css('button')).nativeElement;
+      let nativeCheckboxButton =
+          buttonToggleDebugElements[0].query(By.css('button'))!.nativeElement;
 
       nativeCheckboxButton.click();
       fixture.detectChanges();
@@ -643,10 +664,10 @@ describe('MatButtonToggle without forms', () => {
       fixture = TestBed.createComponent(StandaloneButtonToggle);
       fixture.detectChanges();
 
-      buttonToggleDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle));
+      buttonToggleDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle))!;
       buttonToggleNativeElement = buttonToggleDebugElement.nativeElement;
       buttonToggleLabelElement = fixture.debugElement
-          .query(By.css('.mat-button-toggle-label-content')).nativeElement;
+          .query(By.css('.mat-button-toggle-label-content'))!.nativeElement;
       buttonToggleInstance = buttonToggleDebugElement.componentInstance;
       buttonToggleButtonElement =
           buttonToggleNativeElement.querySelector('button')! as HTMLButtonElement;
@@ -688,7 +709,7 @@ describe('MatButtonToggle without forms', () => {
     }));
 
     it('should focus on underlying input element when focus() is called', () => {
-      let nativeButton = buttonToggleDebugElement.query(By.css('button')).nativeElement;
+      let nativeButton = buttonToggleDebugElement.query(By.css('button'))!.nativeElement;
       expect(document.activeElement).not.toBe(nativeButton);
 
       buttonToggleInstance.focus();
@@ -717,7 +738,7 @@ describe('MatButtonToggle without forms', () => {
   describe('aria-label handling ', () => {
     it('should not set the aria-label attribute if none is provided', () => {
       let fixture = TestBed.createComponent(StandaloneButtonToggle);
-      let checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle));
+      let checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle))!;
       let checkboxNativeElement = checkboxDebugElement.nativeElement;
       let buttonElement = checkboxNativeElement.querySelector('button') as HTMLButtonElement;
 
@@ -727,7 +748,7 @@ describe('MatButtonToggle without forms', () => {
 
     it('should use the provided aria-label', () => {
       let fixture = TestBed.createComponent(ButtonToggleWithAriaLabel);
-      let checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle));
+      let checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle))!;
       let checkboxNativeElement = checkboxDebugElement.nativeElement;
       let buttonElement = checkboxNativeElement.querySelector('button') as HTMLButtonElement;
 
@@ -743,7 +764,7 @@ describe('MatButtonToggle without forms', () => {
 
     it('should use the provided aria-labelledby', () => {
       let fixture = TestBed.createComponent(ButtonToggleWithAriaLabelledby);
-      checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle));
+      checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle))!;
       checkboxNativeElement = checkboxDebugElement.nativeElement;
       buttonElement = checkboxNativeElement.querySelector('button') as HTMLButtonElement;
 
@@ -753,7 +774,7 @@ describe('MatButtonToggle without forms', () => {
 
     it('should not assign aria-labelledby if none is provided', () => {
       let fixture = TestBed.createComponent(StandaloneButtonToggle);
-      checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle));
+      checkboxDebugElement = fixture.debugElement.query(By.directive(MatButtonToggle))!;
       checkboxNativeElement = checkboxDebugElement.nativeElement;
       buttonElement = checkboxNativeElement.querySelector('button') as HTMLButtonElement;
 
@@ -845,6 +866,20 @@ describe('MatButtonToggle without forms', () => {
     expect(fixture.componentInstance.toggles.toArray()[1].checked).toBe(false);
     expect(fixture.componentInstance.toggles.toArray()[2].checked).toBe(true);
   });
+
+  it('should not throw if initial value is set during creation', () => {
+    const fixture = TestBed.createComponent(ButtonTogglesInsideButtonToggleGroupMultiple);
+
+    // In Ivy static inputs are set during creation. We simulate this by not calling
+    // `fixture.detectChanges` immediately, but getting a hold of the instance via the
+    // DebugElement and setting the value ourselves.
+    expect(() => {
+      const toggle = fixture.debugElement.query(By.css('mat-button-toggle'))!.componentInstance;
+      toggle.checked = true;
+      fixture.detectChanges();
+    }).not.toThrow();
+  });
+
 });
 
 @Component({
@@ -951,6 +986,22 @@ class ButtonToggleGroupWithFormControl {
   control = new FormControl();
 }
 
+@Component({
+  // We need the `ngSwitch` so that there's a directive between the group and the toggles.
+  template: `
+    <mat-button-toggle-group [formControl]="control">
+      <ng-container [ngSwitch]="true">
+        <mat-button-toggle value="red">Value Red</mat-button-toggle>
+        <mat-button-toggle value="green">Value Green</mat-button-toggle>
+        <mat-button-toggle value="blue">Value Blue</mat-button-toggle>
+      </ng-container>
+    </mat-button-toggle-group>
+  `
+})
+class ButtonToggleGroupWithIndirectDescendantToggles {
+  control = new FormControl();
+}
+
 /** Simple test component with an aria-label set. */
 @Component({
   template: `<mat-button-toggle aria-label="Super effective"></mat-button-toggle>`
@@ -974,7 +1025,7 @@ class ButtonToggleWithAriaLabelledby {}
   `
 })
 class RepeatedButtonTogglesWithPreselectedValue {
-  @ViewChild(MatButtonToggleGroup, {static: false}) toggleGroup: MatButtonToggleGroup;
+  @ViewChild(MatButtonToggleGroup) toggleGroup: MatButtonToggleGroup;
   @ViewChildren(MatButtonToggle) toggles: QueryList<MatButtonToggle>;
 
   possibleValues = ['One', 'Two', 'Three'];

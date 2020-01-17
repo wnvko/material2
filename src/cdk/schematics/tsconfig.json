@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,
     "declaration": true,
     "lib": ["es2017"],
     "module": "commonjs",
@@ -8,6 +7,7 @@
     "outDir": "../../../dist/packages/cdk/schematics",
     "noEmitOnError": false,
     "strictNullChecks": true,
+    "noImplicitReturns": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "sourceMap": true,

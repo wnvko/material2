@@ -1,5 +1,5 @@
 import {TestBed, inject} from '@angular/core/testing';
-import {dispatchKeyboardEvent} from '@angular/cdk/testing';
+import {dispatchKeyboardEvent} from '@angular/cdk/testing/private';
 import {ESCAPE} from '@angular/cdk/keycodes';
 import {Component, NgModule} from '@angular/core';
 import {OverlayModule, OverlayContainer, Overlay} from '../index';
@@ -104,11 +104,11 @@ describe('OverlayKeyboardDispatcher', () => {
     instance.attach(new ComponentPortal(TestComponent));
     instance.keydownEvents().subscribe(spy);
 
-    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, instance.overlayElement);
+    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, undefined, instance.overlayElement);
     expect(spy).toHaveBeenCalledTimes(1);
 
     instance.detach();
-    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, instance.overlayElement);
+    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, undefined, instance.overlayElement);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -120,11 +120,11 @@ describe('OverlayKeyboardDispatcher', () => {
     instance.attach(new ComponentPortal(TestComponent));
     instance.keydownEvents().subscribe(spy);
 
-    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, instance.overlayElement);
+    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, undefined, instance.overlayElement);
     expect(spy).toHaveBeenCalledTimes(1);
 
     instance.dispose();
-    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, instance.overlayElement);
+    dispatchKeyboardEvent(document.body, 'keydown', ESCAPE, undefined, instance.overlayElement);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });

@@ -36,7 +36,6 @@ export class MatDatepickerToggleIcon {}
 
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-datepicker-toggle',
   templateUrl: 'datepicker-toggle.html',
   styleUrls: ['datepicker-toggle.css'],
@@ -81,10 +80,10 @@ export class MatDatepickerToggle<D> implements AfterContentInit, OnChanges, OnDe
   @Input() disableRipple: boolean;
 
   /** Custom icon set by the consumer. */
-  @ContentChild(MatDatepickerToggleIcon, {static: false}) _customIcon: MatDatepickerToggleIcon;
+  @ContentChild(MatDatepickerToggleIcon) _customIcon: MatDatepickerToggleIcon;
 
   /** Underlying button element. */
-  @ViewChild('button', {static: false}) _button: MatButton;
+  @ViewChild('button') _button: MatButton;
 
   constructor(
     public _intl: MatDatepickerIntl,
@@ -132,4 +131,6 @@ export class MatDatepickerToggle<D> implements AfterContentInit, OnChanges, OnDe
       datepickerToggled
     ).subscribe(() => this._changeDetectorRef.markForCheck());
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

@@ -6,7 +6,7 @@ import {
   createTouchEvent,
   dispatchTouchEvent,
   dispatchFakeEvent,
-} from '@angular/cdk/testing';
+} from '@angular/cdk/testing/private';
 import {DragDropRegistry} from './drag-drop-registry';
 import {DragDropModule} from './drag-drop-module';
 import {CdkDrag} from './directives/drag';
@@ -184,10 +184,6 @@ describe('DragDropRegistry', () => {
 
     pointerUpSubscription.unsubscribe();
     pointerMoveSubscription.unsubscribe();
-  });
-
-  it('should not throw when trying to register the same container again', () => {
-    expect(() => registry.registerDropContainer(testComponent.dropInstances.first)).not.toThrow();
   });
 
   it('should not prevent the default `touchmove` actions when nothing is being dragged', () => {

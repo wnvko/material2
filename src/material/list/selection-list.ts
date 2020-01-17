@@ -10,14 +10,14 @@ import {FocusableOption, FocusKeyManager} from '@angular/cdk/a11y';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {SelectionModel} from '@angular/cdk/collections';
 import {
-  SPACE,
-  ENTER,
-  HOME,
-  END,
-  UP_ARROW,
-  DOWN_ARROW,
   A,
+  DOWN_ARROW,
+  END,
+  ENTER,
   hasModifierKey,
+  HOME,
+  SPACE,
+  UP_ARROW,
 } from '@angular/cdk/keycodes';
 import {
   AfterContentInit,
@@ -32,25 +32,27 @@ import {
   forwardRef,
   Inject,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation,
-  SimpleChanges,
-  OnChanges,
 } from '@angular/core';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {
-  CanDisableRipple, CanDisableRippleCtor,
+  CanDisableRipple,
+  CanDisableRippleCtor,
   MatLine,
-  setLines,
   mixinDisableRipple,
+  setLines,
   ThemePalette,
 } from '@angular/material/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
+
 import {MatListAvatarCssMatStyler, MatListIconCssMatStyler} from './list';
 
 
@@ -86,7 +88,6 @@ export class MatSelectionListChange {
  * if the current item is selected.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-list-option',
   exportAs: 'matListOption',
   inputs: ['disableRipple'],
@@ -101,8 +102,11 @@ export class MatSelectionListChange {
     '[class.mat-list-item-with-avatar]': '_avatar || _icon',
     // Manually set the "primary" or "warn" class if the color has been explicitly
     // set to "primary" or "warn". The pseudo checkbox picks up these classes for
-    // its theme. The accent theme palette is the default and doesn't need to be set.
+    // its theme.
     '[class.mat-primary]': 'color === "primary"',
+    // Even though accent is the default, we need to set this class anyway, because the  list might
+    // be placed inside a parent that has one of the other colors with a higher specificity.
+    '[class.mat-accent]': 'color !== "primary" && color !== "warn"',
     '[class.mat-warn]': 'color === "warn"',
     '[attr.aria-selected]': 'selected',
     '[attr.aria-disabled]': 'disabled',
@@ -111,19 +115,19 @@ export class MatSelectionListChange {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatListOption extends _MatListOptionMixinBase
-    implements AfterContentInit, OnDestroy, OnInit, FocusableOption, CanDisableRipple {
-
+export class MatListOption extends _MatListOptionMixinBase implements AfterContentInit, OnDestroy,
+                                                                      OnInit, FocusableOption,
+                                                                      CanDisableRipple {
   private _selected = false;
   private _disabled = false;
   private _hasFocus = false;
 
-  @ContentChild(MatListAvatarCssMatStyler, {static: false}) _avatar: MatListAvatarCssMatStyler;
-  @ContentChild(MatListIconCssMatStyler, {static: false}) _icon: MatListIconCssMatStyler;
-  @ContentChildren(MatLine) _lines: QueryList<MatLine>;
+  @ContentChild(MatListAvatarCssMatStyler) _avatar: MatListAvatarCssMatStyler;
+  @ContentChild(MatListIconCssMatStyler) _icon: MatListIconCssMatStyler;
+  @ContentChildren(MatLine, {descendants: true}) _lines: QueryList<MatLine>;
 
   /** DOM element containing the item's text. */
-  @ViewChild('text', {static: false}) _text: ElementRef;
+  @ViewChild('text') _text: ElementRef;
 
   /** Whether the label should appear before or after the checkbox. Defaults to 'after' */
   @Input() checkboxPosition: 'before' | 'after' = 'after';
@@ -134,11 +138,16 @@ export class MatListOption extends _MatListOptionMixinBase
   set color(newValue: ThemePalette) { this._color = newValue; }
   private _color: ThemePalette;
 
+  /**
+   * This is set to true after the first OnChanges cycle so we don't clear the value of `selected`
+   * in the first cycle.
+   */
+  private _inputsInitialized = false;
   /** Value of the option */
   @Input()
   get value(): any { return this._value; }
   set value(newValue: any) {
-    if (this.selected && newValue !== this.value) {
+    if (this.selected && newValue !== this.value && this._inputsInitialized) {
       this.selected = false;
     }
 
@@ -197,6 +206,7 @@ export class MatListOption extends _MatListOptionMixinBase
         this._changeDetector.markForCheck();
       }
     });
+    this._inputsInitialized = true;
   }
 
   ngAfterContentInit() {
@@ -294,6 +304,10 @@ export class MatListOption extends _MatListOptionMixinBase
   _markForCheck() {
     this._changeDetector.markForCheck();
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_selected: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
 
@@ -301,7 +315,6 @@ export class MatListOption extends _MatListOptionMixinBase
  * Material Design list component where each item is a selectable option. Behaves as a listbox.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-selection-list',
   exportAs: 'matSelectionList',
   inputs: ['disableRipple'],
@@ -320,8 +333,8 @@ export class MatListOption extends _MatListOptionMixinBase
   providers: [MAT_SELECTION_LIST_VALUE_ACCESSOR],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MatSelectionList extends _MatSelectionListMixinBase implements FocusableOption,
-    CanDisableRipple, AfterContentInit, ControlValueAccessor, OnDestroy, OnChanges {
+export class MatSelectionList extends _MatSelectionListMixinBase implements CanDisableRipple,
+  AfterContentInit, ControlValueAccessor, OnDestroy, OnChanges {
 
   /** The FocusKeyManager which handles focus. */
   _keyManager: FocusKeyManager<MatListOption>;
@@ -397,7 +410,7 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements Focu
     }
 
     // Sync external changes to the model back to the options.
-    this.selectedOptions.onChange.pipe(takeUntil(this._destroyed)).subscribe(event => {
+    this.selectedOptions.changed.pipe(takeUntil(this._destroyed)).subscribe(event => {
       if (event.added) {
         for (let item of event.added) {
           item.selected = true;
@@ -429,8 +442,8 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements Focu
   }
 
   /** Focuses the selection list. */
-  focus() {
-    this._element.nativeElement.focus();
+  focus(options?: FocusOptions) {
+    this._element.nativeElement.focus(options);
   }
 
   /** Selects all of the options. */
@@ -477,7 +490,7 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements Focu
     switch (keyCode) {
       case SPACE:
       case ENTER:
-        if (!hasModifier) {
+        if (!hasModifier && !manager.isTyping()) {
           this._toggleFocusedOption();
           // Always prevent space from scrolling the page since the list has focus
           event.preventDefault();
@@ -491,7 +504,7 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements Focu
         }
         break;
       case A:
-        if (hasModifierKey(event, 'ctrlKey')) {
+        if (hasModifierKey(event, 'ctrlKey') && !manager.isTyping()) {
           this.options.find(option => !option.selected) ? this.selectAll() : this.deselectAll();
           event.preventDefault();
         }
@@ -626,4 +639,7 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements Focu
       this.options.forEach(option => option._markForCheck());
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

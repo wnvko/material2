@@ -41,7 +41,6 @@ import {createMissingDateImplError} from './datepicker-errors';
  * @docs-private
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-year-view',
   templateUrl: 'year-view.html',
   exportAs: 'matYearView',
@@ -101,7 +100,7 @@ export class MatYearView<D> implements AfterContentInit {
   @Output() readonly activeDateChange: EventEmitter<D> = new EventEmitter<D>();
 
   /** The body of calendar table */
-  @ViewChild(MatCalendarBody, {static: false}) _matCalendarBody: MatCalendarBody;
+  @ViewChild(MatCalendarBody) _matCalendarBody: MatCalendarBody;
 
   /** Grid of calendar cells representing the months of the year. */
   _months: MatCalendarCell[][];

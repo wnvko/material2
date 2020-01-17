@@ -45,11 +45,16 @@ import {
 import {CdkDragHandle} from './drag-handle';
 import {CdkDragPlaceholder} from './drag-placeholder';
 import {CdkDragPreview} from './drag-preview';
-import {CDK_DROP_LIST} from '../drop-list-container';
 import {CDK_DRAG_PARENT} from '../drag-parent';
 import {DragRef, DragRefConfig, Point} from '../drag-ref';
 import {CdkDropListInternal as CdkDropList} from './drop-list';
 import {DragDrop} from '../drag-drop';
+
+/**
+ * Injection token that is used to provide a CdkDropList instance to CdkDrag.
+ * Used for avoiding circular imports.
+ */
+export const CDK_DROP_LIST = new InjectionToken<CdkDropList>('CDK_DROP_LIST');
 
 /** Injection token that can be used to configure the behavior of `CdkDrag`. */
 export const CDK_DRAG_CONFIG = new InjectionToken<DragRefConfig>('CDK_DRAG_CONFIG', {
@@ -83,10 +88,10 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
   @ContentChildren(CdkDragHandle, {descendants: true}) _handles: QueryList<CdkDragHandle>;
 
   /** Element that will be used as a template to create the draggable item's preview. */
-  @ContentChild(CdkDragPreview, {static: false}) _previewTemplate: CdkDragPreview;
+  @ContentChild(CdkDragPreview) _previewTemplate: CdkDragPreview;
 
   /** Template for placeholder element rendered to show where a draggable would be dropped. */
-  @ContentChild(CdkDragPlaceholder, {static: false}) _placeholderTemplate: CdkDragPlaceholder;
+  @ContentChild(CdkDragPlaceholder) _placeholderTemplate: CdkDragPlaceholder;
 
   /** Arbitrary data to attach to this drag instance. */
   @Input('cdkDragData') data: T;
@@ -110,24 +115,10 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
   @Input('cdkDragBoundary') boundaryElement: string | ElementRef<HTMLElement> | HTMLElement;
 
   /**
-   * Selector that will be used to determine the element to which the draggable's position will
-   * be constrained. Matching starts from the element's parent and goes up the DOM until a matching
-   * element has been found
-   * @deprecated Use `boundaryElement` instead.
-   * @breaking-change 9.0.0
-   */
-  get boundaryElementSelector(): string {
-    return typeof this.boundaryElement === 'string' ? this.boundaryElement : undefined!;
-  }
-  set boundaryElementSelector(selector: string) {
-    this.boundaryElement = selector;
-  }
-
-  /**
    * Amount of milliseconds to wait after the user has put their
    * pointer down before starting to drag the element.
    */
-  @Input('cdkDragStartDelay') dragStartDelay: number = 0;
+  @Input('cdkDragStartDelay') dragStartDelay: number | {touch: number, mouse: number} = 0;
 
   /**
    * Sets the position of a `CdkDrag` that is outside of a drop container.
@@ -153,6 +144,9 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
    * be rendered.
    */
   @Input('cdkDragConstrainPosition') constrainPosition?: (point: Point, dragRef: DragRef) => Point;
+
+  /** Class to be added to the preview element. */
+  @Input('cdkDragPreviewClass') previewClass: string | string[];
 
   /** Emits when the user starts dragging the item. */
   @Output('cdkDragStarted') started: EventEmitter<CdkDragStart> = new EventEmitter<CdkDragStart>();
@@ -257,7 +251,7 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
           }),
           // Listen if the state of any of the handles changes.
           switchMap((handles: QueryList<CdkDragHandle>) => {
-            return merge(...handles.map(item => item._stateChanges));
+            return merge(...handles.map(item => item._stateChanges)) as Observable<CdkDragHandle>;
           }),
           takeUntil(this._destroyed)
         ).subscribe(handleInstance => {
@@ -335,6 +329,7 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
     ref.beforeStarted.subscribe(() => {
       if (!ref.isDragging()) {
         const dir = this._dir;
+        const dragStartDelay = this.dragStartDelay;
         const placeholder = this._placeholderTemplate ? {
           template: this._placeholderTemplate.templateRef,
           context: this._placeholderTemplate.data,
@@ -348,8 +343,10 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
 
         ref.disabled = this.disabled;
         ref.lockAxis = this.lockAxis;
-        ref.dragStartDelay = coerceNumberProperty(this.dragStartDelay);
+        ref.dragStartDelay = (typeof dragStartDelay === 'object' && dragStartDelay) ?
+            dragStartDelay : coerceNumberProperty(dragStartDelay);
         ref.constrainPosition = this.constrainPosition;
+        ref.previewClass = this.previewClass;
         ref
           .withBoundaryElement(this._getBoundaryElement())
           .withPlaceholderTemplate(placeholder)
@@ -411,6 +408,8 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
       });
     });
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }
 
 /** Gets the closest ancestor of an element that matches a selector. */

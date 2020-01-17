@@ -131,7 +131,11 @@ export class MatButtonToggleGroup implements ControlValueAccessor, OnInit, After
   _onTouched: () => any = () => {};
 
   /** Child button toggle buttons. */
-  @ContentChildren(forwardRef(() => MatButtonToggle)) _buttonToggles: QueryList<MatButtonToggle>;
+  @ContentChildren(forwardRef(() => MatButtonToggle), {
+    // Note that this would technically pick up toggles
+    // from nested groups, but that's not a case that we support.
+    descendants: true
+  }) _buttonToggles: QueryList<MatButtonToggle>;
 
   /** The appearance for all the buttons in the group. */
   @Input() appearance: MatButtonToggleAppearance;
@@ -183,7 +187,7 @@ export class MatButtonToggleGroup implements ControlValueAccessor, OnInit, After
 
   /** Selected button toggles in the group. */
   get selected() {
-    const selected = this._selectionModel.selected;
+    const selected = this._selectionModel ? this._selectionModel.selected : [];
     return this.multiple ? selected : (selected[0] || null);
   }
 
@@ -276,10 +280,14 @@ export class MatButtonToggleGroup implements ControlValueAccessor, OnInit, After
       (this.selected as MatButtonToggle).checked = false;
     }
 
-    if (select) {
-      this._selectionModel.select(toggle);
+    if (this._selectionModel) {
+      if (select) {
+        this._selectionModel.select(toggle);
+      } else {
+        this._selectionModel.deselect(toggle);
+      }
     } else {
-      this._selectionModel.deselect(toggle);
+      deferEvents = true;
     }
 
     // We need to defer in some cases in order to avoid "changed after checked errors", however
@@ -294,7 +302,7 @@ export class MatButtonToggleGroup implements ControlValueAccessor, OnInit, After
 
   /** Checks whether a button toggle is selected. */
   _isSelected(toggle: MatButtonToggle) {
-    return this._selectionModel.isSelected(toggle);
+    return this._selectionModel && this._selectionModel.isSelected(toggle);
   }
 
   /** Determines whether a button toggle should be checked on init. */
@@ -360,6 +368,10 @@ export class MatButtonToggleGroup implements ControlValueAccessor, OnInit, After
     // it is used by Angular to sync up the two-way data binding.
     this.valueChange.emit(this.value);
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_multiple: boolean | string | null | undefined;
+  static ngAcceptInputType_vertical: boolean | string | null | undefined;
 }
 
 // Boilerplate for applying mixins to the MatButtonToggle class.
@@ -370,7 +382,6 @@ const _MatButtonToggleMixinBase: CanDisableRippleCtor & typeof MatButtonToggleBa
 
 /** Single button inside of a toggle group. */
 @Component({
-  moduleId: module.id,
   selector: 'mat-button-toggle',
   templateUrl: 'button-toggle.html',
   styleUrls: ['button-toggle.css'],
@@ -412,7 +423,7 @@ export class MatButtonToggle extends _MatButtonToggleMixinBase implements OnInit
   /** Type of the button toggle. Either 'radio' or 'checkbox'. */
   _type: ToggleType;
 
-  @ViewChild('button', {static: false}) _buttonElement: ElementRef<HTMLButtonElement>;
+  @ViewChild('button') _buttonElement: ElementRef<HTMLButtonElement>;
 
   /** The parent button toggle group (exclusive selection). Optional. */
   buttonToggleGroup: MatButtonToggleGroup;
@@ -519,8 +530,8 @@ export class MatButtonToggle extends _MatButtonToggleMixinBase implements OnInit
   }
 
   /** Focuses the button. */
-  focus(): void {
-    this._buttonElement.nativeElement.focus();
+  focus(options?: FocusOptions): void {
+    this._buttonElement.nativeElement.focus(options);
   }
 
   /** Checks the button toggle due to an interaction with the underlying native button. */
@@ -548,4 +559,10 @@ export class MatButtonToggle extends _MatButtonToggleMixinBase implements OnInit
     // Use `markForCheck` to explicit update button toggle's status.
     this._changeDetectorRef.markForCheck();
   }
+
+  static ngAcceptInputType_checked: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_vertical: boolean | string | null | undefined;
+  static ngAcceptInputType_multiple: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

@@ -22,7 +22,7 @@ describe('MatBadge', () => {
     testComponent = fixture.debugElement.componentInstance;
     fixture.detectChanges();
 
-    badgeDebugElement = fixture.debugElement.query(By.directive(MatBadge));
+    badgeDebugElement = fixture.debugElement.query(By.directive(MatBadge))!;
     badgeNativeElement = badgeDebugElement.nativeElement;
   }));
 
@@ -232,7 +232,7 @@ describe('MatBadge', () => {
   `
 })
 class BadgeTestApp {
-  @ViewChild(MatBadge, {static: false}) badgeInstance: MatBadge;
+  @ViewChild(MatBadge) badgeInstance: MatBadge;
   badgeColor: ThemePalette;
   badgeContent: string | number = '1';
   badgeDirection = 'above after';

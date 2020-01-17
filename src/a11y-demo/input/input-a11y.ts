@@ -12,7 +12,6 @@ import {Component} from '@angular/core';
 const USD_TO_JPY = 110.29;
 
 @Component({
-  moduleId: module.id,
   selector: 'input-a11y',
   templateUrl: 'input-a11y.html',
 })
@@ -24,7 +23,7 @@ export class InputAccessibilityDemo {
   email: string;
   usd: number;
   comment: string;
-  commentMax = 200;
+  commentMax = '200';
 
   get passwordType() { return this.showPassword ? 'text' : 'password'; }
 

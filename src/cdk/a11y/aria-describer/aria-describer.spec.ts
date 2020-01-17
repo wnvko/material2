@@ -185,6 +185,10 @@ describe('AriaDescriber', () => {
 
     // Use `querySelectorAll` with an attribute since `getElementById` will stop at the first match.
     expect(document.querySelectorAll(`[id='${MESSAGES_CONTAINER_ID}']`).length).toBe(1);
+
+    if (extraContainer.parentNode) {
+      extraContainer.parentNode.removeChild(extraContainer);
+    }
   });
 
   it('should not describe messages that match up with the aria-label of the element', () => {
@@ -224,6 +228,18 @@ describe('AriaDescriber', () => {
     expect(component.element1.hasAttribute(CDK_DESCRIBEDBY_HOST_ATTRIBUTE)).toBe(false);
     expect(document.body.contains(descriptionNode)).toBe(true,
         'Expected description node to still be in the DOM after it is no longer being used.');
+  });
+
+  it('should remove the aria-describedby attribute if there are no more messages', () => {
+    const element = component.element1;
+
+    expect(element.hasAttribute('aria-describedby')).toBe(false);
+
+    ariaDescriber.describe(component.element1, 'Message');
+    expect(element.hasAttribute('aria-describedby')).toBe(true);
+
+    ariaDescriber.removeDescription(component.element1, 'Message');
+    expect(element.hasAttribute('aria-describedby')).toBe(false);
   });
 
 });
@@ -277,16 +293,16 @@ function expectMessage(el: Element, message: string) {
   `,
 })
 class TestApp {
-  @ViewChild('element1', {static: false}) _element1: ElementRef<HTMLElement>;
+  @ViewChild('element1') _element1: ElementRef<HTMLElement>;
   get element1(): Element { return this._element1.nativeElement; }
 
-  @ViewChild('element2', {static: false}) _element2: ElementRef<HTMLElement>;
+  @ViewChild('element2') _element2: ElementRef<HTMLElement>;
   get element2(): Element { return this._element2.nativeElement; }
 
-  @ViewChild('element3', {static: false}) _element3: ElementRef<HTMLElement>;
+  @ViewChild('element3') _element3: ElementRef<HTMLElement>;
   get element3(): Element { return this._element3.nativeElement; }
 
-  @ViewChild('element4', {static: false}) _element4: ElementRef<HTMLElement>;
+  @ViewChild('element4') _element4: ElementRef<HTMLElement>;
   get element4(): Element { return this._element4.nativeElement; }
 
 

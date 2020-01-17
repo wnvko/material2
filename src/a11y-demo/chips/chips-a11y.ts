@@ -9,6 +9,7 @@
 import {Component} from '@angular/core';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {ThemePalette} from '@angular/material/core';
 
 
 export interface Person {
@@ -16,14 +17,13 @@ export interface Person {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'chips-a11y',
   templateUrl: 'chips-a11y.html',
   styleUrls: ['chips-a11y.css'],
 })
 export class ChipsAccessibilityDemo {
   visible: boolean = true;
-  color: string = '';
+  color: ThemePalette;
   selectable: boolean = true;
   removable: boolean = true;
   addOnBlur: boolean = true;

@@ -2,7 +2,11 @@ import {Directionality} from '@angular/cdk/bidi';
 import {A, ESCAPE} from '@angular/cdk/keycodes';
 import {OverlayContainer, ScrollStrategy} from '@angular/cdk/overlay';
 import {ViewportRuler} from '@angular/cdk/scrolling';
-import {dispatchKeyboardEvent, createKeyboardEvent, dispatchEvent} from '@angular/cdk/testing';
+import {
+  dispatchKeyboardEvent,
+  createKeyboardEvent,
+  dispatchEvent,
+} from '@angular/cdk/testing/private';
 import {Location} from '@angular/common';
 import {SpyLocation} from '@angular/common/testing';
 import {
@@ -235,8 +239,8 @@ describe('MatBottomSheet', () => {
     const container =
         overlayContainerElement.querySelector('mat-bottom-sheet-container') as HTMLElement;
     dispatchKeyboardEvent(document.body, 'keydown', A);
-    dispatchKeyboardEvent(document.body, 'keydown', A, backdrop);
-    dispatchKeyboardEvent(document.body, 'keydown', A, container);
+    dispatchKeyboardEvent(document.body, 'keydown', A, undefined, backdrop);
+    dispatchKeyboardEvent(document.body, 'keydown', A, undefined, container);
 
     expect(spy).toHaveBeenCalledTimes(3);
   }));
@@ -686,6 +690,44 @@ describe('MatBottomSheet', () => {
       document.body.removeChild(button);
     }));
 
+    it('should not move focus if it was moved outside the sheet while animating', fakeAsync(() => {
+      // Create a element that has focus before the bottom sheet is opened.
+      const button = document.createElement('button');
+      const otherButton = document.createElement('button');
+      const body = document.body;
+      button.id = 'bottom-sheet-trigger';
+      otherButton.id = 'other-button';
+      body.appendChild(button);
+      body.appendChild(otherButton);
+      button.focus();
+
+      const bottomSheetRef = bottomSheet.open(PizzaMsg, {viewContainerRef: testViewContainerRef});
+
+      flushMicrotasks();
+      viewContainerFixture.detectChanges();
+      flushMicrotasks();
+
+      expect(document.activeElement!.id).not.toBe('bottom-sheet-trigger',
+          'Expected the focus to change when the bottom sheet was opened.');
+
+      // Start the closing sequence and move focus out of bottom sheet.
+      bottomSheetRef.dismiss();
+      otherButton.focus();
+
+      expect(document.activeElement!.id)
+          .toBe('other-button', 'Expected focus to be on the alternate button.');
+
+      flushMicrotasks();
+      viewContainerFixture.detectChanges();
+      flush();
+
+      expect(document.activeElement!.id)
+          .toBe('other-button', 'Expected focus to stay on the alternate button.');
+
+      body.removeChild(button);
+      body.removeChild(otherButton);
+    }));
+
   });
 
 });
@@ -852,9 +894,7 @@ class DirectiveWithViewContainer {
 
 @Component({template: `<dir-with-view-container></dir-with-view-container>`})
 class ComponentWithChildViewContainer {
-  @ViewChild(DirectiveWithViewContainer, {
-    static: false
-  }) childWithViewContainer: DirectiveWithViewContainer;
+  @ViewChild(DirectiveWithViewContainer) childWithViewContainer: DirectiveWithViewContainer;
 
   get childViewContainer() {
     return this.childWithViewContainer.viewContainerRef;
@@ -870,7 +910,7 @@ class ComponentWithTemplateRef {
   localValue: string;
   bottomSheetRef: MatBottomSheetRef<any>;
 
-  @ViewChild(TemplateRef, {static: false}) templateRef: TemplateRef<any>;
+  @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
 
   setRef(bottomSheetRef: MatBottomSheetRef<any>): string {
     this.bottomSheetRef = bottomSheetRef;

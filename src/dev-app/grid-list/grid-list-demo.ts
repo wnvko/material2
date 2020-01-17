@@ -10,7 +10,6 @@ import {Component} from '@angular/core';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'grid-list-demo',
   templateUrl: 'grid-list-demo.html',
   styleUrls: ['grid-list-demo.css']
@@ -35,7 +34,7 @@ export class GridListDemo {
   basicRowHeight = 80;
   fixedCols = 4;
   fixedRowHeight = 100;
-  ratioGutter = 1;
+  ratioGutter = '1px';
   fitListHeight = '400px';
   ratio = '4:1';
 

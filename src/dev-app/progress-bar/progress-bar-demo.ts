@@ -7,18 +7,18 @@
  */
 
 import {Component} from '@angular/core';
+import {ThemePalette} from '@angular/material/core';
 
 
 // TODO(josephperrott): Add an automatically filling example progress bar.
 
 @Component({
-  moduleId: module.id,
   selector: 'progress-bar-demo',
   templateUrl: 'progress-bar-demo.html',
   styleUrls: ['progress-bar-demo.css'],
 })
 export class ProgressBarDemo {
-  color: string = 'primary';
+  color: ThemePalette = 'primary';
   determinateProgressValue: number = 30;
   determinateAnimationEndValue: number;
   bufferAnimationEndValue: number;

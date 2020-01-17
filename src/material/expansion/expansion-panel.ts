@@ -76,7 +76,6 @@ export const MAT_EXPANSION_PANEL_DEFAULT_OPTIONS =
  * multiple children of an element with the MatAccordion directive attached.
  */
 @Component({
-  moduleId: module.id,
   styleUrls: ['./expansion-panel.css'],
   selector: 'mat-expansion-panel',
   exportAs: 'matExpansionPanel',
@@ -113,7 +112,7 @@ export class MatExpansionPanel extends CdkAccordionItem implements AfterContentI
     this._hideToggle = coerceBooleanProperty(value);
   }
 
-  /** Whether the toggle indicator should be hidden. */
+  /** The position of the expansion indicator. */
   @Input()
   get togglePosition(): MatAccordionTogglePosition {
     return this._togglePosition || (this.accordion && this.accordion.togglePosition);
@@ -135,10 +134,10 @@ export class MatExpansionPanel extends CdkAccordionItem implements AfterContentI
   accordion: MatAccordionBase;
 
   /** Content that will be rendered lazily. */
-  @ContentChild(MatExpansionPanelContent, {static: false}) _lazyContent: MatExpansionPanelContent;
+  @ContentChild(MatExpansionPanelContent) _lazyContent: MatExpansionPanelContent;
 
   /** Element containing the panel's user-provided content. */
-  @ViewChild('body', {static: false}) _body: ElementRef<HTMLElement>;
+  @ViewChild('body') _body: ElementRef<HTMLElement>;
 
   /** Portal holding the user's content. */
   _portal: TemplatePortal;
@@ -183,10 +182,7 @@ export class MatExpansionPanel extends CdkAccordionItem implements AfterContentI
   /** Determines whether the expansion panel should have spacing between it and its siblings. */
   _hasSpacing(): boolean {
     if (this.accordion) {
-      // We don't need to subscribe to the `stateChanges` of the parent accordion because each time
-      // the [displayMode] input changes, the change detection will also cover the host bindings
-      // of this expansion panel.
-      return (this.expanded ? this.accordion.displayMode : this._getExpandedState()) === 'default';
+      return this.expanded && this.accordion.displayMode === 'default';
     }
     return false;
   }
@@ -229,6 +225,10 @@ export class MatExpansionPanel extends CdkAccordionItem implements AfterContentI
 
     return false;
   }
+
+  static ngAcceptInputType_hideToggle: boolean | string | null | undefined;
+  static ngAcceptInputType_expanded: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }
 
 @Directive({

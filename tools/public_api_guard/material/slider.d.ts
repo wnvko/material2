@@ -24,7 +24,7 @@ export declare class MatSlider extends _MatSliderMixinBase implements ControlVal
     };
     readonly change: EventEmitter<MatSliderChange>;
     readonly displayValue: string | number;
-    displayWith: (value: number | null) => string | number;
+    displayWith: (value: number) => string | number;
     readonly input: EventEmitter<MatSliderChange>;
     invert: boolean;
     max: number;
@@ -37,24 +37,32 @@ export declare class MatSlider extends _MatSliderMixinBase implements ControlVal
     value: number | null;
     readonly valueChange: EventEmitter<number | null>;
     vertical: boolean;
-    constructor(elementRef: ElementRef, _focusMonitor: FocusMonitor, _changeDetectorRef: ChangeDetectorRef, _dir: Directionality, tabIndex: string, _animationMode?: string | undefined);
+    constructor(elementRef: ElementRef, _focusMonitor: FocusMonitor, _changeDetectorRef: ChangeDetectorRef, _dir: Directionality, tabIndex: string, _animationMode?: string | undefined, _ngZone?: NgZone | undefined);
     _onBlur(): void;
     _onFocus(): void;
     _onKeydown(event: KeyboardEvent): void;
     _onKeyup(): void;
-    _onMousedown(event: MouseEvent): void;
     _onMouseenter(): void;
-    _onSlide(event: HammerInput): void;
-    _onSlideEnd(): void;
-    _onSlideStart(event: HammerInput | null): void;
+    _shouldInvertMouseCoords(): boolean;
     blur(): void;
-    focus(): void;
+    focus(options?: FocusOptions): void;
     ngOnDestroy(): void;
     ngOnInit(): void;
     registerOnChange(fn: (value: any) => void): void;
     registerOnTouched(fn: any): void;
     setDisabledState(isDisabled: boolean): void;
     writeValue(value: any): void;
+    static ngAcceptInputType_disabled: boolean | string | null | undefined;
+    static ngAcceptInputType_invert: boolean | string | null | undefined;
+    static ngAcceptInputType_max: number | string | null | undefined;
+    static ngAcceptInputType_min: number | string | null | undefined;
+    static ngAcceptInputType_step: number | string | null | undefined;
+    static ngAcceptInputType_thumbLabel: boolean | string | null | undefined;
+    static ngAcceptInputType_tickInterval: number | string | null | undefined;
+    static ngAcceptInputType_value: number | string | null | undefined;
+    static ngAcceptInputType_vertical: boolean | string | null | undefined;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatSlider, "mat-slider", ["matSlider"], { 'disabled': "disabled", 'color': "color", 'tabIndex': "tabIndex", 'invert': "invert", 'max': "max", 'min': "min", 'step': "step", 'thumbLabel': "thumbLabel", 'tickInterval': "tickInterval", 'value': "value", 'displayWith': "displayWith", 'vertical': "vertical" }, { 'change': "change", 'input': "input", 'valueChange': "valueChange" }, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatSlider>;
 }
 
 export declare class MatSliderChange {
@@ -63,4 +71,6 @@ export declare class MatSliderChange {
 }
 
 export declare class MatSliderModule {
+    static ɵinj: i0.ɵɵInjectorDef<MatSliderModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatSliderModule, [typeof i1.MatSlider], [typeof i2.CommonModule, typeof i3.MatCommonModule], [typeof i1.MatSlider, typeof i3.MatCommonModule]>;
 }

@@ -39,7 +39,6 @@ const _MatMenuItemMixinBase: CanDisableRippleCtor & CanDisableCtor & typeof MatM
  * It exists mostly to set the role attribute.
  */
 @Component({
-  moduleId: module.id,
   selector: '[mat-menu-item]',
   exportAs: 'matMenuItem',
   inputs: ['disabled', 'disableRipple'],
@@ -66,6 +65,9 @@ export class MatMenuItem extends _MatMenuItemMixinBase
 
   /** Stream that emits when the menu item is hovered. */
   readonly _hovered: Subject<MatMenuItem> = new Subject<MatMenuItem>();
+
+  /** Stream that emits when the menu item is focused. */
+  readonly _focused = new Subject<MatMenuItem>();
 
   /** Whether the menu item is highlighted. */
   _highlighted: boolean = false;
@@ -97,12 +99,14 @@ export class MatMenuItem extends _MatMenuItemMixinBase
   }
 
   /** Focuses the menu item. */
-  focus(origin: FocusOrigin = 'program'): void {
+  focus(origin: FocusOrigin = 'program', options?: FocusOptions): void {
     if (this._focusMonitor) {
-      this._focusMonitor.focusVia(this._getHostElement(), origin);
+      this._focusMonitor.focusVia(this._getHostElement(), origin, options);
     } else {
-      this._getHostElement().focus();
+      this._getHostElement().focus(options);
     }
+
+    this._focused.next(this);
   }
 
   ngOnDestroy() {
@@ -115,6 +119,7 @@ export class MatMenuItem extends _MatMenuItemMixinBase
     }
 
     this._hovered.complete();
+    this._focused.complete();
   }
 
   /** Used to set the `tabindex`. */
@@ -130,7 +135,7 @@ export class MatMenuItem extends _MatMenuItemMixinBase
   /** Prevents the default element actions if it is disabled. */
   // We have to use a `HostListener` here in order to support both Ivy and ViewEngine.
   // In Ivy the `host` bindings will be merged when this class is extended, whereas in
-  // ViewEngine they're overwritte.
+  // ViewEngine they're overwritten.
   // TODO(crisbeto): we move this back into `host` once Ivy is turned on by default.
   // tslint:disable-next-line:no-host-decorator-in-concrete
   @HostListener('click', ['$event'])
@@ -144,7 +149,7 @@ export class MatMenuItem extends _MatMenuItemMixinBase
   /** Emits to the hover stream. */
   // We have to use a `HostListener` here in order to support both Ivy and ViewEngine.
   // In Ivy the `host` bindings will be merged when this class is extended, whereas in
-  // ViewEngine they're overwritte.
+  // ViewEngine they're overwritten.
   // TODO(crisbeto): we move this back into `host` once Ivy is turned on by default.
   // tslint:disable-next-line:no-host-decorator-in-concrete
   @HostListener('mouseenter')
@@ -174,4 +179,6 @@ export class MatMenuItem extends _MatMenuItemMixinBase
     return output.trim();
   }
 
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

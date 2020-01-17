@@ -9,6 +9,7 @@
 import {DOCUMENT} from '@angular/common';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {
+  ErrorHandler,
   Inject,
   Injectable,
   InjectionToken,
@@ -64,6 +65,11 @@ export function getMatIconFailedToSanitizeLiteralError(literal: SafeHtml): Error
                `Angular's DomSanitizer. Attempted literal was "${literal}".`);
 }
 
+/** Options that can be used to configure how an icon or the icons in an icon set are presented. */
+export interface IconOptions {
+  /** View box to set on the icon. */
+  viewBox?: string;
+}
 
 /**
  * Configuration for an icon, including the URL and possibly the cached SVG element.
@@ -73,9 +79,9 @@ class SvgIconConfig {
   url: SafeResourceUrl | null;
   svgElement: SVGElement | null;
 
-  constructor(url: SafeResourceUrl);
-  constructor(svgElement: SVGElement);
-  constructor(data: SafeResourceUrl | SVGElement) {
+  constructor(url: SafeResourceUrl, options?: IconOptions);
+  constructor(svgElement: SVGElement, options?: IconOptions);
+  constructor(data: SafeResourceUrl | SVGElement, public options?: IconOptions) {
     // Note that we can't use `instanceof SVGElement` here,
     // because it'll break during server-side rendering.
     if (!!(data as any).nodeName) {
@@ -127,7 +133,9 @@ export class MatIconRegistry implements OnDestroy {
   constructor(
     @Optional() private _httpClient: HttpClient,
     private _sanitizer: DomSanitizer,
-    @Optional() @Inject(DOCUMENT) document: any) {
+    @Optional() @Inject(DOCUMENT) document: any,
+    // @breaking-change 9.0.0 _errorHandler parameter to be made required
+    @Optional() private readonly _errorHandler?: ErrorHandler) {
       this._document = document;
     }
 
@@ -136,8 +144,8 @@ export class MatIconRegistry implements OnDestroy {
    * @param iconName Name under which the icon should be registered.
    * @param url
    */
-  addSvgIcon(iconName: string, url: SafeResourceUrl): this {
-    return this.addSvgIconInNamespace('', iconName, url);
+  addSvgIcon(iconName: string, url: SafeResourceUrl, options?: IconOptions): this {
+    return this.addSvgIconInNamespace('', iconName, url, options);
   }
 
   /**
@@ -145,8 +153,8 @@ export class MatIconRegistry implements OnDestroy {
    * @param iconName Name under which the icon should be registered.
    * @param literal SVG source of the icon.
    */
-  addSvgIconLiteral(iconName: string, literal: SafeHtml): this {
-    return this.addSvgIconLiteralInNamespace('', iconName, literal);
+  addSvgIconLiteral(iconName: string, literal: SafeHtml, options?: IconOptions): this {
+    return this.addSvgIconLiteralInNamespace('', iconName, literal, options);
   }
 
   /**
@@ -155,8 +163,9 @@ export class MatIconRegistry implements OnDestroy {
    * @param iconName Name under which the icon should be registered.
    * @param url
    */
-  addSvgIconInNamespace(namespace: string, iconName: string, url: SafeResourceUrl): this {
-    return this._addSvgIconConfig(namespace, iconName, new SvgIconConfig(url));
+  addSvgIconInNamespace(namespace: string, iconName: string, url: SafeResourceUrl,
+                        options?: IconOptions): this {
+    return this._addSvgIconConfig(namespace, iconName, new SvgIconConfig(url, options));
   }
 
   /**
@@ -165,31 +174,32 @@ export class MatIconRegistry implements OnDestroy {
    * @param iconName Name under which the icon should be registered.
    * @param literal SVG source of the icon.
    */
-  addSvgIconLiteralInNamespace(namespace: string, iconName: string, literal: SafeHtml): this {
+  addSvgIconLiteralInNamespace(namespace: string, iconName: string, literal: SafeHtml,
+                               options?: IconOptions): this {
     const sanitizedLiteral = this._sanitizer.sanitize(SecurityContext.HTML, literal);
 
     if (!sanitizedLiteral) {
       throw getMatIconFailedToSanitizeLiteralError(literal);
     }
 
-    const svgElement = this._createSvgElementForSingleIcon(sanitizedLiteral);
-    return this._addSvgIconConfig(namespace, iconName, new SvgIconConfig(svgElement));
+    const svgElement = this._createSvgElementForSingleIcon(sanitizedLiteral, options);
+    return this._addSvgIconConfig(namespace, iconName, new SvgIconConfig(svgElement, options));
   }
 
   /**
    * Registers an icon set by URL in the default namespace.
    * @param url
    */
-  addSvgIconSet(url: SafeResourceUrl): this {
-    return this.addSvgIconSetInNamespace('', url);
+  addSvgIconSet(url: SafeResourceUrl, options?: IconOptions): this {
+    return this.addSvgIconSetInNamespace('', url, options);
   }
 
   /**
    * Registers an icon set using an HTML string in the default namespace.
    * @param literal SVG source of the icon set.
    */
-  addSvgIconSetLiteral(literal: SafeHtml): this {
-    return this.addSvgIconSetLiteralInNamespace('', literal);
+  addSvgIconSetLiteral(literal: SafeHtml, options?: IconOptions): this {
+    return this.addSvgIconSetLiteralInNamespace('', literal, options);
   }
 
   /**
@@ -197,8 +207,8 @@ export class MatIconRegistry implements OnDestroy {
    * @param namespace Namespace in which to register the icon set.
    * @param url
    */
-  addSvgIconSetInNamespace(namespace: string, url: SafeResourceUrl): this {
-    return this._addSvgIconSetConfig(namespace, new SvgIconConfig(url));
+  addSvgIconSetInNamespace(namespace: string, url: SafeResourceUrl, options?: IconOptions): this {
+    return this._addSvgIconSetConfig(namespace, new SvgIconConfig(url, options));
   }
 
   /**
@@ -206,7 +216,8 @@ export class MatIconRegistry implements OnDestroy {
    * @param namespace Namespace in which to register the icon set.
    * @param literal SVG source of the icon set.
    */
-  addSvgIconSetLiteralInNamespace(namespace: string, literal: SafeHtml): this {
+  addSvgIconSetLiteralInNamespace(namespace: string, literal: SafeHtml,
+                                  options?: IconOptions): this {
     const sanitizedLiteral = this._sanitizer.sanitize(SecurityContext.HTML, literal);
 
     if (!sanitizedLiteral) {
@@ -214,7 +225,7 @@ export class MatIconRegistry implements OnDestroy {
     }
 
     const svgElement = this._svgElementFromString(sanitizedLiteral);
-    return this._addSvgIconSetConfig(namespace, new SvgIconConfig(svgElement));
+    return this._addSvgIconSetConfig(namespace, new SvgIconConfig(svgElement, options));
   }
 
   /**
@@ -365,7 +376,13 @@ export class MatIconRegistry implements OnDestroy {
 
             // Swallow errors fetching individual URLs so the
             // combined Observable won't necessarily fail.
-            console.error(`Loading icon set URL: ${url} failed: ${err.message}`);
+            const errorMessage = `Loading icon set URL: ${url} failed: ${err.message}`;
+            // @breaking-change 9.0.0 _errorHandler parameter to be made required
+            if (this._errorHandler) {
+              this._errorHandler.handleError(new Error(errorMessage));
+            } else {
+              console.error(errorMessage);
+            }
             return observableOf(null);
           })
         );
@@ -395,7 +412,7 @@ export class MatIconRegistry implements OnDestroy {
     for (let i = iconSetConfigs.length - 1; i >= 0; i--) {
       const config = iconSetConfigs[i];
       if (config.svgElement) {
-        const foundIcon = this._extractSvgIconFromSet(config.svgElement, iconName);
+        const foundIcon = this._extractSvgIconFromSet(config.svgElement, iconName, config.options);
         if (foundIcon) {
           return foundIcon;
         }
@@ -410,7 +427,7 @@ export class MatIconRegistry implements OnDestroy {
    */
   private _loadSvgIconFromConfig(config: SvgIconConfig): Observable<SVGElement> {
     return this._fetchUrl(config.url)
-        .pipe(map(svgText => this._createSvgElementForSingleIcon(svgText)));
+        .pipe(map(svgText => this._createSvgElementForSingleIcon(svgText, config.options)));
   }
 
   /**
@@ -437,9 +454,9 @@ export class MatIconRegistry implements OnDestroy {
   /**
    * Creates a DOM element from the given SVG string, and adds default attributes.
    */
-  private _createSvgElementForSingleIcon(responseText: string): SVGElement {
+  private _createSvgElementForSingleIcon(responseText: string, options?: IconOptions): SVGElement {
     const svg = this._svgElementFromString(responseText);
-    this._setSvgAttributes(svg);
+    this._setSvgAttributes(svg, options);
     return svg;
   }
 
@@ -448,7 +465,8 @@ export class MatIconRegistry implements OnDestroy {
    * tag matches the specified name. If found, copies the nested element to a new SVG element and
    * returns it. Returns null if no matching element is found.
    */
-  private _extractSvgIconFromSet(iconSet: SVGElement, iconName: string): SVGElement | null {
+  private _extractSvgIconFromSet(iconSet: SVGElement, iconName: string,
+                                 options?: IconOptions): SVGElement | null {
     // Use the `id="iconName"` syntax in order to escape special
     // characters in the ID (versus using the #iconName syntax).
     const iconSource = iconSet.querySelector(`[id="${iconName}"]`);
@@ -465,14 +483,14 @@ export class MatIconRegistry implements OnDestroy {
     // If the icon node is itself an <svg> node, clone and return it directly. If not, set it as
     // the content of a new <svg> node.
     if (iconElement.nodeName.toLowerCase() === 'svg') {
-      return this._setSvgAttributes(iconElement as SVGElement);
+      return this._setSvgAttributes(iconElement as SVGElement, options);
     }
 
     // If the node is a <symbol>, it won't be rendered so we have to convert it into <svg>. Note
     // that the same could be achieved by referring to it via <use href="#id">, however the <use>
     // tag is problematic on Firefox, because it needs to include the current page path.
     if (iconElement.nodeName.toLowerCase() === 'symbol') {
-      return this._setSvgAttributes(this._toSvgElement(iconElement));
+      return this._setSvgAttributes(this._toSvgElement(iconElement), options);
     }
 
     // createElement('SVG') doesn't work as expected; the DOM ends up with
@@ -484,7 +502,7 @@ export class MatIconRegistry implements OnDestroy {
     // Clone the node so we don't remove it from the parent icon set element.
     svg.appendChild(iconElement);
 
-    return this._setSvgAttributes(svg);
+    return this._setSvgAttributes(svg, options);
   }
 
   /**
@@ -506,7 +524,17 @@ export class MatIconRegistry implements OnDestroy {
    * Converts an element into an SVG node by cloning all of its children.
    */
   private _toSvgElement(element: Element): SVGElement {
-    let svg = this._svgElementFromString('<svg></svg>');
+    const svg = this._svgElementFromString('<svg></svg>');
+    const attributes = element.attributes;
+
+    // Copy over all the attributes from the `symbol` to the new SVG, except the id.
+    for (let i = 0; i < attributes.length; i++) {
+      const {name, value} = attributes[i];
+
+      if (name !== 'id') {
+        svg.setAttribute(name, value);
+      }
+    }
 
     for (let i = 0; i < element.childNodes.length; i++) {
       if (element.childNodes[i].nodeType === this._document.ELEMENT_NODE) {
@@ -520,12 +548,17 @@ export class MatIconRegistry implements OnDestroy {
   /**
    * Sets the default attributes for an SVG element to be used as an icon.
    */
-  private _setSvgAttributes(svg: SVGElement): SVGElement {
+  private _setSvgAttributes(svg: SVGElement, options?: IconOptions): SVGElement {
     svg.setAttribute('fit', '');
     svg.setAttribute('height', '100%');
     svg.setAttribute('width', '100%');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('focusable', 'false'); // Disable IE11 default behavior to make SVGs focusable.
+
+    if (options && options.viewBox) {
+      svg.setAttribute('viewBox', options.viewBox);
+    }
+
     return svg;
   }
 
@@ -602,8 +635,9 @@ export function ICON_REGISTRY_PROVIDER_FACTORY(
   parentRegistry: MatIconRegistry,
   httpClient: HttpClient,
   sanitizer: DomSanitizer,
-  document?: any) {
-  return parentRegistry || new MatIconRegistry(httpClient, sanitizer, document);
+  document?: any,
+  errorHandler?: ErrorHandler) {
+  return parentRegistry || new MatIconRegistry(httpClient, sanitizer, document, errorHandler);
 }
 
 /** @docs-private */
@@ -614,6 +648,7 @@ export const ICON_REGISTRY_PROVIDER = {
     [new Optional(), new SkipSelf(), MatIconRegistry],
     [new Optional(), HttpClient],
     DomSanitizer,
+    [new Optional(), ErrorHandler],
     [new Optional(), DOCUMENT as InjectionToken<any>],
   ],
   useFactory: ICON_REGISTRY_PROVIDER_FACTORY,

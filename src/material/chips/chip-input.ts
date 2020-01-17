@@ -156,8 +156,8 @@ export class MatChipInput implements MatChipTextControl, OnChanges {
   }
 
   /** Focuses the input. */
-  focus(): void {
-    this._inputElement.focus();
+  focus(options?: FocusOptions): void {
+    this._inputElement.focus(options);
   }
 
   /** Checks whether a keycode is one of the configured separators. */
@@ -170,4 +170,7 @@ export class MatChipInput implements MatChipTextControl, OnChanges {
     const keyCode = event.keyCode;
     return Array.isArray(separators) ? separators.indexOf(keyCode) > -1 : separators.has(keyCode);
   }
+
+  static ngAcceptInputType_addOnBlur: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

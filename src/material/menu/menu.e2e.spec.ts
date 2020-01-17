@@ -5,7 +5,7 @@ import {
   expectLocation,
   expectToExist,
   pressKeys,
-} from '@angular/cdk/testing/e2e';
+} from '@angular/cdk/testing/private/e2e';
 
 const presenceOf = ExpectedConditions.presenceOf;
 const not = ExpectedConditions.not;
@@ -57,7 +57,7 @@ describe('menu', () => {
 
   it('should run not run click handlers on disabled menu items', async () => {
     await page.trigger().click();
-    await page.items(2).click();
+    await browser.actions().mouseMove(page.items(2)).click();
     expect(await page.getResultText()).toEqual('');
   });
 

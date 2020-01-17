@@ -27,9 +27,16 @@ import {
   MatButtonBase
 } from './button-base';
 
-
+/**
+ * Material Design button component. Users interact with a button to perform an action.
+ * See https://material.io/components/buttons
+ *
+ * The `MatButton` class applies to native button elements and captures the appearances for
+ * "text button", "outlined button", and "contained button" per the Material Design
+ * specification. `MatButton` additionally captures an additional "flat" appearance, which matches
+ * "contained" but without elevation.
+ */
 @Component({
-  moduleId: module.id,
   selector: `
     button[mat-button], button[mat-raised-button], button[mat-flat-button],
     button[mat-stroked-button]
@@ -48,10 +55,22 @@ export class MatButton extends MatButtonBase {
       @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(elementRef, platform, ngZone, animationMode);
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
+/**
+ * Material Design button component for anchor elements. Anchor elements are used to provide
+ * links for the user to navigate across different routes or pages.
+ * See https://material.io/components/buttons
+ *
+ * The `MatAnchor` class applies to native anchor elements and captures the appearances for
+ * "text button", "outlined button", and "contained button" per the Material Design
+ * specification. `MatAnchor` additionally captures an additional "flat" appearance, which matches
+ * "contained" but without elevation.
+ */
 @Component({
-  moduleId: module.id,
   selector: `a[mat-button], a[mat-raised-button], a[mat-flat-button], a[mat-stroked-button]`,
   exportAs: 'matButton, matAnchor',
   host: MAT_ANCHOR_HOST,
@@ -67,4 +86,7 @@ export class MatAnchor extends MatAnchorBase {
       @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(elementRef, platform, ngZone, animationMode);
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

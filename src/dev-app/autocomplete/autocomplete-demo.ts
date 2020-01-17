@@ -23,10 +23,9 @@ export interface StateGroup {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'autocomplete-demo',
   templateUrl: 'autocomplete-demo.html',
-  styleUrls: ['autocomplete-demo.css'],
+  styleUrls: ['autocomplete-demo.css']
 })
 export class AutocompleteDemo {
   stateCtrl: FormControl;
@@ -39,7 +38,7 @@ export class AutocompleteDemo {
 
   tdDisabled = false;
 
-  @ViewChild(NgModel, {static: false}) modelDir: NgModel;
+  @ViewChild(NgModel) modelDir: NgModel;
 
   groupedStates: StateGroup[];
   filteredGroupedStates: StateGroup[];

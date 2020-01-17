@@ -26,6 +26,7 @@ import {
   ComponentPortal,
   TemplatePortal,
   CdkPortalOutlet,
+  DomPortal,
 } from '@angular/cdk/portal';
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {MatBottomSheetConfig} from './bottom-sheet-config';
@@ -41,7 +42,6 @@ import {FocusTrap, FocusTrapFactory} from '@angular/cdk/a11y';
  * @docs-private
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-bottom-sheet-container',
   templateUrl: 'bottom-sheet-container.html',
   styleUrls: ['bottom-sheet-container.css'],
@@ -122,6 +122,18 @@ export class MatBottomSheetContainer extends BasePortalOutlet implements OnDestr
     return this._portalOutlet.attachTemplatePortal(portal);
   }
 
+  /**
+   * Attaches a DOM portal to the bottom sheet container.
+   * @deprecated To be turned into a method.
+   * @breaking-change 10.0.0
+   */
+  attachDomPortal = (portal: DomPortal) => {
+    this._validatePortalAttached();
+    this._setPanelClass();
+    this._savePreviouslyFocusedElement();
+    return this._portalOutlet.attachDomPortal(portal);
+  }
+
   /** Begin animation of bottom sheet entrance into view. */
   enter(): void {
     if (!this._destroyed) {
@@ -180,15 +192,27 @@ export class MatBottomSheetContainer extends BasePortalOutlet implements OnDestr
     }
   }
 
-
   /** Moves the focus inside the focus trap. */
   private _trapFocus() {
+    const element = this._elementRef.nativeElement;
+
     if (!this._focusTrap) {
-      this._focusTrap = this._focusTrapFactory.create(this._elementRef.nativeElement);
+      this._focusTrap = this._focusTrapFactory.create(element);
     }
 
     if (this.bottomSheetConfig.autoFocus) {
       this._focusTrap.focusInitialElementWhenReady();
+    } else {
+      const activeElement = this._document.activeElement;
+
+      // Otherwise ensure that focus is on the container. It's possible that a different
+      // component tried to move focus while the open animation was running. See:
+      // https://github.com/angular/components/issues/16215. Note that we only want to do this
+      // if the focus isn't inside the bottom sheet already, because it's possible that the
+      // consumer turned off `autoFocus` in order to move focus themselves.
+      if (activeElement !== element && !element.contains(activeElement)) {
+        element.focus();
+      }
     }
   }
 
@@ -198,7 +222,17 @@ export class MatBottomSheetContainer extends BasePortalOutlet implements OnDestr
 
     // We need the extra check, because IE can set the `activeElement` to null in some cases.
     if (this.bottomSheetConfig.restoreFocus && toFocus && typeof toFocus.focus === 'function') {
-      toFocus.focus();
+      const activeElement = this._document.activeElement;
+      const element = this._elementRef.nativeElement;
+
+      // Make sure that focus is still inside the bottom sheet or is on the body (usually because a
+      // non-focusable element like the backdrop was clicked) before moving it. It's possible that
+      // the consumer moved it themselves before the animation was done, in which case we shouldn't
+      // do anything.
+      if (!activeElement || activeElement === this._document.body || activeElement === element ||
+        element.contains(activeElement)) {
+        toFocus.focus();
+      }
     }
 
     if (this._focusTrap) {

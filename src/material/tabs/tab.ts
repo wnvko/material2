@@ -20,6 +20,9 @@ import {
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation,
+  InjectionToken,
+  Inject,
+  Optional,
 } from '@angular/core';
 import {CanDisable, CanDisableCtor, mixinDisabled} from '@angular/material/core';
 import {Subject} from 'rxjs';
@@ -33,18 +36,35 @@ class MatTabBase {}
 const _MatTabMixinBase: CanDisableCtor & typeof MatTabBase =
     mixinDisabled(MatTabBase);
 
+/**
+ * Used to provide a tab group to a tab without causing a circular dependency.
+ * @docs-private
+ */
+export const MAT_TAB_GROUP = new InjectionToken<any>('MAT_TAB_GROUP');
+
 @Component({
-  moduleId: module.id,
   selector: 'mat-tab',
   templateUrl: 'tab.html',
   inputs: ['disabled'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // tslint:disable-next-line:validate-decorators
+  changeDetection: ChangeDetectionStrategy.Default,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'matTab',
 })
 export class MatTab extends _MatTabMixinBase implements OnInit, CanDisable, OnChanges, OnDestroy {
   /** Content for the tab label given by `<ng-template mat-tab-label>`. */
-  @ContentChild(MatTabLabel, {static: false}) templateLabel: MatTabLabel;
+  @ContentChild(MatTabLabel)
+  get templateLabel(): MatTabLabel { return this._templateLabel; }
+  set templateLabel(value: MatTabLabel) {
+    // Only update the templateLabel via query if there is actually
+    // a MatTabLabel found. This works around an issue where a user may have
+    // manually set `templateLabel` during creation mode, which would then get clobbered
+    // by `undefined` when this query resolves.
+    if (value) {
+      this._templateLabel = value;
+    }
+  }
+  private _templateLabel: MatTabLabel;
 
   /**
    * Template provided in the tab content that will be used if present, used to enable lazy-loading
@@ -95,7 +115,13 @@ export class MatTab extends _MatTabMixinBase implements OnInit, CanDisable, OnCh
    */
   isActive = false;
 
-  constructor(private _viewContainerRef: ViewContainerRef) {
+  constructor(
+    private _viewContainerRef: ViewContainerRef,
+    /**
+     * @deprecated `_closestTabGroup` parameter to become required.
+     * @breaking-change 10.0.0
+     */
+    @Optional() @Inject(MAT_TAB_GROUP) public _closestTabGroup?: any) {
     super();
   }
 
@@ -113,4 +139,6 @@ export class MatTab extends _MatTabMixinBase implements OnInit, CanDisable, OnCh
     this._contentPortal = new TemplatePortal(
         this._explicitContent || this._implicitContent, this._viewContainerRef);
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

@@ -75,7 +75,7 @@ describe('Directionality', () => {
     it('should provide itself as Directionality', () => {
       const fixture = TestBed.createComponent(ElementWithDir);
       const injectedDirectionality =
-        fixture.debugElement.query(By.directive(InjectsDirectionality)).componentInstance.dir;
+        fixture.debugElement.query(By.directive(InjectsDirectionality))!.componentInstance.dir;
 
       fixture.detectChanges();
 
@@ -85,7 +85,7 @@ describe('Directionality', () => {
     it('should emit a change event when the value changes', fakeAsync(() => {
       const fixture = TestBed.createComponent(ElementWithDir);
       const injectedDirectionality =
-        fixture.debugElement.query(By.directive(InjectsDirectionality)).componentInstance.dir;
+        fixture.debugElement.query(By.directive(InjectsDirectionality))!.componentInstance.dir;
 
       fixture.detectChanges();
 
@@ -108,7 +108,7 @@ describe('Directionality', () => {
     it('should complete the change stream on destroy', fakeAsync(() => {
       const fixture = TestBed.createComponent(ElementWithDir);
       const dir =
-        fixture.debugElement.query(By.directive(InjectsDirectionality)).componentInstance.dir;
+        fixture.debugElement.query(By.directive(InjectsDirectionality))!.componentInstance.dir;
       const spy = jasmine.createSpy('complete spy');
       const subscription = dir.change.subscribe(undefined, undefined, spy);
 
@@ -158,7 +158,7 @@ describe('Directionality', () => {
   `
 })
 class ElementWithDir {
-  @ViewChild(Dir, {static: false}) dir: Dir;
+  @ViewChild(Dir) dir: Dir;
   direction = 'rtl';
   changeCount = 0;
 }
@@ -167,14 +167,14 @@ class ElementWithDir {
   template: '<div dir="auto"></div>'
 })
 class ElementWithPredefinedAutoDir {
-  @ViewChild(Dir, {static: false}) dir: Dir;
+  @ViewChild(Dir) dir: Dir;
 }
 
 @Component({
   template: '<div dir="RTL"></div>'
 })
 class ElementWithPredefinedUppercaseDir {
-  @ViewChild(Dir, {static: false}) dir: Dir;
+  @ViewChild(Dir) dir: Dir;
 }
 
 

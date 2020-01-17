@@ -60,12 +60,13 @@ export class MatChipGridChange {
 class MatChipGridBase extends MatChipSet {
   constructor(_elementRef: ElementRef,
               _changeDetectorRef: ChangeDetectorRef,
+              _dir: Directionality,
               public _defaultErrorStateMatcher: ErrorStateMatcher,
               public _parentForm: NgForm,
               public _parentFormGroup: FormGroupDirective,
               /** @docs-private */
               public ngControl: NgControl) {
-    super(_elementRef, _changeDetectorRef);
+    super(_elementRef, _changeDetectorRef, _dir);
   }
 }
 const _MatChipGridMixinBase: CanUpdateErrorStateCtor & typeof MatChipGridBase =
@@ -76,7 +77,6 @@ const _MatChipGridMixinBase: CanUpdateErrorStateCtor & typeof MatChipGridBase =
  * the matChipInputFor directive.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-chip-grid',
   template: '<ng-content></ng-content>',
   styleUrls: ['chips.css'],
@@ -87,7 +87,7 @@ const _MatChipGridMixinBase: CanUpdateErrorStateCtor & typeof MatChipGridBase =
     '[tabIndex]': '_chips && _chips.length === 0 ? -1 : tabIndex',
     // TODO: replace this binding with use of AriaDescriber
     '[attr.aria-describedby]': '_ariaDescribedby || null',
-    '[attr.aria-required]': 'required.toString()',
+    '[attr.aria-required]': 'role ? required : null',
     '[attr.aria-disabled]': 'disabled.toString()',
     '[attr.aria-invalid]': 'errorState',
     '[class.mat-mdc-chip-list-disabled]': 'disabled',
@@ -237,14 +237,14 @@ export class MatChipGrid extends _MatChipGridMixinBase implements AfterContentIn
 
   constructor(_elementRef: ElementRef,
               _changeDetectorRef: ChangeDetectorRef,
-              @Optional() private _dir: Directionality,
+              @Optional() _dir: Directionality,
               @Optional() _parentForm: NgForm,
               @Optional() _parentFormGroup: FormGroupDirective,
               _defaultErrorStateMatcher: ErrorStateMatcher,
               /** @docs-private */
               @Optional() @Self() public ngControl: NgControl) {
-    super(_elementRef, _changeDetectorRef, _defaultErrorStateMatcher, _parentForm, _parentFormGroup,
-      ngControl);
+    super(_elementRef, _changeDetectorRef, _dir, _defaultErrorStateMatcher, _parentForm,
+        _parentFormGroup, ngControl);
     if (this.ngControl) {
       this.ngControl.valueAccessor = this;
     }
@@ -513,11 +513,13 @@ export class MatChipGrid extends _MatChipGridMixinBase implements AfterContentIn
 
   /** Returns true if element is an input with no value. */
   private _isEmptyInput(element: HTMLElement): boolean {
-    if (element && element.nodeName.toLowerCase() === 'input') {
-      let input = element as HTMLInputElement;
-      return !input.value;
+    if (element && element.id === this._chipInput!.id) {
+      return this._chipInput.empty;
     }
 
     return false;
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_required: boolean | string | null | undefined;
 }

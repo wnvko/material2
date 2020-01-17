@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {chain, noop, Rule, Tree} from '@angular-devkit/schematics';
+import {chain, Rule, SchematicContext, Tree} from '@angular-devkit/schematics';
 import {
   addModuleImportToRootModule,
   getProjectFromWorkspace,
@@ -14,13 +14,11 @@ import {
   getProjectStyleFile,
   hasNgModuleImport,
 } from '@angular/cdk/schematics';
-import {red, bold, italic} from 'chalk';
 import {getWorkspace} from '@schematics/angular/utility/config';
 import {getAppModulePath} from '@schematics/angular/utility/ng-ast-utils';
 import {addFontsToIndex} from './fonts/material-fonts';
-import {addHammerJsToMain} from './gestures/hammerjs-import';
 import {Schema} from './schema';
-import {addThemeToAppStyles} from './theming/theming';
+import {addThemeToAppStyles, addTypographyClass} from './theming/theming';
 
 /** Name of the Angular module that enables Angular browser animations. */
 const browserAnimationsModuleName = 'BrowserAnimationsModule';
@@ -36,11 +34,11 @@ const noopAnimationsModuleName = 'NoopAnimationsModule';
  */
 export default function(options: Schema): Rule {
   return chain([
-    options && options.gestures ? addHammerJsToMain(options) : noop(),
     addAnimationsModule(options),
     addThemeToAppStyles(options),
     addFontsToIndex(options),
     addMaterialAppStyles(options),
+    addTypographyClass(options),
   ]);
 }
 
@@ -50,7 +48,7 @@ export default function(options: Schema): Rule {
  * components of Angular Material will throw an exception.
  */
 function addAnimationsModule(options: Schema) {
-  return (host: Tree) => {
+  return (host: Tree, context: SchematicContext) => {
     const workspace = getWorkspace(host);
     const project = getProjectFromWorkspace(workspace, options.project);
     const appModulePath = getAppModulePath(host, getProjectMainFile(project));
@@ -61,9 +59,11 @@ function addAnimationsModule(options: Schema) {
       // animations. If we would add the BrowserAnimationsModule while the NoopAnimationsModule
       // is already configured, we would cause unexpected behavior and runtime exceptions.
       if (hasNgModuleImport(host, appModulePath, noopAnimationsModuleName)) {
-        return console.warn(red(`Could not set up "${bold(browserAnimationsModuleName)}" ` +
-            `because "${bold(noopAnimationsModuleName)}" is already imported. Please manually ` +
-            `set up browser animations.`));
+        context.logger.error(
+            `Could not set up "${browserAnimationsModuleName}" ` +
+            `because "${noopAnimationsModuleName}" is already imported.`);
+        context.logger.info(`Please manually set up browser animations.`);
+        return;
       }
 
       addModuleImportToRootModule(host, browserAnimationsModuleName,
@@ -84,23 +84,24 @@ function addAnimationsModule(options: Schema) {
  * and reset the default browser body margin.
  */
 function addMaterialAppStyles(options: Schema) {
-  return (host: Tree) => {
+  return (host: Tree, context: SchematicContext) => {
     const workspace = getWorkspace(host);
     const project = getProjectFromWorkspace(workspace, options.project);
     const styleFilePath = getProjectStyleFile(project);
+    const logger = context.logger;
 
     if (!styleFilePath) {
-      console.warn(red(`Could not find the default style file for this project.`));
-      console.warn(red(`Please consider manually setting up the Roboto font in your CSS.`));
+      logger.error(`Could not find the default style file for this project.`);
+      logger.info(`Please consider manually setting up the Roboto font in your CSS.`);
       return;
     }
 
     const buffer = host.read(styleFilePath);
 
     if (!buffer) {
-      console.warn(red(`Could not read the default style file within the project ` +
-        `(${italic(styleFilePath)})`));
-      console.warn(red(`Please consider manually setting up the Robot font.`));
+      logger.error(`Could not read the default style file within the project ` +
+        `(${styleFilePath})`);
+      logger.info(`Please consider manually setting up the Robot font.`);
       return;
     }
 

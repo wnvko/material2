@@ -6,11 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Rule} from '@angular-devkit/schematics';
+import {Rule, SchematicContext} from '@angular-devkit/schematics';
 import {createUpgradeRule, TargetVersion} from '@angular/cdk/schematics';
-import {green, yellow} from 'chalk';
 
 import {materialUpgradeData} from './upgrade-data';
+import {HammerGesturesRule} from './upgrade-rules/hammer-gestures-v9/hammer-gestures-rule';
 import {MiscClassInheritanceRule} from './upgrade-rules/misc-checks/misc-class-inheritance-rule';
 import {MiscClassNamesRule} from './upgrade-rules/misc-checks/misc-class-names-rule';
 import {MiscImportsRule} from './upgrade-rules/misc-checks/misc-imports-rule';
@@ -29,6 +29,7 @@ const materialMigrationRules = [
   MiscTemplateRule,
   RippleSpeedFactorRule,
   SecondaryEntryPointsRule,
+  HammerGesturesRule,
 ];
 
 /** Entry point for the migration schematics with target of Angular Material v6 */
@@ -49,15 +50,22 @@ export function updateToV8(): Rule {
       TargetVersion.V8, materialMigrationRules, materialUpgradeData, onMigrationComplete);
 }
 
+/** Entry point for the migration schematics with target of Angular Material v9 */
+export function updateToV9(): Rule {
+  return createUpgradeRule(
+      TargetVersion.V9, materialMigrationRules, materialUpgradeData, onMigrationComplete);
+}
+
 /** Function that will be called when the migration completed. */
-function onMigrationComplete(targetVersion: TargetVersion, hasFailures: boolean) {
-  console.log();
-  console.log(green(`  ✓  Updated Angular Material to ${targetVersion}`));
-  console.log();
+function onMigrationComplete(context: SchematicContext, targetVersion: TargetVersion,
+                             hasFailures: boolean) {
+  context.logger.info('');
+  context.logger.info(`  ✓  Updated Angular Material to ${targetVersion}`);
+  context.logger.info('');
 
   if (hasFailures) {
-    console.log(yellow(
+    context.logger.warn(
       '  ⚠  Some issues were detected but could not be fixed automatically. Please check the ' +
-      'output above and fix these issues manually.'));
+      'output above and fix these issues manually.');
   }
 }

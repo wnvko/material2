@@ -17,7 +17,6 @@ import {MatPlaceholder} from './placeholder';
 import {MatPrefix} from './prefix';
 import {MatSuffix} from './suffix';
 
-
 @NgModule({
   declarations: [
     MatError,

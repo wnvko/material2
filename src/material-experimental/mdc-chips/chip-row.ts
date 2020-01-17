@@ -25,7 +25,6 @@ import {GridKeyManagerRow, NAVIGATION_KEYS} from './grid-key-manager';
  * the matChipInputFor directive.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-chip-row, mat-basic-chip-row',
   templateUrl: 'chip-row.html',
   styleUrls: ['chips.css'],
@@ -42,7 +41,6 @@ import {GridKeyManagerRow, NAVIGATION_KEYS} from './grid-key-manager';
     '[tabIndex]': 'tabIndex',
     '(mousedown)': '_mousedown($event)',
     '(keydown)': '_keydown($event)',
-    '(transitionend)': '_chipFoundation.handleTransitionEnd($event)',
     '(focusin)': '_focusin()',
     '(focusout)': '_focusout()'
   },
@@ -58,7 +56,7 @@ export class MatChipRow extends MatChip implements AfterContentInit, AfterViewIn
    * The focusable wrapper element in the first gridcell, which contains all
    * chip content other than the remove icon.
    */
-  @ViewChild('chipContent', {static: false}) chipContent: ElementRef;
+  @ViewChild('chipContent') chipContent: ElementRef;
 
   /** The focusable grid cells for this row. Implemented as part of GridKeyManagerRow. */
   cells!: HTMLElement[];
@@ -70,9 +68,13 @@ export class MatChipRow extends MatChip implements AfterContentInit, AfterViewIn
     super.ngAfterContentInit();
 
     if (this.removeIcon) {
-      // removeIcon has tabIndex 0 for regular chips, but should only be focusable by
-      // the GridFocusKeyManager for row chips.
-      this.removeIcon.tabIndex = -1;
+      // Defer setting the value in order to avoid the "Expression
+      // has changed after it was checked" errors from Angular.
+      setTimeout(() => {
+        // removeIcon has tabIndex 0 for regular chips, but should only be focusable by
+        // the GridFocusKeyManager for row chips.
+        this.removeIcon.tabIndex = -1;
+      });
     }
   }
 
@@ -146,4 +148,9 @@ export class MatChipRow extends MatChip implements AfterContentInit, AfterViewIn
         this._handleInteraction(event);
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_removable: boolean | string | null | undefined;
+  static ngAcceptInputType_highlighted: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

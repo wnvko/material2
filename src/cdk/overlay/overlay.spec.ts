@@ -10,7 +10,7 @@ import {
   NgZone,
 } from '@angular/core';
 import {Direction, Directionality} from '@angular/cdk/bidi';
-import {dispatchFakeEvent, MockNgZone} from '@angular/cdk/testing';
+import {MockNgZone, dispatchFakeEvent} from '@angular/cdk/testing/private';
 import {
   ComponentPortal,
   PortalModule,
@@ -416,6 +416,14 @@ describe('Overlay', () => {
     // panel classes
     overlayRef.dispose();
     expect(() => overlayRef.addPanelClass('custom-class-two')).not.toThrowError();
+  });
+
+  it('should not throw when trying to add or remove and empty string class', () => {
+    const overlayRef = overlay.create();
+    overlayRef.attach(componentPortal);
+
+    expect(() => overlayRef.addPanelClass('')).not.toThrow();
+    expect(() => overlayRef.removePanelClass('')).not.toThrow();
   });
 
   describe('positioning', () => {
@@ -972,7 +980,7 @@ class PizzaMsg { }
 /** Test-bed component that contains a TempatePortal and an ElementRef. */
 @Component({template: `<ng-template cdk-portal>Cake</ng-template>`})
 class TestComponentWithTemplatePortals {
-  @ViewChild(CdkPortal, {static: false}) templatePortal: CdkPortal;
+  @ViewChild(CdkPortal) templatePortal: CdkPortal;
 
   constructor(public viewContainerRef: ViewContainerRef) { }
 }

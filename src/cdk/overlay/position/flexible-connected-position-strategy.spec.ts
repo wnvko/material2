@@ -1,6 +1,6 @@
 import {ComponentPortal, PortalModule} from '@angular/cdk/portal';
 import {CdkScrollable, ScrollingModule, ViewportRuler} from '@angular/cdk/scrolling';
-import {MockNgZone} from '@angular/cdk/testing';
+import {MockNgZone} from '@angular/cdk/testing/private';
 import {Component, ElementRef, NgModule, NgZone} from '@angular/core';
 import {inject, TestBed} from '@angular/core/testing';
 import {Subscription} from 'rxjs';
@@ -746,6 +746,23 @@ describe('FlexibleConnectedPositionStrategy', () => {
         const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
         expect(Math.floor(overlayRect.bottom)).toBe(viewportHeight);
         expect(Math.floor(overlayRect.left)).toBe(50);
+      });
+
+      it('should be able to position relative to a point with width and height', () => {
+        positionStrategy
+          .setOrigin({x: 100, y: 200, width: 100, height: 50})
+          .withPositions([{
+            originX: 'end',
+            originY: 'bottom',
+            overlayX: 'end',
+            overlayY: 'top'
+          }]);
+
+        attachOverlay({positionStrategy});
+
+        const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+        expect(Math.floor(overlayRect.top)).toBe(250);
+        expect(Math.floor(overlayRect.right)).toBe(200);
       });
 
     });
@@ -2002,6 +2019,65 @@ describe('FlexibleConnectedPositionStrategy', () => {
         document.body.removeChild(veryLargeElement);
       });
 
+    it('should set the maxWidth and maxHeight on the bounding box when exact dimension are ' +
+      'not used', () => {
+        originElement.style.top = '50px';
+        originElement.style.left = '50%';
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPositions([{
+            overlayX: 'start',
+            overlayY: 'top',
+            originX: 'start',
+            originY: 'bottom'
+          }]);
+
+        attachOverlay({
+          positionStrategy,
+          maxWidth: 250,
+          maxHeight: 300
+        });
+
+        const overlayStyle = overlayRef.overlayElement.style;
+        const boundingBoxStyle = overlayRef.hostElement.style;
+
+        expect(overlayStyle.maxWidth).toBeFalsy();
+        expect(overlayStyle.maxHeight).toBeFalsy();
+        expect(boundingBoxStyle.maxWidth).toBe('250px');
+        expect(boundingBoxStyle.maxHeight).toBe('300px');
+      });
+
+    it('should set the maxWidth and maxHeight on the overlay pane when exact dimensions are used',
+      () => {
+        originElement.style.bottom = '0';
+        originElement.style.left = '50%';
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPositions([{
+            overlayX: 'start',
+            overlayY: 'top',
+            originX: 'start',
+            originY: 'bottom'
+          }]);
+
+        attachOverlay({
+          positionStrategy,
+          maxWidth: 250,
+          maxHeight: 300
+        });
+
+        const overlayStyle = overlayRef.overlayElement.style;
+        const boundingBoxStyle = overlayRef.hostElement.style;
+
+        expect(overlayStyle.maxWidth).toBe('250px');
+        expect(overlayStyle.maxHeight).toBe('300px');
+        expect(boundingBoxStyle.maxWidth).toBeFalsy();
+        expect(boundingBoxStyle.maxHeight).toBeFalsy();
+      });
 
   });
 

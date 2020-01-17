@@ -9,10 +9,8 @@
 import {Component} from '@angular/core';
 
 @Component({
-  moduleId: module.id,
   selector: 'mdc-tabs-e2e',
   templateUrl: 'mdc-tabs-e2e.html',
 })
 export class MdcTabsE2e {
-  // TODO: copy implementation from existing tabs e2e page.
 }

@@ -8,7 +8,11 @@ import {
   MatExpansionPanel,
   MatExpansionPanelHeader,
 } from './index';
-import {dispatchKeyboardEvent, createKeyboardEvent, dispatchEvent} from '@angular/cdk/testing';
+import {
+  dispatchKeyboardEvent,
+  createKeyboardEvent,
+  dispatchEvent,
+} from '@angular/cdk/testing/private';
 import {DOWN_ARROW, UP_ARROW, HOME, END} from '@angular/cdk/keycodes';
 import {FocusMonitor} from '@angular/cdk/a11y';
 
@@ -27,6 +31,7 @@ describe('MatAccordion', () => {
         AccordionWithTogglePosition,
         NestedPanel,
         SetOfItems,
+        NestedAccordions,
       ],
     });
     TestBed.compileComponents();
@@ -124,7 +129,7 @@ describe('MatAccordion', () => {
 
   it('should update the expansion panel if hideToggle changed', () => {
     const fixture = TestBed.createComponent(AccordionWithHideToggle);
-    const panel = fixture.debugElement.query(By.directive(MatExpansionPanel));
+    const panel = fixture.debugElement.query(By.directive(MatExpansionPanel))!;
 
     fixture.detectChanges();
 
@@ -140,7 +145,7 @@ describe('MatAccordion', () => {
 
   it('should update the expansion panel if togglePosition changed', () => {
     const fixture = TestBed.createComponent(AccordionWithTogglePosition);
-    const panel = fixture.debugElement.query(By.directive(MatExpansionPanel));
+    const panel = fixture.debugElement.query(By.directive(MatExpansionPanel))!;
 
     fixture.detectChanges();
 
@@ -170,6 +175,23 @@ describe('MatAccordion', () => {
       fixture.detectChanges();
       expect(headers[i + 1].focus).toHaveBeenCalledTimes(1);
     }
+  });
+
+  it('should not move focus into nested accordions', () => {
+    const fixture = TestBed.createComponent(NestedAccordions);
+    fixture.detectChanges();
+
+    const headerElements = fixture.debugElement.queryAll(By.css('mat-expansion-panel-header'));
+    const headers = fixture.componentInstance.headers.toArray();
+    const {firstInnerHeader, secondOuterHeader} = fixture.componentInstance;
+
+    focusMonitor.focusVia(headerElements[0].nativeElement, 'keyboard');
+    headers.forEach(header => spyOn(header, 'focus'));
+
+    dispatchKeyboardEvent(headerElements[0].nativeElement, 'keydown', DOWN_ARROW);
+    fixture.detectChanges();
+    expect(secondOuterHeader.focus).toHaveBeenCalledTimes(1);
+    expect(firstInnerHeader.focus).not.toHaveBeenCalled();
   });
 
   it('should move focus to the next header when pressing the up arrow', () => {
@@ -291,11 +313,34 @@ describe('MatAccordion', () => {
     </mat-expansion-panel>
   </mat-accordion>`})
 class SetOfItems {
-  @ViewChild(MatAccordion, {static: false}) accordion: MatAccordion;
+  @ViewChild(MatAccordion) accordion: MatAccordion;
   @ViewChildren(MatExpansionPanel) panels: QueryList<MatExpansionPanel>;
   @ViewChildren(MatExpansionPanelHeader) headers: QueryList<MatExpansionPanelHeader>;
 
   multi: boolean = false;
+}
+
+@Component({template: `
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>Summary 0</mat-expansion-panel-header>
+      Content 0
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header #firstInnerHeader>Summary 0-0</mat-expansion-panel-header>
+        Content 0-0
+      </mat-expansion-panel>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header #secondOuterHeader>Summary 1</mat-expansion-panel-header>
+      Content 1
+    </mat-expansion-panel>
+  </mat-accordion>`})
+class NestedAccordions {
+  @ViewChildren(MatExpansionPanelHeader) headers: QueryList<MatExpansionPanelHeader>;
+  @ViewChild('secondOuterHeader', {static: false}) secondOuterHeader: MatExpansionPanelHeader;
+  @ViewChild('firstInnerHeader', {static: false}) firstInnerHeader: MatExpansionPanelHeader;
 }
 
 @Component({template: `
@@ -309,8 +354,8 @@ class SetOfItems {
     </mat-expansion-panel>
   </mat-accordion>`})
 class NestedPanel {
-  @ViewChild('outerPanel', {static: false}) outerPanel: MatExpansionPanel;
-  @ViewChild('innerPanel', {static: false}) innerPanel: MatExpansionPanel;
+  @ViewChild('outerPanel') outerPanel: MatExpansionPanel;
+  @ViewChild('innerPanel') innerPanel: MatExpansionPanel;
 }
 
 @Component({template: `

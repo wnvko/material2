@@ -1,6 +1,6 @@
 import {Directionality} from '@angular/cdk/bidi';
 import {SPACE} from '@angular/cdk/keycodes';
-import {createKeyboardEvent, dispatchFakeEvent} from '@angular/cdk/testing';
+import {createKeyboardEvent, dispatchFakeEvent} from '@angular/cdk/testing/private';
 import {Component, DebugElement, ViewChild} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, flush, TestBed} from '@angular/core/testing';
 import {MAT_RIPPLE_GLOBAL_OPTIONS, RippleGlobalOptions} from '@angular/material/core';
@@ -15,7 +15,7 @@ import {
 } from './index';
 
 
-describe('Option Chips', () => {
+describe('MDC-based Option Chips', () => {
   let fixture: ComponentFixture<any>;
   let chipDebugElement: DebugElement;
   let chipNativeElement: HTMLElement;
@@ -48,16 +48,10 @@ describe('Option Chips', () => {
       fixture = TestBed.createComponent(SingleChip);
       fixture.detectChanges();
 
-      chipDebugElement = fixture.debugElement.query(By.directive(MatChipOption));
+      chipDebugElement = fixture.debugElement.query(By.directive(MatChipOption))!;
       chipNativeElement = chipDebugElement.nativeElement;
       chipInstance = chipDebugElement.injector.get<MatChipOption>(MatChipOption);
       testComponent = fixture.debugElement.componentInstance;
-
-      document.body.appendChild(chipNativeElement);
-    });
-
-    afterEach(() => {
-      document.body.removeChild(chipNativeElement);
     });
 
     describe('basic behaviors', () => {
@@ -292,7 +286,7 @@ describe('Option Chips', () => {
     </mat-chip-listbox>`
 })
 class SingleChip {
-  @ViewChild(MatChipListbox, {static: false}) chipList: MatChipListbox;
+  @ViewChild(MatChipListbox) chipList: MatChipListbox;
   disabled: boolean = false;
   name: string = 'Test';
   color: string = 'primary';

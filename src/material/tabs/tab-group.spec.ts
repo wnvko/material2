@@ -1,5 +1,5 @@
 import {LEFT_ARROW} from '@angular/cdk/keycodes';
-import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing';
+import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing/private';
 import {Component, OnInit, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
@@ -23,6 +23,8 @@ describe('MatTabGroup', () => {
         TemplateTabs,
         TabGroupWithAriaInputs,
         TabGroupWithIsActiveBinding,
+        NestedTabs,
+        TabGroupWithIndirectDescendantTabs,
       ],
     });
 
@@ -99,7 +101,7 @@ describe('MatTabGroup', () => {
 
     it('should change tabs based on selectedIndex', fakeAsync(() => {
       let component = fixture.componentInstance;
-      let tabComponent = fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+      let tabComponent = fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       spyOn(component, 'handleSelection').and.callThrough();
 
@@ -117,7 +119,7 @@ describe('MatTabGroup', () => {
     it('should update tab positions when selected index is changed', () => {
       fixture.detectChanges();
       const component: MatTabGroup =
-          fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+          fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
       const tabs: MatTab[] = component._tabs.toArray();
 
       expect(tabs[0].position).toBeLessThan(0);
@@ -142,7 +144,7 @@ describe('MatTabGroup', () => {
     it('should clamp the selected index to the size of the number of tabs', () => {
       fixture.detectChanges();
       const component: MatTabGroup =
-          fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+          fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       // Set the index to be negative, expect first tab selected
       fixture.componentInstance.selectedIndex = -1;
@@ -259,7 +261,7 @@ describe('MatTabGroup', () => {
 
       const tabLabels = fixture.debugElement.queryAll(By.css('.mat-tab-label'));
       const tabLabelContainer = fixture.debugElement
-        .query(By.css('.mat-tab-label-container')).nativeElement as HTMLElement;
+        .query(By.css('.mat-tab-label-container'))!.nativeElement as HTMLElement;
 
       expect(fixture.componentInstance.handleFocus).toHaveBeenCalledTimes(0);
 
@@ -275,6 +277,18 @@ describe('MatTabGroup', () => {
       expect(fixture.componentInstance.handleFocus).toHaveBeenCalledTimes(2);
       expect(fixture.componentInstance.handleFocus)
         .toHaveBeenCalledWith(jasmine.objectContaining({index: 0}));
+    });
+
+    it('should clean up the tabs QueryList on destroy', () => {
+      const component: MatTabGroup =
+        fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
+      const spy = jasmine.createSpy('complete spy');
+      const subscription = component._tabs.changes.subscribe({complete: spy});
+
+      fixture.destroy();
+
+      expect(spy).toHaveBeenCalled();
+      subscription.unsubscribe();
     });
 
   });
@@ -365,7 +379,7 @@ describe('MatTabGroup', () => {
     it('should be able to add a new tab, select it, and have correct origin position',
       fakeAsync(() => {
         const component: MatTabGroup =
-            fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+            fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
         let tabs: MatTab[] = component._tabs.toArray();
         expect(tabs[0].origin).toBe(null);
@@ -397,7 +411,7 @@ describe('MatTabGroup', () => {
 
     it('should update selected index if the last tab removed while selected', fakeAsync(() => {
       const component: MatTabGroup =
-          fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+          fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       const numberOfTabs = component._tabs.length;
       fixture.componentInstance.selectedIndex = numberOfTabs - 1;
@@ -416,7 +430,7 @@ describe('MatTabGroup', () => {
     it('should maintain the selected tab if a new tab is added', () => {
       fixture.detectChanges();
       const component: MatTabGroup =
-          fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+          fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       fixture.componentInstance.selectedIndex = 1;
       fixture.detectChanges();
@@ -436,7 +450,7 @@ describe('MatTabGroup', () => {
       fixture.detectChanges();
 
       const component: MatTabGroup =
-          fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+          fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       // Remove the first tab that is right before the selected one.
       fixture.componentInstance.tabs.splice(0, 1);
@@ -451,7 +465,7 @@ describe('MatTabGroup', () => {
     it('should be able to select a new tab after creation', fakeAsync(() => {
       fixture.detectChanges();
       const component: MatTabGroup =
-        fixture.debugElement.query(By.css('mat-tab-group')).componentInstance;
+        fixture.debugElement.query(By.css('mat-tab-group'))!.componentInstance;
 
       fixture.componentInstance.tabs.push({label: 'Last tab', content: 'at the end'});
       fixture.componentInstance.selectedIndex = 3;
@@ -507,7 +521,7 @@ describe('MatTabGroup', () => {
       tick();
 
       tabGroup =
-          fixture.debugElement.query(By.directive(MatTabGroup)).componentInstance as MatTabGroup;
+          fixture.debugElement.query(By.directive(MatTabGroup))!.componentInstance as MatTabGroup;
     }));
 
     it('should support a tab-group with the simple api', fakeAsync(() => {
@@ -546,7 +560,7 @@ describe('MatTabGroup', () => {
     }));
 
     it('should support setting the header position', () => {
-      let tabGroupNode = fixture.debugElement.query(By.css('mat-tab-group')).nativeElement;
+      let tabGroupNode = fixture.debugElement.query(By.css('mat-tab-group'))!.nativeElement;
 
       expect(tabGroupNode.classList).not.toContain('mat-tab-group-inverted-header');
 
@@ -569,7 +583,7 @@ describe('MatTabGroup', () => {
       tick();
       fixture.detectChanges();
 
-      const child = fixture.debugElement.query(By.css('.child'));
+      const child = fixture.debugElement.query(By.css('.child'))!;
       expect(child.nativeElement).toBeDefined();
     }));
   });
@@ -588,6 +602,33 @@ describe('MatTabGroup', () => {
     }));
   });
 
+  describe('nested tabs', () => {
+    it('should not pick up the tabs from descendant tab groups', fakeAsync(() => {
+      const fixture = TestBed.createComponent(NestedTabs);
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      const groups = fixture.componentInstance.groups.toArray();
+
+      expect(groups.length).toBe(2);
+      expect(groups[0]._tabs.map((tab: MatTab) => tab.textLabel))
+          .toEqual(['One', 'Two']);
+      expect(groups[1]._tabs.map((tab: MatTab) => tab.textLabel))
+        .toEqual(['Inner tab one', 'Inner tab two']);
+    }));
+
+    it('should pick up indirect descendant tabs', fakeAsync(() => {
+      const fixture = TestBed.createComponent(TabGroupWithIndirectDescendantTabs);
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      const tabs = fixture.componentInstance.tabGroup._tabs;
+      expect(tabs.map((tab: MatTab) => tab.textLabel)).toEqual(['One', 'Two']);
+    }));
+  });
+
   /**
    * Checks that the `selectedIndex` has been updated; checks that the label and body have their
    * respective `active` classes
@@ -596,15 +637,15 @@ describe('MatTabGroup', () => {
     fixture.detectChanges();
 
     let tabComponent: MatTabGroup = fixture.debugElement
-        .query(By.css('mat-tab-group')).componentInstance;
+        .query(By.css('mat-tab-group'))!.componentInstance;
     expect(tabComponent.selectedIndex).toBe(expectedIndex);
 
     let tabLabelElement = fixture.debugElement
-        .query(By.css(`.mat-tab-label:nth-of-type(${expectedIndex + 1})`)).nativeElement;
+        .query(By.css(`.mat-tab-label:nth-of-type(${expectedIndex + 1})`))!.nativeElement;
     expect(tabLabelElement.classList.contains('mat-tab-label-active')).toBe(true);
 
     let tabContentElement = fixture.debugElement
-        .query(By.css(`mat-tab-body:nth-of-type(${expectedIndex + 1})`)).nativeElement;
+        .query(By.css(`mat-tab-body:nth-of-type(${expectedIndex + 1})`))!.nativeElement;
     expect(tabContentElement.classList.contains('mat-tab-body-active')).toBe(true);
   }
 
@@ -805,7 +846,7 @@ class AsyncTabsTestApp implements OnInit {
 class TabGroupWithSimpleApi {
   otherLabel = 'Fruit';
   otherContent = 'Apples, grapes';
-  @ViewChild('legumes', {static: false}) legumes: any;
+  @ViewChild('legumes') legumes: any;
 }
 
 
@@ -824,7 +865,9 @@ class TabGroupWithSimpleApi {
     </mat-tab-group>
   `,
 })
-class NestedTabs {}
+class NestedTabs {
+  @ViewChildren(MatTabGroup) groups: QueryList<MatTabGroup>;
+}
 
 @Component({
   selector: 'template-tabs',
@@ -880,3 +923,18 @@ class TabGroupWithIsActiveBinding {
   `,
 })
 class TabsWithCustomAnimationDuration {}
+
+
+@Component({
+  template: `
+    <mat-tab-group>
+      <ng-container [ngSwitch]="true">
+        <mat-tab label="One">Tab one content</mat-tab>
+        <mat-tab label="Two">Tab two content</mat-tab>
+      </ng-container>
+    </mat-tab-group>
+  `,
+})
+class TabGroupWithIndirectDescendantTabs {
+  @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
+}

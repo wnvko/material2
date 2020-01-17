@@ -1,13 +1,22 @@
 import {existsSync, readFileSync} from 'fs';
 import {sync as glob} from 'glob';
-import {dirname, isAbsolute, join, basename} from 'path';
+import {basename, dirname, isAbsolute, join} from 'path';
+import * as semver from 'semver';
 import * as ts from 'typescript';
+import {Version} from '../version-name/parse-version';
 
 /** RegExp that matches Angular component inline styles that contain a sourcemap reference. */
 const inlineStylesSourcemapRegex = /styles: ?\[["'].*sourceMappingURL=.*["']/;
 
 /** RegExp that matches Angular component metadata properties that refer to external resources. */
 const externalReferencesRegex = /(templateUrl|styleUrls): *["'[]/;
+
+/**
+ * List of fields which are mandatory in entry-point "package.json" files and refer
+ * to files in the release output.
+ */
+const packageJsonPathFields =
+    ['main', 'module', 'typings', 'es2015', 'fesm5', 'fesm2015', 'esm5', 'esm2015'];
 
 /**
  * Checks the specified release bundle and ensures that it does not contain
@@ -24,6 +33,32 @@ export function checkReleaseBundle(bundlePath: string): string[] {
   if (externalReferencesRegex.exec(bundleContent) !== null) {
     failures.push('Found external component resource references');
   }
+
+  return failures;
+}
+
+/**
+ * Checks a "package.json" file by ensuring that common fields which are
+ * specified in the Angular package format are present. Those fields which
+ * resolve to paths are checked so that they do not refer to non-existent files.
+ */
+export function checkPackageJsonFile(filePath: string): string[] {
+  const fileContent = readFileSync(filePath, 'utf8');
+  const parsed = JSON.parse(fileContent);
+  const packageJsonDir = dirname(filePath);
+  const failures: string[] = [];
+
+  packageJsonPathFields.forEach(fieldName => {
+    if (!parsed[fieldName]) {
+      failures.push(`Missing field: ${fieldName}`);
+    }
+
+    const resolvedPath = join(packageJsonDir, parsed[fieldName]);
+
+    if (!existsSync(resolvedPath)) {
+      failures.push(`File referenced in "${fieldName}" field does not exist.`);
+    }
+  });
 
   return failures;
 }
@@ -69,6 +104,21 @@ export function checkTypeDefinitionFile(filePath: string): string[] {
 }
 
 /**
+ * Checks the ng-update migration setup for the specified "package.json"
+ * file if present.
+ */
+export function checkPackageJsonMigrations(
+    packageJsonPath: string, currentVersion: Version): string[] {
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+
+  if (packageJson['ng-update'] && packageJson['ng-update'].migrations) {
+    return checkMigrationCollection(
+        packageJson['ng-update'].migrations, dirname(packageJsonPath), currentVersion);
+  }
+  return [];
+}
+
+/**
  * Checks the Angular Material release package and ensures that prebuilt themes
  * and the theming bundle are built properly.
  */
@@ -93,8 +143,39 @@ export function checkMaterialPackage(packagePath: string): string[] {
  */
 export function checkCdkPackage(packagePath: string): string[] {
   const prebuiltFiles = glob('*-prebuilt.css', {cwd: packagePath}).map(path => basename(path));
-
   return ['overlay', 'a11y', 'text-field']
       .filter(name => !prebuiltFiles.includes(`${name}-prebuilt.css`))
       .map(name => `Could not find the prebuilt ${name} styles.`);
+}
+
+/**
+ * Checks if the migration collected referenced in the specified "package.json"
+ * has a migration set up for the given target version.
+ */
+function checkMigrationCollection(
+    collectionPath: string, packagePath: string, targetVersion: Version): string[] {
+  const collection = JSON.parse(readFileSync(join(packagePath, collectionPath), 'utf8'));
+  if (!collection.schematics) {
+    return ['No schematics found in migration collection.'];
+  }
+
+  const failures: string[] = [];
+  const lowerBoundaryVersion = `${targetVersion.major}.0.0-0`;
+  const schematics = collection.schematics;
+  const targetSchematics = Object.keys(schematics).filter(name => {
+    const schematicVersion = schematics[name].version;
+    try {
+      return schematicVersion && semver.gte(schematicVersion, lowerBoundaryVersion) &&
+          semver.lte(schematicVersion, targetVersion.format());
+    } catch {
+      failures.push(`Could not parse version for migration: ${name}`);
+    }
+  });
+
+  if (targetSchematics.length === 0) {
+    failures.push(`No migration configured that handles versions: ^${lowerBoundaryVersion}`);
+  } else if (targetSchematics.length > 1) {
+    failures.push(`Multiple migrations targeting the same major version: ${targetVersion.major}`);
+  }
+  return failures;
 }

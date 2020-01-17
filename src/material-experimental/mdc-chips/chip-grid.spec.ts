@@ -15,9 +15,9 @@ import {
   dispatchFakeEvent,
   dispatchKeyboardEvent,
   dispatchMouseEvent,
-  MockNgZone,
   typeInElement,
-} from '@angular/cdk/testing';
+  MockNgZone,
+} from '@angular/cdk/testing/private';
 import {
   Component,
   DebugElement,
@@ -46,7 +46,7 @@ import {
 } from './index';
 
 
-describe('MatChipGrid', () => {
+describe('MDC-based MatChipGrid', () => {
   let fixture: ComponentFixture<any>;
   let chipGridDebugElement: DebugElement;
   let chipGridNativeElement: HTMLElement;
@@ -96,6 +96,22 @@ describe('MatChipGrid', () => {
 
         expect(chips.toArray().every(chip => chip.disabled)).toBe(true);
       }));
+
+      it('should not set a role on the grid when the list is empty', () => {
+        testComponent.chips = [];
+        fixture.detectChanges();
+
+        expect(chipGridNativeElement.hasAttribute('role')).toBe(false);
+      });
+
+      it('should not set aria-required when it does not have a role', () => {
+        testComponent.chips = [];
+        fixture.detectChanges();
+
+        expect(chipGridNativeElement.hasAttribute('role')).toBe(false);
+        expect(chipGridNativeElement.hasAttribute('aria-required')).toBe(false);
+      });
+
     });
 
     describe('focus behaviors', () => {
@@ -213,7 +229,7 @@ describe('MatChipGrid', () => {
             fixture = createComponent(StandardChipGridWithAnimations, [], BrowserAnimationsModule);
             fixture.detectChanges();
 
-            chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid));
+            chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid))!;
             chipGridNativeElement = chipGridDebugElement.nativeElement;
             chipGridInstance = chipGridDebugElement.componentInstance;
             testComponent = fixture.debugElement.componentInstance;
@@ -240,7 +256,7 @@ describe('MatChipGrid', () => {
           fixture = createComponent(ChipGridWithRemove);
           fixture.detectChanges();
 
-          chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid));
+          chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid))!;
           chipGridInstance = chipGridDebugElement.componentInstance;
           chipGridNativeElement = chipGridDebugElement.nativeElement;
           chips = chipGridInstance._chips;
@@ -251,7 +267,7 @@ describe('MatChipGrid', () => {
           let nativeChips = chipGridNativeElement.querySelectorAll('mat-chip-row');
           let lastNativeChip = nativeChips[nativeChips.length - 1] as HTMLElement;
 
-          let LEFT_EVENT = createKeyboardEvent('keydown', LEFT_ARROW, lastNativeChip);
+          let LEFT_EVENT = createKeyboardEvent('keydown', LEFT_ARROW, undefined, lastNativeChip);
           let array = chips.toArray();
           let lastRowIndex = array.length - 1;
           let lastChip = array[lastRowIndex];
@@ -276,7 +292,7 @@ describe('MatChipGrid', () => {
           let firstNativeChip = nativeChips[0] as HTMLElement;
 
           let RIGHT_EVENT: KeyboardEvent =
-            createKeyboardEvent('keydown', RIGHT_ARROW, firstNativeChip);
+            createKeyboardEvent('keydown', RIGHT_ARROW, undefined, firstNativeChip);
           let array = chips.toArray();
           let firstItem = array[0];
 
@@ -297,7 +313,7 @@ describe('MatChipGrid', () => {
 
         it('should not handle arrow key events from non-chip elements', () => {
           const event: KeyboardEvent =
-              createKeyboardEvent('keydown', RIGHT_ARROW, chipGridNativeElement);
+              createKeyboardEvent('keydown', RIGHT_ARROW, undefined, chipGridNativeElement);
           const initialActiveIndex = manager.activeRowIndex;
 
           chipGridInstance._keydown(event);
@@ -319,7 +335,7 @@ describe('MatChipGrid', () => {
           let lastNativeChip = nativeChips[nativeChips.length - 1] as HTMLElement;
 
           let RIGHT_EVENT: KeyboardEvent =
-              createKeyboardEvent('keydown', RIGHT_ARROW, lastNativeChip);
+              createKeyboardEvent('keydown', RIGHT_ARROW, undefined, lastNativeChip);
           let array = chips.toArray();
           let lastRowIndex = array.length - 1;
           let lastItem = array[lastRowIndex];
@@ -345,7 +361,7 @@ describe('MatChipGrid', () => {
           let firstNativeChip = nativeChips[0] as HTMLElement;
 
           let LEFT_EVENT: KeyboardEvent =
-              createKeyboardEvent('keydown', LEFT_ARROW, firstNativeChip);
+              createKeyboardEvent('keydown', LEFT_ARROW, undefined, firstNativeChip);
           let array = chips.toArray();
           let firstItem = array[0];
 
@@ -369,7 +385,8 @@ describe('MatChipGrid', () => {
           let nativeChips = chipGridNativeElement.querySelectorAll('mat-chip-row');
           let firstNativeChip = nativeChips[0] as HTMLElement;
 
-          chipGridInstance._keydown(createKeyboardEvent('keydown', TAB, firstNativeChip));
+          chipGridInstance._keydown(
+              createKeyboardEvent('keydown', TAB, undefined, firstNativeChip));
 
           expect(chipGridInstance.tabIndex)
             .toBe(-1, 'Expected tabIndex to be set to -1 temporarily.');
@@ -390,7 +407,8 @@ describe('MatChipGrid', () => {
           let nativeChips = chipGridNativeElement.querySelectorAll('mat-chip-row');
           let firstNativeChip = nativeChips[0] as HTMLElement;
 
-          chipGridInstance._keydown(createKeyboardEvent('keydown', TAB, firstNativeChip));
+          chipGridInstance._keydown(
+              createKeyboardEvent('keydown', TAB, undefined, firstNativeChip));
 
           expect(chipGridInstance.tabIndex)
             .toBe(-1, 'Expected tabIndex to be set to -1 temporarily.');
@@ -409,7 +427,7 @@ describe('MatChipGrid', () => {
         let firstNativeChip = nativeChips[0] as HTMLElement;
 
         let RIGHT_EVENT: KeyboardEvent =
-          createKeyboardEvent('keydown', RIGHT_ARROW, firstNativeChip);
+          createKeyboardEvent('keydown', RIGHT_ARROW, undefined, firstNativeChip);
         let array = chips.toArray();
         let firstItem = array[0];
 
@@ -485,7 +503,7 @@ describe('MatChipGrid', () => {
         it('should focus the last chip when press BACKSPACE', () => {
           let nativeInput = fixture.nativeElement.querySelector('input');
           let BACKSPACE_EVENT: KeyboardEvent =
-              createKeyboardEvent('keydown', BACKSPACE, nativeInput);
+              createKeyboardEvent('keydown', BACKSPACE, undefined, nativeInput);
 
           // Focus the input
           nativeInput.focus();
@@ -533,7 +551,7 @@ describe('MatChipGrid', () => {
       fixture = createComponent(ChipGridWithRemove);
       fixture.detectChanges();
 
-      chipGrid = fixture.debugElement.query(By.directive(MatChipGrid)).componentInstance;
+      chipGrid = fixture.debugElement.query(By.directive(MatChipGrid))!.componentInstance;
       chipElements = fixture.debugElement.queryAll(By.directive(MatChipRow));
       chipRemoveDebugElements = fixture.debugElement.queryAll(By.directive(MatChipRemove));
       chips = chipGrid._chips;
@@ -547,7 +565,8 @@ describe('MatChipGrid', () => {
       dispatchMouseEvent(chipRemoveDebugElements[2].nativeElement, 'click');
       fixture.detectChanges();
 
-      const fakeEvent = Object.assign(createFakeEvent('transitionend'), {propertyName: 'width'});
+      const fakeEvent = createFakeEvent('transitionend');
+      (fakeEvent as any).propertyName = 'width';
       chipElements[2].nativeElement.dispatchEvent(fakeEvent);
 
       fixture.detectChanges();
@@ -594,7 +613,7 @@ describe('MatChipGrid', () => {
       // tick();
       nativeInput.focus();
 
-      typeInElement('123', nativeInput);
+      typeInElement(nativeInput, '123');
       fixture.detectChanges();
       dispatchKeyboardEvent(nativeInput, 'keydown', ENTER);
       fixture.detectChanges();
@@ -620,7 +639,7 @@ describe('MatChipGrid', () => {
       expect(fixture.componentInstance.control.touched)
         .toBe(false, 'Expected the control to start off as untouched.');
 
-      const nativeChipGrid = fixture.debugElement.query(By.css('mat-chip-grid')).nativeElement;
+      const nativeChipGrid = fixture.debugElement.query(By.css('mat-chip-grid'))!.nativeElement;
       dispatchFakeEvent(nativeChipGrid, 'blur');
       tick();
 
@@ -633,7 +652,7 @@ describe('MatChipGrid', () => {
         .toBe(false, 'Expected the control to start off as untouched.');
 
       fixture.componentInstance.control.disable();
-      const nativeChipGrid = fixture.debugElement.query(By.css('mat-chip-grid')).nativeElement;
+      const nativeChipGrid = fixture.debugElement.query(By.css('mat-chip-grid'))!.nativeElement;
       dispatchFakeEvent(nativeChipGrid, 'blur');
       tick();
 
@@ -649,7 +668,7 @@ describe('MatChipGrid', () => {
       const nativeInput = fixture.nativeElement.querySelector('input');
       nativeInput.focus();
 
-      typeInElement('123', nativeInput);
+      typeInElement(nativeInput, '123');
       fixture.detectChanges();
       dispatchKeyboardEvent(nativeInput, 'keydown', ENTER);
       fixture.detectChanges();
@@ -673,14 +692,14 @@ describe('MatChipGrid', () => {
     });
 
     it('should set an asterisk after the placeholder if the control is required', () => {
-      let requiredMarker = fixture.debugElement.query(By.css('.mat-form-field-required-marker'));
+      let requiredMarker = fixture.debugElement.query(By.css('.mat-form-field-required-marker'))!;
       expect(requiredMarker)
         .toBeNull(`Expected placeholder not to have an asterisk, as control was not required.`);
 
       fixture.componentInstance.isRequired = true;
       fixture.detectChanges();
 
-      requiredMarker = fixture.debugElement.query(By.css('.mat-form-field-required-marker'));
+      requiredMarker = fixture.debugElement.query(By.css('.mat-form-field-required-marker'))!;
       expect(requiredMarker)
         .not.toBeNull(`Expected placeholder to have an asterisk, as control was required.`);
     });
@@ -711,7 +730,8 @@ describe('MatChipGrid', () => {
         chip.focus();
         dispatchKeyboardEvent(chip, 'keydown', BACKSPACE);
         fixture.detectChanges();
-        const fakeEvent = Object.assign(createFakeEvent('transitionend'), {propertyName: 'width'});
+        const fakeEvent = createFakeEvent('transitionend');
+        (fakeEvent as any).propertyName = 'width';
         chip.dispatchEvent(fakeEvent);
         fixture.detectChanges();
         tick();
@@ -721,7 +741,7 @@ describe('MatChipGrid', () => {
       expect(fixture.componentInstance.foods).toEqual([], 'Expected all chips to be removed.');
       expect(document.activeElement).toBe(nativeInput, 'Expected input to be focused.');
 
-      typeInElement('123', nativeInput);
+      typeInElement(nativeInput, '123');
       fixture.detectChanges();
       dispatchKeyboardEvent(nativeInput, 'keydown', ENTER);
       fixture.detectChanges();
@@ -738,7 +758,7 @@ describe('MatChipGrid', () => {
 
       expect(input.getAttribute('aria-invalid')).toBe('true');
 
-      typeInElement('123', input);
+      typeInElement(input, '123');
       fixture.detectChanges();
       dispatchKeyboardEvent(input, 'keydown', ENTER);
       fixture.detectChanges();
@@ -761,8 +781,8 @@ describe('MatChipGrid', () => {
       fixture = createComponent(ChipGridWithFormErrorMessages);
       fixture.detectChanges();
       errorTestComponent = fixture.componentInstance;
-      containerEl = fixture.debugElement.query(By.css('mat-form-field')).nativeElement;
-      chipGridEl = fixture.debugElement.query(By.css('mat-chip-grid')).nativeElement;
+      containerEl = fixture.debugElement.query(By.css('mat-form-field'))!.nativeElement;
+      chipGridEl = fixture.debugElement.query(By.css('mat-chip-grid'))!.nativeElement;
     });
 
     it('should not show any errors if the user has not interacted', () => {
@@ -798,7 +818,7 @@ describe('MatChipGrid', () => {
         .toBe(true, 'Expected form control to be invalid');
       expect(containerEl.querySelectorAll('mat-error').length).toBe(0, 'Expected no error message');
 
-      dispatchFakeEvent(fixture.debugElement.query(By.css('form')).nativeElement, 'submit');
+      dispatchFakeEvent(fixture.debugElement.query(By.css('form'))!.nativeElement, 'submit');
       fixture.detectChanges();
 
       fixture.whenStable().then(() => {
@@ -848,7 +868,8 @@ describe('MatChipGrid', () => {
     });
 
     it('sets the aria-describedby to reference errors when in error state', () => {
-      let hintId = fixture.debugElement.query(By.css('.mat-hint')).nativeElement.getAttribute('id');
+      let hintId =
+          fixture.debugElement.query(By.css('.mat-hint'))!.nativeElement.getAttribute('id');
       let describedBy = chipGridEl.getAttribute('aria-describedby');
 
       expect(hintId).toBeTruthy('hint should be shown');
@@ -898,7 +919,7 @@ describe('MatChipGrid', () => {
     }]);
     fixture.detectChanges();
 
-    chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid));
+    chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid))!;
     chipGridNativeElement = chipGridDebugElement.nativeElement;
     chipGridInstance = chipGridDebugElement.componentInstance;
     testComponent = fixture.debugElement.componentInstance;
@@ -909,7 +930,7 @@ describe('MatChipGrid', () => {
     fixture = createComponent(FormFieldChipGrid);
     fixture.detectChanges();
 
-    chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid));
+    chipGridDebugElement = fixture.debugElement.query(By.directive(MatChipGrid))!;
     chipGridNativeElement = chipGridDebugElement.nativeElement;
     chipGridInstance = chipGridDebugElement.componentInstance;
     testComponent = fixture.debugElement.componentInstance;
@@ -1015,7 +1036,7 @@ class InputChipGrid {
     }
   }
 
-  @ViewChild(MatChipGrid, {static: false}) chipGrid: MatChipGrid;
+  @ViewChild(MatChipGrid) chipGrid: MatChipGrid;
   @ViewChildren(MatChipRow) chips: QueryList<MatChipRow>;
 }
 
@@ -1043,7 +1064,7 @@ class ChipGridWithFormErrorMessages {
   ];
   @ViewChildren(MatChipRow) chips: QueryList<MatChipRow>;
 
-  @ViewChild('form', {static: false}) form: NgForm;
+  @ViewChild('form') form: NgForm;
   formControl = new FormControl('', Validators.required);
 }
 

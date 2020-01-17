@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {FocusMonitor} from '@angular/cdk/a11y';
+import {FocusMonitor, FocusableOption, FocusOrigin} from '@angular/cdk/a11y';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -62,7 +62,6 @@ const _MatButtonMixinBase: CanDisableRippleCtor & CanDisableCtor & CanColorCtor 
  * Material design button.
  */
 @Component({
-  moduleId: module.id,
   selector: `button[mat-button], button[mat-raised-button], button[mat-icon-button],
              button[mat-fab], button[mat-mini-fab], button[mat-stroked-button],
              button[mat-flat-button]`,
@@ -78,7 +77,7 @@ const _MatButtonMixinBase: CanDisableRippleCtor & CanDisableCtor & CanColorCtor 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatButton extends _MatButtonMixinBase
-    implements OnDestroy, CanDisable, CanColor, CanDisableRipple {
+    implements OnDestroy, CanDisable, CanColor, CanDisableRipple, FocusableOption {
 
   /** Whether the button is round. */
   readonly isRoundButton: boolean = this._hasHostAttributes('mat-fab', 'mat-mini-fab');
@@ -87,20 +86,25 @@ export class MatButton extends _MatButtonMixinBase
   readonly isIconButton: boolean = this._hasHostAttributes('mat-icon-button');
 
   /** Reference to the MatRipple instance of the button. */
-  @ViewChild(MatRipple, {static: false}) ripple: MatRipple;
+  @ViewChild(MatRipple) ripple: MatRipple;
 
   constructor(elementRef: ElementRef,
               private _focusMonitor: FocusMonitor,
               @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode: string) {
     super(elementRef);
 
-    // For each of the variant selectors that is prevent in the button's host
+    // For each of the variant selectors that is present in the button's host
     // attributes, add the correct corresponding class.
     for (const attr of BUTTON_HOST_ATTRIBUTES) {
       if (this._hasHostAttributes(attr)) {
         (this._getHostElement() as HTMLElement).classList.add(attr);
       }
     }
+
+    // Add a class that applies to all buttons. This makes it easier to target if somebody
+    // wants to target all Material buttons. We do it here rather than `host` to ensure that
+    // the class is applied to derived classes.
+    elementRef.nativeElement.classList.add('mat-button-base');
 
     this._focusMonitor.monitor(this._elementRef, true);
 
@@ -114,8 +118,8 @@ export class MatButton extends _MatButtonMixinBase
   }
 
   /** Focuses the button. */
-  focus(): void {
-    this._getHostElement().focus();
+  focus(origin: FocusOrigin = 'program', options?: FocusOptions): void {
+    this._focusMonitor.focusVia(this._getHostElement(), origin, options);
   }
 
   _getHostElement() {
@@ -130,13 +134,15 @@ export class MatButton extends _MatButtonMixinBase
   _hasHostAttributes(...attributes: string[]) {
     return attributes.some(attribute => this._getHostElement().hasAttribute(attribute));
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
 /**
  * Material design anchor button.
  */
 @Component({
-  moduleId: module.id,
   selector: `a[mat-button], a[mat-raised-button], a[mat-icon-button], a[mat-fab],
              a[mat-mini-fab], a[mat-stroked-button], a[mat-flat-button]`,
   exportAs: 'matButton, matAnchor',
@@ -174,4 +180,7 @@ export class MatAnchor extends MatButton {
       event.stopImmediatePropagation();
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

@@ -13,7 +13,6 @@ import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/co
  * Wrapper for the CdkTable with Material design styles.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-table, table[mat-table]',
   exportAs: 'matTable',
   template: CDK_TABLE_TEMPLATE,
@@ -30,4 +29,6 @@ import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/co
 export class MatTable<T> extends CdkTable<T> {
   /** Overrides the sticky CSS class set by the `CdkTable`. */
   protected stickyCssClass = 'mat-table-sticky';
+
+  static ngAcceptInputType_multiTemplateDataRows: boolean | string | null | undefined;
 }

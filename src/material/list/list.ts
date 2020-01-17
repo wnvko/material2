@@ -44,7 +44,6 @@ const _MatListItemMixinBase: CanDisableRippleCtor & typeof MatListItemBase =
     mixinDisableRipple(MatListItemBase);
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-nav-list',
   exportAs: 'matNavList',
   host: {
@@ -69,10 +68,11 @@ export class MatNavList extends _MatListMixinBase implements CanDisableRipple, O
   ngOnDestroy() {
     this._stateChanges.complete();
   }
+
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-list, mat-action-list',
   exportAs: 'matList',
   templateUrl: 'list.html',
@@ -117,6 +117,8 @@ export class MatList extends _MatListMixinBase implements CanDisableRipple, OnCh
   ngOnDestroy() {
     this._stateChanges.complete();
   }
+
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
 /**
@@ -151,7 +153,6 @@ export class MatListSubheaderCssMatStyler {}
 
 /** An item within a Material Design list. */
 @Component({
-  moduleId: module.id,
   selector: 'mat-list-item, a[mat-list-item], button[mat-list-item]',
   exportAs: 'matListItem',
   host: {
@@ -172,8 +173,8 @@ export class MatListItem extends _MatListItemMixinBase implements AfterContentIn
   private _destroyed = new Subject<void>();
 
   @ContentChildren(MatLine, {descendants: true}) _lines: QueryList<MatLine>;
-  @ContentChild(MatListAvatarCssMatStyler, {static: false}) _avatar: MatListAvatarCssMatStyler;
-  @ContentChild(MatListIconCssMatStyler, {static: false}) _icon: MatListIconCssMatStyler;
+  @ContentChild(MatListAvatarCssMatStyler) _avatar: MatListAvatarCssMatStyler;
+  @ContentChild(MatListIconCssMatStyler) _icon: MatListIconCssMatStyler;
 
   constructor(private _element: ElementRef<HTMLElement>,
               _changeDetectorRef: ChangeDetectorRef,
@@ -219,4 +220,6 @@ export class MatListItem extends _MatListItemMixinBase implements AfterContentIn
   _getHostElement(): HTMLElement {
     return this._element.nativeElement;
   }
+
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

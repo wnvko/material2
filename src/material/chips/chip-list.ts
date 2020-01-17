@@ -73,14 +73,13 @@ export class MatChipListChange {
  * A material design chips component (named ChipList for its similarity to the List component).
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-chip-list',
   template: `<div class="mat-chip-list-wrapper"><ng-content></ng-content></div>`,
   exportAs: 'matChipList',
   host: {
     '[attr.tabindex]': 'disabled ? null : _tabIndex',
     '[attr.aria-describedby]': '_ariaDescribedby || null',
-    '[attr.aria-required]': 'required.toString()',
+    '[attr.aria-required]': 'role ? required : null',
     '[attr.aria-disabled]': 'disabled.toString()',
     '[attr.aria-invalid]': 'errorState',
     '[attr.aria-multiselectable]': 'multiple',
@@ -460,7 +459,7 @@ export class MatChipList extends _MatChipListMixinBase implements MatFormFieldCo
    * Focuses the first non-disabled chip in this chip list, or the associated input when there
    * are no eligible chips.
    */
-  focus(): void {
+  focus(options?: FocusOptions): void {
     if (this.disabled) {
       return;
     }
@@ -473,15 +472,15 @@ export class MatChipList extends _MatChipListMixinBase implements MatFormFieldCo
       this._keyManager.setFirstItemActive();
       this.stateChanges.next();
     } else {
-      this._focusInput();
+      this._focusInput(options);
       this.stateChanges.next();
     }
   }
 
   /** Attempt to focus an input if we have one. */
-  _focusInput() {
+  _focusInput(options?: FocusOptions) {
     if (this._chipInput) {
-      this._chipInput.focus();
+      this._chipInput.focus(options);
     }
   }
 
@@ -756,7 +755,7 @@ export class MatChipList extends _MatChipListMixinBase implements MatFormFieldCo
       let chipIndex: number = this.chips.toArray().indexOf(event.chip);
 
       if (this._isValidIndex(chipIndex)) {
-        this._keyManager.updateActiveItemIndex(chipIndex);
+        this._keyManager.updateActiveItem(chipIndex);
       }
       this.stateChanges.next();
     });
@@ -810,4 +809,9 @@ export class MatChipList extends _MatChipListMixinBase implements MatFormFieldCo
       });
     }
   }
+
+  static ngAcceptInputType_multiple: boolean | string | null | undefined;
+  static ngAcceptInputType_required: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_selectable: boolean | string | null | undefined;
 }

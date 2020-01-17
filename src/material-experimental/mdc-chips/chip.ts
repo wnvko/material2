@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {Directionality} from '@angular/cdk/bidi';
 import {coerceBooleanProperty} from '@angular/cdk/coercion';
 import {Platform} from '@angular/cdk/platform';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
@@ -25,7 +26,7 @@ import {
   OnDestroy,
   Optional,
   Output,
-  ViewEncapsulation
+  ViewEncapsulation, HostListener
 } from '@angular/core';
 import {
   CanColor,
@@ -44,6 +45,7 @@ import {
   RippleTarget,
 } from '@angular/material/core';
 import {MDCChipAdapter, MDCChipFoundation} from '@material/chips';
+import {numbers} from '@material/ripple';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {MatChipAvatar, MatChipTrailingIcon, MatChipRemove} from './chip-icons';
@@ -90,7 +92,6 @@ const _MatChipMixinBase:
  * Extended by MatChipOption and MatChipRow for different interaction patterns.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-basic-chip, mat-chip',
   inputs: ['color', 'disableRipple'],
   exportAs: 'matChip',
@@ -107,7 +108,6 @@ const _MatChipMixinBase:
     '[id]': 'id',
     '[attr.disabled]': 'disabled || null',
     '[attr.aria-disabled]': 'disabled.toString()',
-    '(transitionend)': '_chipFoundation.handleTransitionEnd($event)'
   },
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -127,6 +127,16 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
 
     /** Whether animations for the chip are enabled. */
   _animationsDisabled: boolean;
+
+  // We have to use a `HostListener` here in order to support both Ivy and ViewEngine.
+  // In Ivy the `host` bindings will be merged when this class is extended, whereas in
+  // ViewEngine they're overwritten.
+  // TODO(mmalerba): we move this back into `host` once Ivy is turned on by default.
+  // tslint:disable-next-line:no-host-decorator-in-concrete
+  @HostListener('transitionend', ['$event'])
+  _handleTransitionEnd(event: TransitionEvent) {
+    this._chipFoundation.handleTransitionEnd(event);
+  }
 
   get _hasFocus() {
     return this._hasFocusInternal;
@@ -153,7 +163,7 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
   /** The value of the chip. Defaults to the content inside `<mat-chip>` tags. */
   @Input()
   get value(): any {
-    return this._value != undefined
+    return this._value !== undefined
       ? this._value
       : this._elementRef.nativeElement.textContent;
   }
@@ -221,13 +231,13 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
   }
 
   /** The chip's leading icon. */
-  @ContentChild(MatChipAvatar, {static: false}) leadingIcon: MatChipAvatar;
+  @ContentChild(MatChipAvatar) leadingIcon: MatChipAvatar;
 
   /** The chip's trailing icon. */
-  @ContentChild(MatChipTrailingIcon, {static: false}) trailingIcon: MatChipTrailingIcon;
+  @ContentChild(MatChipTrailingIcon) trailingIcon: MatChipTrailingIcon;
 
   /** The chip's trailing remove icon. */
-  @ContentChild(MatChipRemove, {static: false}) removeIcon: MatChipRemove;
+  @ContentChild(MatChipRemove) removeIcon: MatChipRemove;
 
  /**
   * Implementation of the MDC chip adapter interface.
@@ -247,20 +257,33 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
       // No-op. We call dispatchSelectionEvent ourselves in MatChipOption, because we want to
       // specify whether selection occurred via user input.
     },
+    notifyNavigation: () => {
+      // TODO: This is a new feature added by MDC; consider exposing this event to users in the
+      // future.
+    },
     notifyTrailingIconInteraction: () => this.removeIconInteraction.emit(this.id),
     notifyRemoval: () => this.removed.emit({chip: this}),
-    getComputedStyleValue: (propertyName) => {
-      return window.getComputedStyle(this._elementRef.nativeElement).getPropertyValue(propertyName);
-    },
+    getComputedStyleValue: propertyName =>
+        window.getComputedStyle(this._elementRef.nativeElement).getPropertyValue(propertyName),
     setStyleProperty: (propertyName: string, value: string) => {
       this._elementRef.nativeElement.style.setProperty(propertyName, value);
     },
-    hasLeadingIcon: () => { return !!this.leadingIcon; },
-    setAttr: (name: string, value: string) => {
+    hasLeadingIcon: () => !!this.leadingIcon,
+    hasTrailingAction: () => !!this.trailingIcon,
+    isRTL: () => !!this._dir && this._dir.value === 'rtl',
+    focusPrimaryAction: () => {
+      // Angular Material MDC chips fully manage focus. TODO: Managing focus and handling keyboard
+      // events was added by MDC after our implementation; consider consolidating.
+    },
+    focusTrailingAction: () => {},
+    setTrailingActionAttr: (attr, value) =>
+        this.trailingIcon && this.trailingIcon.setAttribute(attr, value),
+    setPrimaryActionAttr: (name: string, value: string) => {
       // MDC is currently using this method to set aria-checked on choice and filter chips,
       // which in the MDC templates have role="checkbox" and role="radio" respectively.
       // We have role="option" on those chips instead, so we do not want aria-checked.
-      if (name === 'aria-checked') {
+      // Since we also manage the tabindex ourselves, we don't allow MDC to set it.
+      if (name === 'aria-checked' || name === 'tabindex') {
         return;
       }
       this._elementRef.nativeElement.setAttribute(name, value);
@@ -268,7 +291,7 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
     // The 2 functions below are used by the MDC ripple, which we aren't using,
     // so they will never be called
     getRootBoundingClientRect: () => this._elementRef.nativeElement.getBoundingClientRect(),
-    getCheckmarkBoundingClientRect: () => { return null; },
+    getCheckmarkBoundingClientRect: () => null,
  };
 
  constructor(
@@ -278,6 +301,7 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
     protected _ngZone: NgZone,
     @Optional() @Inject(MAT_RIPPLE_GLOBAL_OPTIONS)
     private _globalRippleOptions: RippleGlobalOptions | null,
+    @Optional() private _dir: Directionality,
     // @breaking-change 8.0.0 `animationMode` parameter to become required.
     @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(_elementRef);
@@ -358,13 +382,13 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
 
     // Configure ripple animation to match MDC Ripple.
     this.rippleConfig.animation = {
-      enterDuration: 225  /*MDCRippleFoundation.numbers.DEACTIVATION_TIMEOUT_MS */,
-      exitDuration: 150 /* MDCRippleFoundation.numbers.FG_DEACTIVATION_MS */,
+      enterDuration: numbers.DEACTIVATION_TIMEOUT_MS,
+      exitDuration: numbers.FG_DEACTIVATION_MS,
     };
 
     this._rippleRenderer =
       new RippleRenderer(this, this._ngZone, this._elementRef, this._platform);
-    this._rippleRenderer.setupTriggerEvents(this._elementRef.nativeElement);
+    this._rippleRenderer.setupTriggerEvents(this._elementRef);
   }
 
   /** Forwards interaction events to the MDC chip foundation. */
@@ -373,4 +397,9 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
       this._chipFoundation.handleInteraction(event);
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_removable: boolean | string | null | undefined;
+  static ngAcceptInputType_highlighted: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

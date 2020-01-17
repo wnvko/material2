@@ -7,7 +7,15 @@
  */
 
 import {Platform} from '@angular/cdk/platform';
-import {ElementRef, NgZone, OnChanges, SimpleChanges} from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostListener,
+  Inject,
+  NgZone,
+  Optional,
+  ViewChild
+} from '@angular/core';
 import {
   CanColor,
   CanColorCtor,
@@ -15,35 +23,58 @@ import {
   CanDisableCtor,
   CanDisableRipple,
   CanDisableRippleCtor,
+  MatRipple,
   mixinColor,
   mixinDisabled,
   mixinDisableRipple,
-  RippleRenderer,
-  RippleTarget
+  RippleAnimationConfig
 } from '@angular/material/core';
+import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
+import {numbers} from '@material/ripple';
 
 /** Inputs common to all buttons. */
 export const MAT_BUTTON_INPUTS = ['disabled', 'disableRipple', 'color'];
 
 /** Shared host configuration for all buttons */
 export const MAT_BUTTON_HOST = {
-  'class': 'mat-mdc-button',
   '[attr.disabled]': 'disabled || null',
   '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
+  // MDC automatically applies the primary theme color to the button, but we want to support
+  // an unthemed version. If color is undefined, apply a CSS class that makes it easy to
+  // select and style this "theme".
+  '[class.mat-unthemed]': '!color',
 };
 
-/**
- * List of classes to add to buttons instances based on host attributes to
- * style as different variants.
- */
+/** List of classes to add to buttons instances based on host attribute selector. */
 const HOST_SELECTOR_MDC_CLASS_PAIR: {selector: string, mdcClasses: string[]}[] = [
-  {selector: 'mat-button', mdcClasses: ['mdc-button']},
-  {selector: 'mat-flat-button', mdcClasses: ['mdc-button', 'mdc-button--unelevated']},
-  {selector: 'mat-raised-button', mdcClasses: ['mdc-button', 'mdc-button--raised']},
-  {selector: 'mat-stroked-button', mdcClasses: ['mdc-button', 'mdc-button--outlined']},
-  {selector: 'mat-fab', mdcClasses: ['mdc-fab']},
-  {selector: 'mat-mini-fab', mdcClasses: ['mdc-fab', 'mdc-fab--mini']},
-  {selector: 'mat-icon-button', mdcClasses: ['mdc-icon-button']}
+  {
+    selector: 'mat-button',
+    mdcClasses: ['mdc-button', 'mat-mdc-button'],
+  },
+  {
+    selector: 'mat-flat-button',
+    mdcClasses: ['mdc-button', 'mdc-button--unelevated', 'mat-mdc-unelevated-button'],
+  },
+  {
+    selector: 'mat-raised-button',
+    mdcClasses: ['mdc-button', 'mdc-button--raised', 'mat-mdc-raised-button'],
+  },
+  {
+    selector: 'mat-stroked-button',
+    mdcClasses: ['mdc-button', 'mdc-button--outlined', 'mat-mdc-outlined-button'],
+  },
+  {
+    selector: 'mat-fab',
+    mdcClasses: ['mdc-fab', 'mat-mdc-fab'],
+  },
+  {
+    selector: 'mat-mini-fab',
+    mdcClasses: ['mdc-fab', 'mdc-fab--mini', 'mat-mdc-mini-fab'],
+  },
+  {
+    selector: 'mat-icon-button',
+    mdcClasses: ['mdc-icon-button', 'mat-mdc-icon-button'],
+  }
 ];
 
 // Boilerplate for applying mixins to MatButton.
@@ -56,44 +87,37 @@ export const _MatButtonBaseMixin: CanDisableRippleCtor&CanDisableCtor&CanColorCt
     typeof MatButtonMixinCore = mixinColor(mixinDisabled(mixinDisableRipple(MatButtonMixinCore)));
 
 /** Base class for all buttons.  */
+@Directive()
 export class MatButtonBase extends _MatButtonBaseMixin implements CanDisable, CanColor,
-                                                                  CanDisableRipple, OnChanges {
-  rippleTarget: RippleTarget = {
-    rippleConfig: {
-      animation: {
-        // TODO(mmalerba): Use the MDC constants once they are exported separately from the
-        // foundation. Grabbing them off the foundation prevents the foundation class from being
-        // tree-shaken. There is an open PR for this:
-        // https://github.com/material-components/material-components-web/pull/4593
-        enterDuration: 225 /* MDCRippleFoundation.numbers.DEACTIVATION_TIMEOUT_MS */,
-        exitDuration: 150 /* MDCRippleFoundation.numbers.FG_DEACTIVATION_MS */,
-      },
-    },
-    rippleDisabled: false,
+                                                                  CanDisableRipple {
+  /** The ripple animation configuration to use for the buttons. */
+  _rippleAnimation: RippleAnimationConfig = {
+    enterDuration: numbers.DEACTIVATION_TIMEOUT_MS,
+    exitDuration: numbers.FG_DEACTIVATION_MS
   };
 
-  /** The ripple renderer for the button. */
-  private _rippleRenderer =
-      new RippleRenderer(this.rippleTarget, this._ngZone, this._elementRef, this._platform);
+  /** Whether the ripple is centered on the button. */
+  _isRippleCentered = false;
+
+  /** Reference to the MatRipple instance of the button. */
+  @ViewChild(MatRipple) ripple: MatRipple;
 
   constructor(
       elementRef: ElementRef, public _platform: Platform, public _ngZone: NgZone,
-      public _animationMode?: string) {
+      // TODO(devversion): Injection can be removed if angular/angular#32981 is fixed.
+      @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string) {
     super(elementRef);
-    this._rippleRenderer.setupTriggerEvents(this._elementRef.nativeElement);
+
+    const classList = (elementRef.nativeElement as HTMLElement).classList;
 
     // For each of the variant selectors that is present in the button's host
     // attributes, add the correct corresponding MDC classes.
     for (const pair of HOST_SELECTOR_MDC_CLASS_PAIR) {
       if (this._hasHostAttributes(pair.selector)) {
-        (elementRef.nativeElement as HTMLElement).classList.add(...pair.mdcClasses);
+        pair.mdcClasses.forEach((className: string) => {
+          classList.add(className);
+        });
       }
-    }
-  }
-
-  ngOnChanges(simpleChanges: SimpleChanges) {
-    if (simpleChanges['disableRipple'] || simpleChanges['disabled']) {
-      this.rippleTarget.rippleDisabled = this.disableRipple || this.disabled;
     }
   }
 
@@ -106,6 +130,10 @@ export class MatButtonBase extends _MatButtonBaseMixin implements CanDisable, Ca
   private _hasHostAttributes(...attributes: string[]) {
     return attributes.some(attribute => this._elementRef.nativeElement.hasAttribute(attribute));
   }
+
+  _isRippleDisabled() {
+    return this.disableRipple || this.disabled;
+  }
 }
 
 /** Shared inputs by buttons using the `<a>` tag */
@@ -113,25 +141,39 @@ export const MAT_ANCHOR_INPUTS = ['disabled', 'disableRipple', 'color', 'tabInde
 
 /** Shared host configuration for buttons using the `<a>` tag. */
 export const MAT_ANCHOR_HOST = {
-  ...MAT_BUTTON_HOST,
+  '[attr.disabled]': 'disabled || null',
+  '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
+
   // Note that we ignore the user-specified tabindex when it's disabled for
   // consistency with the `mat-button` applied on native buttons where even
   // though they have an index, they're not tabbable.
   '[attr.tabindex]': 'disabled ? -1 : (tabIndex || 0)',
   '[attr.aria-disabled]': 'disabled.toString()',
-  '(click)': '_haltDisabledEvents($event)',
+  // MDC automatically applies the primary theme color to the button, but we want to support
+  // an unthemed version. If color is undefined, apply a CSS class that makes it easy to
+  // select and style this "theme".
+  '[class.mat-unthemed]': '!color',
 };
 
 /**
  * Anchor button base.
  */
+@Directive()
 export class MatAnchorBase extends MatButtonBase {
   tabIndex: number;
 
-  constructor(elementRef: ElementRef, platform: Platform, ngZone: NgZone, animationMode?: string) {
+  constructor(elementRef: ElementRef, platform: Platform, ngZone: NgZone,
+              // TODO(devversion): Injection can be removed if angular/angular#32981 is fixed.
+              @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(elementRef, platform, ngZone, animationMode);
   }
 
+  // We have to use a `HostListener` here in order to support both Ivy and ViewEngine.
+  // In Ivy the `host` bindings will be merged when this class is extended, whereas in
+  // ViewEngine they're overwritten.
+  // TODO(mmalerba): we move this back into `host` once Ivy is turned on by default.
+  // tslint:disable-next-line:no-host-decorator-in-concrete
+  @HostListener('click', ['$event'])
   _haltDisabledEvents(event: Event) {
     // A disabled button shouldn't apply any actions
     if (this.disabled) {

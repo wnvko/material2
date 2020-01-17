@@ -25,17 +25,20 @@ let dialogElementUid = 0;
  * Button that will close the current dialog.
  */
 @Directive({
-  selector: `button[mat-dialog-close], button[matDialogClose]`,
+  selector: '[mat-dialog-close], [matDialogClose]',
   exportAs: 'matDialogClose',
   host: {
     '(click)': 'dialogRef.close(dialogResult)',
     '[attr.aria-label]': 'ariaLabel || null',
-    'type': 'button', // Prevents accidental form submits.
+    '[attr.type]': 'type',
   }
 })
 export class MatDialogClose implements OnInit, OnChanges {
   /** Screenreader label for the button. */
   @Input('aria-label') ariaLabel: string;
+
+  /** Default to "button" to prevents accidental form submits. */
+  @Input() type: 'submit' | 'button' | 'reset' = 'button';
 
   /** Dialog close input. */
   @Input('mat-dialog-close') dialogResult: any;
@@ -79,7 +82,7 @@ export class MatDialogClose implements OnInit, OnChanges {
   },
 })
 export class MatDialogTitle implements OnInit {
-  @Input() id = `mat-dialog-title-${dialogElementUid++}`;
+  @Input() id: string = `mat-dialog-title-${dialogElementUid++}`;
 
   constructor(
     @Optional() private _dialogRef: MatDialogRef<any>,

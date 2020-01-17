@@ -12,7 +12,11 @@ export declare const ICON_REGISTRY_PROVIDER: {
     useFactory: typeof ICON_REGISTRY_PROVIDER_FACTORY;
 };
 
-export declare function ICON_REGISTRY_PROVIDER_FACTORY(parentRegistry: MatIconRegistry, httpClient: HttpClient, sanitizer: DomSanitizer, document?: any): MatIconRegistry;
+export declare function ICON_REGISTRY_PROVIDER_FACTORY(parentRegistry: MatIconRegistry, httpClient: HttpClient, sanitizer: DomSanitizer, document?: any, errorHandler?: ErrorHandler): MatIconRegistry;
+
+export interface IconOptions {
+    viewBox?: string;
+}
 
 export declare const MAT_ICON_LOCATION: InjectionToken<MatIconLocation>;
 
@@ -24,11 +28,14 @@ export declare class MatIcon extends _MatIconMixinBase implements OnChanges, OnI
     inline: boolean;
     svgIcon: string;
     constructor(elementRef: ElementRef<HTMLElement>, _iconRegistry: MatIconRegistry, ariaHidden: string,
-    _location?: MatIconLocation | undefined);
+    _location?: MatIconLocation | undefined, _errorHandler?: ErrorHandler | undefined);
     ngAfterViewChecked(): void;
     ngOnChanges(changes: SimpleChanges): void;
     ngOnDestroy(): void;
     ngOnInit(): void;
+    static ngAcceptInputType_inline: boolean | string | null | undefined;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatIcon, "mat-icon", ["matIcon"], { 'color': "color", 'inline': "inline", 'svgIcon': "svgIcon", 'fontSet': "fontSet", 'fontIcon': "fontIcon" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatIcon>;
 }
 
 export interface MatIconLocation {
@@ -36,18 +43,20 @@ export interface MatIconLocation {
 }
 
 export declare class MatIconModule {
+    static ɵinj: i0.ɵɵInjectorDef<MatIconModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatIconModule, [typeof i1.MatIcon], [typeof i2.MatCommonModule], [typeof i1.MatIcon, typeof i2.MatCommonModule]>;
 }
 
 export declare class MatIconRegistry implements OnDestroy {
-    constructor(_httpClient: HttpClient, _sanitizer: DomSanitizer, document: any);
-    addSvgIcon(iconName: string, url: SafeResourceUrl): this;
-    addSvgIconInNamespace(namespace: string, iconName: string, url: SafeResourceUrl): this;
-    addSvgIconLiteral(iconName: string, literal: SafeHtml): this;
-    addSvgIconLiteralInNamespace(namespace: string, iconName: string, literal: SafeHtml): this;
-    addSvgIconSet(url: SafeResourceUrl): this;
-    addSvgIconSetInNamespace(namespace: string, url: SafeResourceUrl): this;
-    addSvgIconSetLiteral(literal: SafeHtml): this;
-    addSvgIconSetLiteralInNamespace(namespace: string, literal: SafeHtml): this;
+    constructor(_httpClient: HttpClient, _sanitizer: DomSanitizer, document: any, _errorHandler?: ErrorHandler | undefined);
+    addSvgIcon(iconName: string, url: SafeResourceUrl, options?: IconOptions): this;
+    addSvgIconInNamespace(namespace: string, iconName: string, url: SafeResourceUrl, options?: IconOptions): this;
+    addSvgIconLiteral(iconName: string, literal: SafeHtml, options?: IconOptions): this;
+    addSvgIconLiteralInNamespace(namespace: string, iconName: string, literal: SafeHtml, options?: IconOptions): this;
+    addSvgIconSet(url: SafeResourceUrl, options?: IconOptions): this;
+    addSvgIconSetInNamespace(namespace: string, url: SafeResourceUrl, options?: IconOptions): this;
+    addSvgIconSetLiteral(literal: SafeHtml, options?: IconOptions): this;
+    addSvgIconSetLiteralInNamespace(namespace: string, literal: SafeHtml, options?: IconOptions): this;
     classNameForFontAlias(alias: string): string;
     getDefaultFontSetClass(): string;
     getNamedSvgIcon(name: string, namespace?: string): Observable<SVGElement>;
@@ -55,4 +64,6 @@ export declare class MatIconRegistry implements OnDestroy {
     ngOnDestroy(): void;
     registerFontClassAlias(alias: string, className?: string): this;
     setDefaultFontSetClass(className: string): this;
+    static ɵfac: i0.ɵɵFactoryDef<MatIconRegistry>;
+    static ɵprov: i0.ɵɵInjectableDef<MatIconRegistry>;
 }

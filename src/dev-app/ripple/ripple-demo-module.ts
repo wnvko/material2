@@ -7,27 +7,23 @@
  */
 
 import {NgModule} from '@angular/core';
+import {CoreExamplesModule} from '@angular/components-examples/material/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatRippleModule} from '@angular/material/core';
-import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {RouterModule} from '@angular/router';
-import {ExampleModule} from '../example/example-module';
 import {RippleDemo} from './ripple-demo';
 
 @NgModule({
   imports: [
-    ExampleModule,
+    CoreExamplesModule,
     FormsModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatRippleModule,
     RouterModule.forChild([{path: '', component: RippleDemo}]),
   ],
   declarations: [RippleDemo],

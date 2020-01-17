@@ -7,24 +7,25 @@
  */
 
 import {Component, ViewChild} from '@angular/core';
-import {MatAccordion} from '@angular/material/expansion';
+import {
+  MatAccordion, MatAccordionDisplayMode, MatAccordionTogglePosition
+} from '@angular/material/expansion';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'expansion-demo',
   styleUrls: ['expansion-demo.css'],
   templateUrl: 'expansion-demo.html',
 })
 export class ExpansionDemo {
-  @ViewChild(MatAccordion, {static: false}) accordion: MatAccordion;
+  @ViewChild(MatAccordion) accordion: MatAccordion;
 
-  displayMode = 'default';
+  displayMode: MatAccordionDisplayMode = 'default';
   multi = false;
   hideToggle = false;
   disabled = false;
   showPanel3 = true;
-  togglePosition = 'after';
+  togglePosition: MatAccordionTogglePosition = 'after';
   expandedHeight: string;
   collapsedHeight: string;
   events: string[] = [];

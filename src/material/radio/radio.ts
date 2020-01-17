@@ -306,6 +306,9 @@ export class MatRadioGroup implements AfterContentInit, ControlValueAccessor {
     this.disabled = isDisabled;
     this._changeDetector.markForCheck();
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_required: boolean | string | null | undefined;
 }
 
 // Boilerplate for applying mixins to MatRadioButton.
@@ -328,7 +331,6 @@ const _MatRadioButtonMixinBase:
  * A Material design radio-button. Typically placed inside of `<mat-radio-group>` elements.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-radio-button',
   templateUrl: 'radio.html',
   styleUrls: ['radio.css'],
@@ -346,6 +348,9 @@ const _MatRadioButtonMixinBase:
     // Needs to be -1 so the `focus` event still fires.
     '[attr.tabindex]': '-1',
     '[attr.id]': 'id',
+    '[attr.aria-label]': 'null',
+    '[attr.aria-labelledby]': 'null',
+    '[attr.aria-describedby]': 'null',
     // Note: under normal conditions focus shouldn't land on this element, however it may be
     // programmatically set, for example inside of a focus trap, in this case we want to forward
     // the focus to the native element.
@@ -486,7 +491,7 @@ export class MatRadioButton extends _MatRadioButtonMixinBase
   private _removeUniqueSelectionListener: () => void = () => {};
 
   /** The native `<input type=radio>` element */
-  @ViewChild('input', {static: false}) _inputElement: ElementRef<HTMLInputElement>;
+  @ViewChild('input') _inputElement: ElementRef<HTMLInputElement>;
 
   constructor(@Optional() radioGroup: MatRadioGroup,
               elementRef: ElementRef,
@@ -511,8 +516,8 @@ export class MatRadioButton extends _MatRadioButtonMixinBase
   }
 
   /** Focuses the radio button. */
-  focus(): void {
-    this._focusMonitor.focusVia(this._inputElement, 'keyboard');
+  focus(options?: FocusOptions): void {
+    this._focusMonitor.focusVia(this._inputElement, 'keyboard', options);
   }
 
   /**
@@ -592,4 +597,8 @@ export class MatRadioButton extends _MatRadioButtonMixinBase
     }
   }
 
+  static ngAcceptInputType_checked: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_required: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

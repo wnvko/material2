@@ -25,7 +25,7 @@ export declare class MatChip extends _MatChipMixinBase implements FocusableOptio
     readonly selectionChange: EventEmitter<MatChipSelectionChange>;
     trailingIcon: MatChipTrailingIcon;
     value: any;
-    constructor(_elementRef: ElementRef<HTMLElement>, _ngZone: NgZone, platform: Platform, globalRippleOptions: RippleGlobalOptions | null, animationMode?: string);
+    constructor(_elementRef: ElementRef<HTMLElement>, _ngZone: NgZone, platform: Platform, globalRippleOptions: RippleGlobalOptions | null, animationMode?: string, _changeDetectorRef?: ChangeDetectorRef | undefined);
     _addHostClassName(): void;
     _blur(): void;
     _handleClick(event: Event): void;
@@ -37,9 +37,18 @@ export declare class MatChip extends _MatChipMixinBase implements FocusableOptio
     select(): void;
     selectViaInteraction(): void;
     toggleSelected(isUserInput?: boolean): boolean;
+    static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
+    static ngAcceptInputType_disabled: boolean | string | null | undefined;
+    static ngAcceptInputType_removable: boolean | string | null | undefined;
+    static ngAcceptInputType_selectable: boolean | string | null | undefined;
+    static ngAcceptInputType_selected: boolean | string | null | undefined;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatChip, "mat-basic-chip, [mat-basic-chip], mat-chip, [mat-chip]", ["matChip"], { 'color': "color", 'disabled': "disabled", 'disableRipple': "disableRipple", 'selected': "selected", 'value': "value", 'selectable': "selectable", 'removable': "removable" }, { 'selectionChange': "selectionChange", 'destroyed': "destroyed", 'removed': "removed" }, ["avatar", "trailingIcon", "removeIcon"]>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChip>;
 }
 
 export declare class MatChipAvatar {
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatChipAvatar, "mat-chip-avatar, [matChipAvatar]", never, {}, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChipAvatar>;
 }
 
 export interface MatChipEvent {
@@ -66,8 +75,12 @@ export declare class MatChipInput implements MatChipTextControl, OnChanges {
     _focus(): void;
     _keydown(event?: KeyboardEvent): void;
     _onInput(): void;
-    focus(): void;
+    focus(options?: FocusOptions): void;
     ngOnChanges(): void;
+    static ngAcceptInputType_addOnBlur: boolean | string | null | undefined;
+    static ngAcceptInputType_disabled: boolean | string | null | undefined;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatChipInput, "input[matChipInputFor]", ["matChipInput", "matChipInputFor"], { 'chipList': "matChipInputFor", 'addOnBlur': "matChipInputAddOnBlur", 'separatorKeyCodes': "matChipInputSeparatorKeyCodes", 'placeholder': "placeholder", 'id': "id", 'disabled': "disabled" }, { 'chipEnd': "matChipInputTokenEnd" }, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChipInput>;
 }
 
 export interface MatChipInputEvent {
@@ -120,13 +133,13 @@ export declare class MatChipList extends _MatChipListMixinBase implements MatFor
     ngControl: NgControl);
     _allowFocusEscape(): void;
     _blur(): void;
-    _focusInput(): void;
+    _focusInput(options?: FocusOptions): void;
     _keydown(event: KeyboardEvent): void;
     _markAsTouched(): void;
     _setSelectionByValue(value: any, isUserInput?: boolean): void;
     protected _updateFocusForDestroyedChips(): void;
     protected _updateTabIndex(): void;
-    focus(): void;
+    focus(options?: FocusOptions): void;
     ngAfterContentInit(): void;
     ngDoCheck(): void;
     ngOnDestroy(): void;
@@ -138,6 +151,12 @@ export declare class MatChipList extends _MatChipListMixinBase implements MatFor
     setDescribedByIds(ids: string[]): void;
     setDisabledState(isDisabled: boolean): void;
     writeValue(value: any): void;
+    static ngAcceptInputType_disabled: boolean | string | null | undefined;
+    static ngAcceptInputType_multiple: boolean | string | null | undefined;
+    static ngAcceptInputType_required: boolean | string | null | undefined;
+    static ngAcceptInputType_selectable: boolean | string | null | undefined;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatChipList, "mat-chip-list", ["matChipList"], { 'errorStateMatcher': "errorStateMatcher", 'multiple': "multiple", 'compareWith': "compareWith", 'value': "value", 'required': "required", 'placeholder': "placeholder", 'disabled': "disabled", 'ariaOrientation': "aria-orientation", 'selectable': "selectable", 'tabIndex': "tabIndex" }, { 'change': "change", 'valueChange': "valueChange" }, ["chips"]>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChipList>;
 }
 
 export declare class MatChipListChange {
@@ -152,6 +171,8 @@ export declare class MatChipRemove {
     protected _parentChip: MatChip;
     constructor(_parentChip: MatChip);
     _handleClick(event: Event): void;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatChipRemove, "[matChipRemove]", never, {}, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChipRemove>;
 }
 
 export interface MatChipsDefaultOptions {
@@ -169,7 +190,11 @@ export declare class MatChipSelectionChange {
 }
 
 export declare class MatChipsModule {
+    static ɵinj: i0.ɵɵInjectorDef<MatChipsModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatChipsModule, [typeof i1.MatChipList, typeof i2.MatChip, typeof i3.MatChipInput, typeof i2.MatChipRemove, typeof i2.MatChipAvatar, typeof i2.MatChipTrailingIcon], never, [typeof i1.MatChipList, typeof i2.MatChip, typeof i3.MatChipInput, typeof i2.MatChipRemove, typeof i2.MatChipAvatar, typeof i2.MatChipTrailingIcon]>;
 }
 
 export declare class MatChipTrailingIcon {
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatChipTrailingIcon, "mat-chip-trailing-icon, [matChipTrailingIcon]", never, {}, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatChipTrailingIcon>;
 }

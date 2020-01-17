@@ -34,7 +34,7 @@ let nextUniqueId = 0;
   selector: 'input[matChipInputFor]',
   exportAs: 'matChipInput, matChipInputFor',
   host: {
-    'class': 'mat-chip-input mat-input-element',
+    'class': 'mat-mdc-chip-input mat-input-element',
     '(keydown)': '_keydown($event)',
     '(blur)': '_blur()',
     '(focus)': '_focus()',
@@ -170,4 +170,7 @@ export class MatChipInput implements MatChipTextControl, OnChanges {
     const keyCode = event.keyCode;
     return Array.isArray(separators) ? separators.indexOf(keyCode) > -1 : separators.has(keyCode);
   }
+
+  static ngAcceptInputType_addOnBlur: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

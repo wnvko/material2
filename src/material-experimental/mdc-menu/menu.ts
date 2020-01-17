@@ -38,7 +38,6 @@ export const MAT_MENU_SCROLL_STRATEGY_FACTORY_PROVIDER: Provider = {
 };
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-menu',
   templateUrl: 'menu.html',
   styleUrls: ['menu.css'],
@@ -71,4 +70,7 @@ export class MatMenu extends BaseMatMenu {
     // - should update the elevation when the same menu is opened at a different depth
     // - should not increase the elevation if the user specified a custom one
   }
+
+  static ngAcceptInputType_overlapTrigger: boolean | string | null | undefined;
+  static ngAcceptInputType_hasBackdrop: boolean | string | null | undefined;
 }

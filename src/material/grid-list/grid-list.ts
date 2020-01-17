@@ -33,7 +33,6 @@ import {MAT_GRID_LIST, MatGridListBase} from './grid-list-base';
 const MAT_FIT_MODE = 'fit';
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-grid-list',
   exportAs: 'matGridList',
   templateUrl: 'grid-list.html',
@@ -170,4 +169,6 @@ export class MatGridList implements MatGridListBase, OnInit, AfterContentChecked
       (this._element.nativeElement.style as any)[style[0]] = style[1];
     }
   }
+
+  static ngAcceptInputType_cols: number | string | null | undefined;
 }

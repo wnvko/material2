@@ -38,7 +38,6 @@ const _MatToolbarMixinBase: CanColorCtor & typeof MatToolbarBase = mixinColor(Ma
 export class MatToolbarRow {}
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-toolbar',
   exportAs: 'matToolbar',
   templateUrl: 'toolbar.html',
@@ -56,7 +55,7 @@ export class MatToolbar extends _MatToolbarMixinBase implements CanColor, AfterV
   private _document: Document;
 
   /** Reference to all toolbar row elements that have been projected. */
-  @ContentChildren(MatToolbarRow) _toolbarRows: QueryList<MatToolbarRow>;
+  @ContentChildren(MatToolbarRow, {descendants: true}) _toolbarRows: QueryList<MatToolbarRow>;
 
   constructor(
     elementRef: ElementRef,

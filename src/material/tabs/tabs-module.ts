@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {A11yModule} from '@angular/cdk/a11y';
 import {ObserversModule} from '@angular/cdk/observers';
 import {PortalModule} from '@angular/cdk/portal';
 import {CommonModule} from '@angular/common';
@@ -20,7 +21,6 @@ import {MatTabHeader} from './tab-header';
 import {MatTabLabel} from './tab-label';
 import {MatTabLabelWrapper} from './tab-label-wrapper';
 import {MatTabLink, MatTabNav} from './tab-nav-bar/tab-nav-bar';
-import {A11yModule} from '@angular/cdk/a11y';
 
 
 @NgModule({

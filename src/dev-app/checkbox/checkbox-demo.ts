@@ -9,6 +9,7 @@
 import {Component, Directive} from '@angular/core';
 import {MAT_CHECKBOX_CLICK_ACTION} from '@angular/material/checkbox';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
+import {ThemePalette} from '@angular/material/core';
 
 
 export interface Task {
@@ -39,14 +40,13 @@ export class AnimationsNoop {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-checkbox-demo-nested-checklist',
   styles: [`
     li {
       margin-bottom: 4px;
     }
   `],
-  templateUrl: 'nested-checklist.html',
+  templateUrl: './nested-checklist.html',
 })
 export class MatCheckboxDemoNestedChecklist {
   tasks: Task[] = [
@@ -76,18 +76,23 @@ export class MatCheckboxDemoNestedChecklist {
     return task.completed || (subtasks != null && subtasks.every(t => t.completed));
   }
 
-  someComplete(tasks: Task[]): boolean {
+  someComplete(tasks: Task[] | undefined | null): boolean {
+    if (tasks == null) {
+      return false;
+    }
     const numComplete = tasks.filter(t => t.completed).length;
     return numComplete > 0 && numComplete < tasks.length;
   }
 
-  setAllCompleted(tasks: Task[], completed: boolean) {
+  setAllCompleted(tasks: Task[] | undefined | null, completed: boolean): void {
+    if (tasks == null) {
+      return;
+    }
     tasks.forEach(t => t.completed = completed);
   }
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-checkbox-demo',
   templateUrl: 'checkbox-demo.html',
   styleUrls: ['checkbox-demo.css'],
@@ -96,7 +101,7 @@ export class CheckboxDemo {
   isIndeterminate: boolean = false;
   isChecked: boolean = false;
   isDisabled: boolean = false;
-  labelPosition: string = 'after';
+  labelPosition: 'after' | 'before' = 'after';
   useAlternativeColor: boolean = false;
 
   demoRequired = false;
@@ -104,12 +109,12 @@ export class CheckboxDemo {
   demoChecked = false;
   demoDisabled = false;
   demoIndeterminate = false;
-  demoLabel = null;
-  demoLabelledBy = null;
-  demoId = null;
-  demoName = null;
-  demoValue = null;
-  demoColor = 'primary';
+  demoLabel: string;
+  demoLabelledBy: string;
+  demoId: string;
+  demoName: string;
+  demoValue: string;
+  demoColor: ThemePalette = 'primary';
   demoDisableRipple = false;
   demoHideLabel = false;
 

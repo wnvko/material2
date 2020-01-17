@@ -28,6 +28,7 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {coerceBooleanProperty, coerceNumberProperty} from '@angular/cdk/coercion';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {ThemePalette, RippleAnimationConfig} from '@angular/material/core';
+import {numbers} from '@material/ripple';
 import {
   MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS,
   MatSlideToggleDefaultOptions,
@@ -53,7 +54,6 @@ export class MatSlideToggleChange {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'mat-slide-toggle',
   templateUrl: 'slide-toggle.html',
   styleUrls: ['slide-toggle.css'],
@@ -61,6 +61,8 @@ export class MatSlideToggleChange {
     'class': 'mat-mdc-slide-toggle',
     '[id]': 'id',
     '[attr.tabindex]': 'null',
+    '[attr.aria-label]': 'null',
+    '[attr.aria-labelledby]': 'null',
     '[class.mat-primary]': 'color == "primary"',
     '[class.mat-accent]': 'color == "accent"',
     '[class.mat-warn]': 'color == "warn"',
@@ -106,12 +108,8 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
 
   /** Configuration for the underlying ripple. */
   _rippleAnimation: RippleAnimationConfig = {
-    // TODO(crisbeto): Use the MDC constants once they are exported separately from the
-    // foundation. Grabbing them off the foundation prevents the foundation class from being
-    // tree-shaken. There is an open PR for this:
-    // https://github.com/material-components/material-components-web/pull/4593
-    enterDuration: 225 /* MDCRippleFoundation.numbers.DEACTIVATION_TIMEOUT_MS */,
-    exitDuration: 150 /* MDCRippleFoundation.numbers.FG_DEACTIVATION_MS */,
+    enterDuration: numbers.DEACTIVATION_TIMEOUT_MS,
+    exitDuration: numbers.FG_DEACTIVATION_MS,
   };
 
   /** The color palette  for this slide toggle. */
@@ -201,7 +199,7 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
   get inputId(): string { return `${this.id || this._uniqueId}-input`; }
 
   /** Reference to the underlying input element. */
-  @ViewChild('input', {static: false}) _inputElement: ElementRef<HTMLInputElement>;
+  @ViewChild('input') _inputElement: ElementRef<HTMLInputElement>;
 
   constructor(private _changeDetectorRef: ChangeDetectorRef,
               @Attribute('tabindex') tabIndex: string,
@@ -313,4 +311,10 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
     this._classes[cssClass] = active;
     this._changeDetectorRef.markForCheck();
   }
+
+  static ngAcceptInputType_tabIndex: number | string | null | undefined;
+  static ngAcceptInputType_required: boolean | string | null | undefined;
+  static ngAcceptInputType_checked: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

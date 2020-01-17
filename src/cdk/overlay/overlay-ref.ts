@@ -210,7 +210,7 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
     // Remove this overlay from keyboard dispatcher tracking.
     this._keyboardDispatcher.remove(this);
 
-    // Keeping the host element in DOM the can cause scroll jank, because it still gets
+    // Keeping the host element in the DOM can cause scroll jank, because it still gets
     // rendered, even though it's transparent and unclickable which is why we remove it.
     this._detachContentWhenStable();
 
@@ -377,6 +377,10 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
 
   /** Updates the size of the overlay element based on the overlay config. */
   private _updateElementSize() {
+    if (!this._pane) {
+      return;
+    }
+
     const style = this._pane.style;
 
     style.width = coerceCssPixelValue(this._config.width);
@@ -494,7 +498,10 @@ export class OverlayRef implements PortalOutlet, OverlayReference {
 
     coerceArray(cssClasses).forEach(cssClass => {
       // We can't do a spread here, because IE doesn't support setting multiple classes.
-      isAdd ? classList.add(cssClass) : classList.remove(cssClass);
+      // Also trying to add an empty string to a DOMTokenList will throw.
+      if (cssClass) {
+        isAdd ? classList.add(cssClass) : classList.remove(cssClass);
+      }
     });
   }
 

@@ -193,6 +193,9 @@ export class CdkObserveContent implements AfterContentInit, OnDestroy {
       this._currentSubscription.unsubscribe();
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_debounce: boolean | string | null | undefined;
 }
 
 

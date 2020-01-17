@@ -27,9 +27,12 @@ import {
   MatButtonBase
 } from './button-base';
 
-
+/**
+ * Material Design icon button component. This type of button displays a single interactive icon for
+ * users to perform an action.
+ * See https://material.io/develop/web/components/buttons/icon-buttons/
+ */
 @Component({
-  moduleId: module.id,
   selector: `button[mat-icon-button]`,
   templateUrl: 'button.html',
   styleUrls: ['icon-button.css'],
@@ -40,17 +43,25 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatIconButton extends MatButtonBase {
+  // Set the ripple to be centered for icon buttons
+  _isRippleCentered = true;
+
   constructor(
       elementRef: ElementRef, platform: Platform, ngZone: NgZone,
       @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(elementRef, platform, ngZone, animationMode);
-    this.rippleTarget.rippleConfig.centered = true;
-    this.rippleTarget.rippleConfig.radius = 24;
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }
 
+/**
+ * Material Design icon button component for anchor elements. This button displays a single
+ * interaction icon that allows users to navigate across different routes or pages.
+ * See https://material.io/develop/web/components/buttons/icon-buttons/
+ */
 @Component({
-  moduleId: module.id,
   selector: `a[mat-icon-button]`,
   templateUrl: 'button.html',
   styleUrls: ['icon-button.css'],
@@ -61,11 +72,15 @@ export class MatIconButton extends MatButtonBase {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatIconAnchor extends MatAnchorBase {
+  // Set the ripple to be centered for icon buttons
+  _isRippleCentered = true;
+
   constructor(
       elementRef: ElementRef, platform: Platform, ngZone: NgZone,
       @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(elementRef, platform, ngZone, animationMode);
-    this.rippleTarget.rippleConfig.centered = true;
-    this.rippleTarget.rippleConfig.radius = 24;
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

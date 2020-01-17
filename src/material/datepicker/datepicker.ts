@@ -87,7 +87,6 @@ const _MatDatepickerContentMixinBase: CanColorCtor & typeof MatDatepickerContent
  * @docs-private
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-datepicker-content',
   templateUrl: 'datepicker-content.html',
   styleUrls: ['datepicker-content.css'],
@@ -109,7 +108,7 @@ export class MatDatepickerContent<D> extends _MatDatepickerContentMixinBase
   implements AfterViewInit, CanColor {
 
   /** Reference to the internal calendar component. */
-  @ViewChild(MatCalendar, {static: false}) _calendar: MatCalendar<D>;
+  @ViewChild(MatCalendar) _calendar: MatCalendar<D>;
 
   /** Reference to the datepicker that created the overlay. */
   datepicker: MatDatepicker<D>;
@@ -132,7 +131,6 @@ export class MatDatepickerContent<D> extends _MatDatepickerContentMixinBase
 // if angular adds support for `exportAs: '$implicit'` on directives.
 /** Component responsible for managing the datepicker popup/dialog. */
 @Component({
-  moduleId: module.id,
   selector: 'mat-datepicker',
   template: '',
   exportAs: 'matDatepicker',
@@ -522,4 +520,7 @@ export class MatDatepicker<D> implements OnDestroy, CanColor {
       this._dialogRef.componentInstance.color = color;
     }
   }
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_touchUi: boolean | string | null | undefined;
 }

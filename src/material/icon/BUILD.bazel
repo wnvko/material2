@@ -1,6 +1,5 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@io_bazel_rules_sass//:defs.bzl", "sass_binary", "sass_library")
 load("//src/e2e-app:test_suite.bzl", "e2e_test_suite")
 load(
     "//tools:defaults.bzl",
@@ -9,6 +8,8 @@ load(
     "ng_module",
     "ng_test_library",
     "ng_web_test_suite",
+    "sass_binary",
+    "sass_library",
 )
 
 ng_module(
@@ -50,6 +51,7 @@ ng_test_library(
     deps = [
         ":icon",
         "//src/cdk/testing",
+        "//src/cdk/testing/private",
         "@npm//@angular/common",
         "@npm//@angular/platform-browser",
     ],
@@ -64,7 +66,7 @@ ng_e2e_test_library(
     name = "e2e_test_sources",
     srcs = glob(["**/*.e2e.spec.ts"]),
     deps = [
-        "//src/cdk/testing/e2e",
+        "//src/cdk/testing/private/e2e",
     ],
 )
 
@@ -72,7 +74,7 @@ e2e_test_suite(
     name = "e2e_tests",
     deps = [
         ":e2e_test_sources",
-        "//src/cdk/testing/e2e",
+        "//src/cdk/testing/private/e2e",
     ],
 )
 

@@ -1,9 +1,9 @@
 import {DataSource} from '@angular/cdk/collections';
 import {LEFT_ARROW, UP_ARROW, RIGHT_ARROW, DOWN_ARROW, TAB} from '@angular/cdk/keycodes';
 import {CdkTableModule} from '@angular/cdk/table';
-import {dispatchKeyboardEvent} from '@angular/cdk/testing';
+import {dispatchKeyboardEvent} from '@angular/cdk/testing/private';
 import {CommonModule} from '@angular/common';
-import {Component, ElementRef, Type, ViewChild} from '@angular/core';
+import {Component, Directive, ElementRef, Type, ViewChild} from '@angular/core';
 import {ComponentFixture, fakeAsync, flush, TestBed, tick, inject} from '@angular/core/testing';
 import {FormsModule, NgForm} from '@angular/forms';
 import {BidiModule, Direction} from '@angular/cdk/bidi';
@@ -27,6 +27,7 @@ const NAME_EDIT_TEMPLATE = `
           [cdkEditControlIgnoreSubmitUnlessValid]="ignoreSubmitUnlessValid"
           [cdkEditControlClickOutBehavior]="clickOutBehavior">
         <input [ngModel]="element.name" name="name" required>
+        <input [ngModel]="element.weight" name="weight">
         <br>
         <button class="submit" type="submit">Confirm</button>
         <button class="revert" cdkEditRevert>Revert</button>
@@ -60,8 +61,9 @@ interface PeriodicElement {
   weight: number;
 }
 
+@Directive()
 abstract class BaseTestComponent {
-  @ViewChild('table', {static: false}) table: ElementRef;
+  @ViewChild('table') table: ElementRef;
 
   preservedValues = new FormValueContainer<PeriodicElement, {'name': string}>();
 
@@ -119,7 +121,7 @@ abstract class BaseTestComponent {
   openLens(rowIndex = 0, cellIndex = 1) {
     this.focusEditCell(rowIndex, cellIndex);
     this.getEditCell(rowIndex, cellIndex)
-        .dispatchEvent(new KeyboardEvent('keyup', {bubbles: true, key: 'Enter'}));
+        .dispatchEvent(new KeyboardEvent('keydown', {bubbles: true, key: 'Enter'}));
     flush();
   }
 
@@ -131,12 +133,16 @@ abstract class BaseTestComponent {
     return document.querySelector('.cdk-overlay-connected-position-bounding-box');
   }
 
-  getInput() {
-    return document.querySelector('input') as HTMLInputElement|null;
+  getNameInput() {
+    return document.querySelector('input[name="name"]') as HTMLInputElement|null;
+  }
+
+  getWeightInput() {
+    return document.querySelector('input[name="weight"]') as HTMLInputElement|null;
   }
 
   lensIsOpen() {
-    return !!this.getInput();
+    return !!this.getNameInput();
   }
 
   getSubmitButton() {
@@ -479,7 +485,7 @@ describe('CDK Popover Edit', () => {
 
         describe('arrow keys', () => {
           const dispatchKey = (cell: HTMLElement, keyCode: number) =>
-              dispatchKeyboardEvent(cell, 'keydown', keyCode, cell);
+              dispatchKeyboardEvent(cell, 'keydown', keyCode, undefined, cell);
 
           it('moves focus up/down/left/right and prevents default', () => {
             const rowCells = getRowCells();
@@ -602,7 +608,7 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('shows a lens with the value from the table', fakeAsync(() => {
           component.openLens();
 
-          expect(component.getInput()!.value).toBe('Hydrogen');
+          expect(component.getNameInput()!.value).toBe('Hydrogen');
           clearLeftoverTimers();
         }));
 
@@ -654,8 +660,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('updates the form and submits, closing the lens', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickSubmitButton();
           fixture.detectChanges();
@@ -667,8 +673,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('does not close the lens on submit when form is invalid', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = '';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = '';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickSubmitButton();
 
@@ -681,8 +687,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
           component.ignoreSubmitUnlessValid = false;
           component.openLens();
 
-          component.getInput()!.value = '';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = '';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickSubmitButton();
 
@@ -702,8 +708,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('closes and reopens a lens with modified value persisted', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickCloseButton();
           fixture.detectChanges();
@@ -713,56 +719,86 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
 
           component.openLens();
 
-          expect(component.getInput()!.value).toBe('Hydragon');
+          expect(component.getNameInput()!.value).toBe('Hydragon');
           clearLeftoverTimers();
         }));
 
         it('resets the lens to original value', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickRevertButton();
 
-          expect(component.getInput()!.value).toBe('Hydrogen');
+          expect(component.getNameInput()!.value).toBe('Hydrogen');
           clearLeftoverTimers();
         }));
+
+        it('should not reset the values when clicking revert without making changes',
+          fakeAsync(() => {
+            component.openLens();
+
+            expect(component.getNameInput()!.value).toBe('Hydrogen');
+            expect(component.getWeightInput()!.value).toBe('1.007');
+
+            component.clickRevertButton();
+
+            expect(component.getNameInput()!.value).toBe('Hydrogen');
+            expect(component.getWeightInput()!.value).toBe('1.007');
+            clearLeftoverTimers();
+          }));
 
         it('resets the lens to previously submitted value', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickSubmitButton();
           fixture.detectChanges();
 
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon X';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon X';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
 
           component.clickRevertButton();
 
-          expect(component.getInput()!.value).toBe('Hydragon');
+          expect(component.getNameInput()!.value).toBe('Hydragon');
           clearLeftoverTimers();
         }));
 
         it('closes the lens on escape', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.dispatchEvent(
-              new KeyboardEvent('keyup', {bubbles: true, key: 'Escape'}));
+          const event = new KeyboardEvent('keydown', {bubbles: true, key: 'Escape'});
+          spyOn(event, 'preventDefault').and.callThrough();
+          component.getNameInput()!.dispatchEvent(event);
 
           expect(component.lensIsOpen()).toBe(false);
+          expect(event.preventDefault).toHaveBeenCalled();
+          clearLeftoverTimers();
+        }));
+
+        it('does not close the lens on escape with a modifier key', fakeAsync(() => {
+          component.openLens();
+
+          const event = new KeyboardEvent('keydown', {bubbles: true, key: 'Escape'});
+          Object.defineProperty(event, 'altKey', {get: () => true});
+
+          spyOn(event, 'preventDefault').and.callThrough();
+          component.getNameInput()!.dispatchEvent(event);
+
+          expect(component.lensIsOpen()).toBe(true);
+          expect(event.preventDefault).not.toHaveBeenCalled();
           clearLeftoverTimers();
         }));
 
         it('does not close the lens on click within lens', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.dispatchEvent(new Event('click', {bubbles: true}));
+          component.getNameInput()!.dispatchEvent(new Event('click', {bubbles: true}));
 
           expect(component.lensIsOpen()).toBe(true);
           clearLeftoverTimers();
@@ -771,8 +807,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('closes the lens on outside click', fakeAsync(() => {
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
           document.body.dispatchEvent(new Event('click', {bubbles: true}));
           fixture.detectChanges();
 
@@ -786,8 +822,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
           component.clickOutBehavior = 'submit';
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
           document.body.dispatchEvent(new Event('click', {bubbles: true}));
           fixture.detectChanges();
 
@@ -801,8 +837,8 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
           component.clickOutBehavior = 'noop';
           component.openLens();
 
-          component.getInput()!.value = 'Hydragon';
-          component.getInput()!.dispatchEvent(new Event('input'));
+          component.getNameInput()!.value = 'Hydragon';
+          component.getNameInput()!.dispatchEvent(new Event('input'));
           document.body.dispatchEvent(new Event('click', {bubbles: true}));
           fixture.detectChanges();
 
@@ -814,7 +850,7 @@ cdkPopoverEditTabOut`, fakeAsync(() => {
         it('sets focus on the first input in the lens', fakeAsync(() => {
           component.openLens();
 
-          expect(document.activeElement).toBe(component.getInput());
+          expect(document.activeElement).toBe(component.getNameInput());
           clearLeftoverTimers();
         }));
 

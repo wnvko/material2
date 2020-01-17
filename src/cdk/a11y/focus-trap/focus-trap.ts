@@ -418,4 +418,7 @@ export class CdkTrapFocus implements OnDestroy, AfterContentInit, DoCheck {
       this.focusTrap.attachAnchors();
     }
   }
+
+  static ngAcceptInputType_enabled: boolean | string | null | undefined;
+  static ngAcceptInputType_autoCapture: boolean | string | null | undefined;
 }

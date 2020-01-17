@@ -99,6 +99,8 @@ export class CdkHeaderRowDef extends _CdkHeaderRowDefBase implements CanStick, O
   ngOnChanges(changes: SimpleChanges): void {
     super.ngOnChanges(changes);
   }
+
+  static ngAcceptInputType_sticky: boolean | string | null | undefined;
 }
 
 // Boilerplate for applying mixins to CdkFooterRowDef.
@@ -125,6 +127,8 @@ export class CdkFooterRowDef extends _CdkFooterRowDefBase implements CanStick, O
   ngOnChanges(changes: SimpleChanges): void {
     super.ngOnChanges(changes);
   }
+
+  static ngAcceptInputType_sticky: boolean | string | null | undefined;
 }
 
 /**
@@ -243,7 +247,6 @@ export class CdkCellOutlet implements OnDestroy {
 
 /** Header template container that contains the cell outlet. Adds the right class and role. */
 @Component({
-  moduleId: module.id,
   selector: 'cdk-header-row, tr[cdk-header-row]',
   template: CDK_ROW_TEMPLATE,
   host: {
@@ -261,7 +264,6 @@ export class CdkHeaderRow {
 
 /** Footer template container that contains the cell outlet. Adds the right class and role. */
 @Component({
-  moduleId: module.id,
   selector: 'cdk-footer-row, tr[cdk-footer-row]',
   template: CDK_ROW_TEMPLATE,
   host: {
@@ -278,7 +280,6 @@ export class CdkFooterRow {
 
 /** Data row template container that contains the cell outlet. Adds the right class and role. */
 @Component({
-  moduleId: module.id,
   selector: 'cdk-row, tr[cdk-row]',
   template: CDK_ROW_TEMPLATE,
   host: {

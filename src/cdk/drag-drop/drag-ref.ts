@@ -66,7 +66,6 @@ interface DragHelperTemplate<T = any> {
 
 /**
  * Reference to a draggable item. Used to manipulate or dispose of the item.
- * @docs-private
  */
 export class DragRef<T = any> {
   /** Element displayed next to the user's pointer while the element is dragged. */
@@ -158,6 +157,9 @@ export class DragRef<T = any> {
   /** Subscription to the viewport being scrolled. */
   private _scrollSubscription = Subscription.EMPTY;
 
+  /** Subscription to the viewport being resized. */
+  private _resizeSubscription = Subscription.EMPTY;
+
   /**
    * Time at which the last touch event occurred. Used to avoid firing the same
    * events multiple times on touch devices where the browser will fire a fake
@@ -205,7 +207,10 @@ export class DragRef<T = any> {
    * Amount of milliseconds to wait after the user has put their
    * pointer down before starting to drag the element.
    */
-  dragStartDelay: number = 0;
+  dragStartDelay: number | {touch: number, mouse: number} = 0;
+
+  /** Class to be added to the preview element. */
+  previewClass: string|string[]|undefined;
 
   /** Whether starting to drag this element is disabled. */
   get disabled(): boolean {
@@ -351,6 +356,12 @@ export class DragRef<T = any> {
    */
   withBoundaryElement(boundaryElement: ElementRef<HTMLElement> | HTMLElement | null): this {
     this._boundaryElement = boundaryElement ? coerceElement(boundaryElement) : null;
+    this._resizeSubscription.unsubscribe();
+    if (boundaryElement) {
+      this._resizeSubscription = this._viewportRuler
+        .change(10)
+        .subscribe(() => this._containInsideBoundaryOnResize());
+    }
     return this;
   }
 
@@ -381,6 +392,7 @@ export class DragRef<T = any> {
     this._handles = [];
     this._disabledHandles.clear();
     this._dropContainer = undefined;
+    this._resizeSubscription.unsubscribe();
     this._boundaryElement = this._rootElement = this._placeholderTemplate =
         this._previewTemplate = this._nextSibling = null!;
   }
@@ -524,7 +536,7 @@ export class DragRef<T = any> {
       // in the `pointerMove` subscription, because we're not guaranteed to have one move event
       // per pixel of movement (e.g. if the user moves their pointer quickly).
       if (isOverThreshold) {
-        const isDelayElapsed = Date.now() >= this._dragStartTime + (this.dragStartDelay || 0);
+        const isDelayElapsed = Date.now() >= this._dragStartTime + this._getDragStartDelay(event);
         if (!isDelayElapsed) {
           this._endDragSequence(event);
           return;
@@ -610,6 +622,7 @@ export class DragRef<T = any> {
 
     this._removeSubscriptions();
     this._dragDropRegistry.stopDragging(this);
+    this._toggleNativeDragInteractions();
 
     if (this._handles) {
       this._rootElement.style.webkitTapHighlightColor = this._rootElementTapHighlight;
@@ -626,6 +639,7 @@ export class DragRef<T = any> {
       this._dropContainer._stopScrolling();
       this._animatePreviewToPlaceholder().then(() => {
         this._cleanupDragArtifacts(event);
+        this._cleanupCachedDimensions();
         this._dragDropRegistry.stopDragging(this);
       });
     } else {
@@ -640,6 +654,7 @@ export class DragRef<T = any> {
           distance: this._getDragDistance(this._getPointerPositionOnPage(event))
         });
       });
+      this._cleanupCachedDimensions();
       this._dragDropRegistry.stopDragging(this);
     }
   }
@@ -795,7 +810,7 @@ export class DragRef<T = any> {
     // Drop container that draggable has been moved into.
     let newContainer = this._initialContainer._getSiblingContainerFromPosition(this, x, y);
 
-    // If we couldn't find a new container to move the item into, and the item has left it's
+    // If we couldn't find a new container to move the item into, and the item has left its
     // initial container, check whether the it's over the initial container. This handles the
     // case where two containers are connected one way and the user tries to undo dragging an
     // item into a new container.
@@ -832,13 +847,14 @@ export class DragRef<T = any> {
    */
   private _createPreviewElement(): HTMLElement {
     const previewConfig = this._previewTemplate;
+    const previewClass = this.previewClass;
     const previewTemplate = previewConfig ? previewConfig.template : null;
     let preview: HTMLElement;
 
     if (previewTemplate) {
       const viewRef = previewConfig!.viewContainer.createEmbeddedView(previewTemplate,
                                                                       previewConfig!.context);
-      preview = viewRef.rootNodes[0];
+      preview = getRootNode(viewRef, this._document);
       this._previewRef = viewRef;
       preview.style.transform =
           getTransform(this._pickupPositionOnPage.x, this._pickupPositionOnPage.y);
@@ -856,6 +872,8 @@ export class DragRef<T = any> {
       // It's important that we disable the pointer events on the preview, because
       // it can throw off the `document.elementFromPoint` calls in the `CdkDropList`.
       pointerEvents: 'none',
+      // We have to reset the margin, because it can throw off positioning relative to the viewport.
+      margin: '0',
       position: 'fixed',
       top: '0',
       left: '0',
@@ -863,9 +881,16 @@ export class DragRef<T = any> {
     });
 
     toggleNativeDragInteractions(preview, false);
-
     preview.classList.add('cdk-drag-preview');
     preview.setAttribute('dir', this._direction);
+
+    if (previewClass) {
+      if (Array.isArray(previewClass)) {
+        previewClass.forEach(className => preview.classList.add(className));
+      } else {
+        preview.classList.add(previewClass);
+      }
+    }
 
     return preview;
   }
@@ -928,7 +953,7 @@ export class DragRef<T = any> {
         placeholderTemplate,
         placeholderConfig!.context
       );
-      placeholder = this._placeholderRef.rootNodes[0];
+      placeholder = getRootNode(this._placeholderRef, this._document);
     } else {
       placeholder = deepCloneNode(this._rootElement);
     }
@@ -1079,6 +1104,83 @@ export class DragRef<T = any> {
 
     return {x: 0, y: 0};
   }
+
+  /** Cleans up any cached element dimensions that we don't need after dragging has stopped. */
+  private _cleanupCachedDimensions() {
+    this._boundaryRect = this._previewRect = undefined;
+  }
+
+  /**
+   * Checks whether the element is still inside its boundary after the viewport has been resized.
+   * If not, the position is adjusted so that the element fits again.
+   */
+  private _containInsideBoundaryOnResize() {
+    let {x, y} = this._passiveTransform;
+
+    if ((x === 0 && y === 0) || this.isDragging() || !this._boundaryElement) {
+      return;
+    }
+
+    const boundaryRect = this._boundaryElement.getBoundingClientRect();
+    const elementRect = this._rootElement.getBoundingClientRect();
+
+    // It's possible that the element got hidden away after dragging (e.g. by switching to a
+    // different tab). Don't do anything in this case so we don't clear the user's position.
+    if ((boundaryRect.width === 0 && boundaryRect.height === 0) ||
+        (elementRect.width === 0 && elementRect.height === 0)) {
+      return;
+    }
+
+    const leftOverflow = boundaryRect.left - elementRect.left;
+    const rightOverflow = elementRect.right - boundaryRect.right;
+    const topOverflow = boundaryRect.top - elementRect.top;
+    const bottomOverflow = elementRect.bottom - boundaryRect.bottom;
+
+    // If the element has become wider than the boundary, we can't
+    // do much to make it fit so we just anchor it to the left.
+    if (boundaryRect.width > elementRect.width) {
+      if (leftOverflow > 0) {
+        x += leftOverflow;
+      }
+
+      if (rightOverflow > 0) {
+        x -= rightOverflow;
+      }
+    } else {
+      x = 0;
+    }
+
+    // If the element has become taller than the boundary, we can't
+    // do much to make it fit so we just anchor it to the top.
+    if (boundaryRect.height > elementRect.height) {
+      if (topOverflow > 0) {
+        y += topOverflow;
+      }
+
+      if (bottomOverflow > 0) {
+        y -= bottomOverflow;
+      }
+    } else {
+      y = 0;
+    }
+
+    if (x !== this._passiveTransform.x || y !== this._passiveTransform.y) {
+      this.setFreeDragPosition({y, x});
+    }
+  }
+
+  /** Gets the drag start delay, based on the event type. */
+  private _getDragStartDelay(event: MouseEvent | TouchEvent): number {
+    const value = this.dragStartDelay;
+
+    if (typeof value === 'number') {
+      return value;
+    } else if (isTouchEvent(event)) {
+      return value.touch;
+    }
+
+    return value ? value.mouse : 0;
+  }
 }
 
 /** Point on the page or within an element. */
@@ -1161,4 +1263,20 @@ function getPreviewInsertionPoint(documentRef: any): HTMLElement {
          documentRef.mozFullScreenElement ||
          documentRef.msFullscreenElement ||
          documentRef.body;
+}
+
+/**
+ * Gets the root HTML element of an embedded view.
+ * If the root is not an HTML element it gets wrapped in one.
+ */
+function getRootNode(viewRef: EmbeddedViewRef<any>, _document: Document): HTMLElement {
+  const rootNode: Node = viewRef.rootNodes[0];
+
+  if (rootNode.nodeType !== _document.ELEMENT_NODE) {
+    const wrapper = _document.createElement('div');
+    wrapper.appendChild(rootNode);
+    return wrapper;
+  }
+
+  return rootNode as HTMLElement;
 }

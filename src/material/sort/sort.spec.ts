@@ -4,8 +4,8 @@ import {
   createFakeEvent,
   createMouseEvent,
   dispatchMouseEvent,
-  wrappedErrorMessage
-} from '@angular/cdk/testing';
+  wrappedErrorMessage,
+} from '@angular/cdk/testing/private';
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {async, ComponentFixture, fakeAsync, inject, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
@@ -373,7 +373,7 @@ describe('MatSort', () => {
 
   it('should re-render when the i18n labels have changed',
     inject([MatSortHeaderIntl], (intl: MatSortHeaderIntl) => {
-      const header = fixture.debugElement.query(By.directive(MatSortHeader)).nativeElement;
+      const header = fixture.debugElement.query(By.directive(MatSortHeader))!.nativeElement;
       const button = header.querySelector('.mat-sort-header-button');
 
       intl.sortButtonLabel = () => 'Sort all of the things';
@@ -493,11 +493,11 @@ class SimpleMatSortApp {
   disabledColumnSort = false;
   disableAllSort = false;
 
-  @ViewChild(MatSort, {static: false}) matSort: MatSort;
-  @ViewChild('defaultA', {static: false}) defaultA: MatSortHeader;
-  @ViewChild('defaultB', {static: false}) defaultB: MatSortHeader;
-  @ViewChild('overrideStart', {static: false}) overrideStart: MatSortHeader;
-  @ViewChild('overrideDisableClear', {static: false}) overrideDisableClear: MatSortHeader;
+  @ViewChild(MatSort) matSort: MatSort;
+  @ViewChild('defaultA') defaultA: MatSortHeader;
+  @ViewChild('defaultB') defaultB: MatSortHeader;
+  @ViewChild('overrideStart') overrideStart: MatSortHeader;
+  @ViewChild('overrideDisableClear') overrideDisableClear: MatSortHeader;
 
   constructor (public elementRef: ElementRef<HTMLElement>) { }
 
@@ -563,7 +563,7 @@ class FakeDataSource extends DataSource<any> {
   `
 })
 class CdkTableMatSortApp {
-  @ViewChild(MatSort, {static: false}) matSort: MatSort;
+  @ViewChild(MatSort) matSort: MatSort;
 
   dataSource = new FakeDataSource();
   columnsToRender = ['column_a', 'column_b', 'column_c'];
@@ -593,7 +593,7 @@ class CdkTableMatSortApp {
   `
 })
 class MatTableMatSortApp {
-  @ViewChild(MatSort, {static: false}) matSort: MatSort;
+  @ViewChild(MatSort) matSort: MatSort;
 
   dataSource = new FakeDataSource();
   columnsToRender = ['column_a', 'column_b', 'column_c'];

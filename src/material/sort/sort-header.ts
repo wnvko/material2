@@ -68,15 +68,14 @@ interface MatSortHeaderColumnDef {
  * column definition.
  */
 @Component({
-  moduleId: module.id,
   selector: '[mat-sort-header]',
   exportAs: 'matSortHeader',
   templateUrl: 'sort-header.html',
   styleUrls: ['sort-header.css'],
   host: {
+    'class': 'mat-sort-header',
     '(click)': '_handleClick()',
     '(mouseenter)': '_setIndicatorHintVisible(true)',
-    '(longpress)': '_setIndicatorHintVisible(true)',
     '(mouseleave)': '_setIndicatorHintVisible(false)',
     '[attr.aria-sort]': '_getAriaSortAttribute()',
     '[class.mat-sort-header-disabled]': '_isDisabled()',
@@ -294,4 +293,7 @@ export class MatSortHeader extends _MatSortHeaderMixinBase
   _renderArrow() {
     return !this._isDisabled() || this._isSorted();
   }
+
+  static ngAcceptInputType_disableClear: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

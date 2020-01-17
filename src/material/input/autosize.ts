@@ -23,7 +23,6 @@ import {Directive, Input} from '@angular/core';
     // Textarea elements that have the directive applied should have a single row by default.
     // Browsers normally show two rows by default and therefore this limits the minRows binding.
     'rows': '1',
-    '(input)': '_noopInputHandler()',
   },
 })
 export class MatTextareaAutosize extends CdkTextareaAutosize {
@@ -42,4 +41,8 @@ export class MatTextareaAutosize extends CdkTextareaAutosize {
   @Input()
   get matTextareaAutosize(): boolean { return this.enabled; }
   set matTextareaAutosize(value: boolean) { this.enabled = value; }
+
+  static ngAcceptInputType_minRows: number | string | null | undefined;
+  static ngAcceptInputType_maxRows: number | string | null | undefined;
+  static ngAcceptInputType_enabled: boolean | string | null | undefined;
 }

@@ -27,7 +27,6 @@ import {takeUntil} from 'rxjs/operators';
 
 
 @Component({
-  moduleId: module.id,
   selector: 'datepicker-demo',
   templateUrl: 'datepicker-demo.html',
   styleUrls: ['datepicker-demo.css'],
@@ -42,15 +41,20 @@ export class DatepickerDemo {
   minDate: Date;
   maxDate: Date;
   startAt: Date;
-  date: Date;
+  date: any;
   lastDateInput: Date | null;
   lastDateChange: Date | null;
   color: ThemePalette;
 
   dateCtrl = new FormControl();
 
-  dateFilter =
-      (date: Date) => !(date.getFullYear() % 2) && (date.getMonth() % 2) && !(date.getDate() % 2)
+  dateFilter: (date: Date | null) => boolean =
+    (date: Date | null) => {
+      if (date === null) {
+        return true;
+      }
+      return !(date.getFullYear() % 2) && Boolean(date.getMonth() % 2) && !(date.getDate() % 2);
+    }
 
   onDateInput = (e: MatDatepickerInputEvent<Date>) => this.lastDateInput = e.value;
   onDateChange = (e: MatDatepickerInputEvent<Date>) => this.lastDateChange = e.value;
@@ -62,7 +66,6 @@ export class DatepickerDemo {
 
 // Custom header component for datepicker
 @Component({
-  moduleId: module.id,
   selector: 'custom-header',
   templateUrl: 'custom-header.html',
   styleUrls: ['custom-header.css'],
@@ -104,7 +107,6 @@ export class CustomHeader<D> implements OnDestroy {
 }
 
 @Component({
-    moduleId: module.id,
     selector: 'customer-header-ng-content',
     template: `
       <mat-calendar-header #header>
@@ -114,7 +116,7 @@ export class CustomHeader<D> implements OnDestroy {
 })
 export class CustomHeaderNgContent<D> {
 
-  @ViewChild(MatCalendarHeader, {static: false})
+  @ViewChild(MatCalendarHeader)
   header: MatCalendarHeader<D>;
 
   constructor(@Optional() private _dateAdapter: DateAdapter<D>) {}

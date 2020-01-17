@@ -66,7 +66,6 @@ const _MatPaginatorBase: CanDisableCtor & HasInitializedCtor & typeof MatPaginat
  * navigational button to go to the previous or next page.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-paginator',
   exportAs: 'matPaginator',
   templateUrl: 'paginator.html',
@@ -283,4 +282,11 @@ export class MatPaginator extends _MatPaginatorBase implements OnInit, OnDestroy
       length: this.length
     });
   }
+
+  static ngAcceptInputType_pageIndex: number | string | null | undefined;
+  static ngAcceptInputType_length: number | string | null | undefined;
+  static ngAcceptInputType_pageSize: number | string | null | undefined;
+  static ngAcceptInputType_hidePageSize: boolean | string | null | undefined;
+  static ngAcceptInputType_showFirstLastButtons: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

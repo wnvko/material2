@@ -17,6 +17,9 @@ import {
   AfterContentInit,
   AfterViewInit,
   OnDestroy,
+  Directive,
+  Inject,
+  Input,
 } from '@angular/core';
 import {Direction, Directionality} from '@angular/cdk/bidi';
 import {coerceNumberProperty} from '@angular/cdk/coercion';
@@ -25,8 +28,8 @@ import {FocusKeyManager, FocusableOption} from '@angular/cdk/a11y';
 import {END, ENTER, HOME, SPACE, hasModifierKey} from '@angular/cdk/keycodes';
 import {merge, of as observableOf, Subject, timer, fromEvent} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
-import {MatInkBar} from './ink-bar';
 import {Platform, normalizePassiveListenerOptions} from '@angular/cdk/platform';
+import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 
 
 /** Config used to bind passive event listeners */
@@ -59,15 +62,17 @@ const HEADER_SCROLL_DELAY = 650;
 const HEADER_SCROLL_INTERVAL = 100;
 
 /** Item inside a paginated tab header. */
-type MatPaginatedTabHeaderItem = FocusableOption & {elementRef: ElementRef};
+export type MatPaginatedTabHeaderItem = FocusableOption & {elementRef: ElementRef};
 
 /**
  * Base class for a tab header that supported pagination.
+ * @docs-private
  */
+@Directive()
 export abstract class MatPaginatedTabHeader implements AfterContentChecked, AfterContentInit,
   AfterViewInit, OnDestroy {
   abstract _items: QueryList<MatPaginatedTabHeaderItem>;
-  abstract _inkBar: MatInkBar;
+  abstract _inkBar: {hide: () => void, alignToElement: (element: HTMLElement) => void};
   abstract _tabListContainer: ElementRef<HTMLElement>;
   abstract _tabList: ElementRef<HTMLElement>;
   abstract _nextPaginator: ElementRef<HTMLElement>;
@@ -80,7 +85,7 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
   private _selectedIndexChanged = false;
 
   /** Emits when the component is destroyed. */
-  private readonly _destroyed = new Subject<void>();
+  protected readonly _destroyed = new Subject<void>();
 
   /** Whether the controls for pagination should be displayed */
   _showPaginationControls = false;
@@ -109,6 +114,13 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
   /** Stream that will stop the automated scrolling. */
   private _stopScrolling = new Subject<void>();
 
+  /**
+   * Whether pagination should be disabled. This can be used to avoid unnecessary
+   * layout recalculations if it's known that pagination won't be required.
+   */
+  @Input()
+  disablePagination: boolean = false;
+
   /** The index of the active tab. */
   get selectedIndex(): number { return this._selectedIndex; }
   set selectedIndex(value: number) {
@@ -119,7 +131,7 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
       this._selectedIndex = value;
 
       if (this._keyManager) {
-        this._keyManager.updateActiveItemIndex(value);
+        this._keyManager.updateActiveItem(value);
       }
     }
   }
@@ -141,7 +153,7 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
                * parameters to become required.
                */
               private _platform?: Platform,
-              public _animationMode?: string) {
+              @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string) {
 
     // Bind the `mouseleave` event on the outside since it doesn't change anything in the view.
     _ngZone.runOutsideAngular(() => {
@@ -357,6 +369,10 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
 
   /** Performs the CSS transformation on the tab list that will cause the list to scroll. */
   _updateTabScrollPosition() {
+    if (this.disablePagination) {
+      return;
+    }
+
     const scrollDistance = this.scrollDistance;
     const platform = this._platform;
     const translateX = this._getLayoutDirection() === 'ltr' ? -scrollDistance : scrollDistance;
@@ -415,9 +431,15 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
    * should be called sparingly.
    */
   _scrollToLabel(labelIndex: number) {
+    if (this.disablePagination) {
+      return;
+    }
+
     const selectedLabel = this._items ? this._items.toArray()[labelIndex] : null;
 
-    if (!selectedLabel) { return; }
+    if (!selectedLabel) {
+      return;
+    }
 
     // The view length is the visible width of the tab labels.
     const viewLength = this._tabListContainer.nativeElement.offsetWidth;
@@ -453,18 +475,22 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
    * should be called sparingly.
    */
   _checkPaginationEnabled() {
-    const isEnabled =
-        this._tabList.nativeElement.scrollWidth > this._elementRef.nativeElement.offsetWidth;
+    if (this.disablePagination) {
+      this._showPaginationControls = false;
+    } else {
+      const isEnabled =
+          this._tabList.nativeElement.scrollWidth > this._elementRef.nativeElement.offsetWidth;
 
-    if (!isEnabled) {
-      this.scrollDistance = 0;
+      if (!isEnabled) {
+        this.scrollDistance = 0;
+      }
+
+      if (isEnabled !== this._showPaginationControls) {
+        this._changeDetectorRef.markForCheck();
+      }
+
+      this._showPaginationControls = isEnabled;
     }
-
-    if (isEnabled !== this._showPaginationControls) {
-      this._changeDetectorRef.markForCheck();
-    }
-
-    this._showPaginationControls = isEnabled;
   }
 
   /**
@@ -477,10 +503,14 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
    * should be called sparingly.
    */
   _checkScrollingControls() {
-    // Check if the pagination arrows should be activated.
-    this._disableScrollBefore = this.scrollDistance == 0;
-    this._disableScrollAfter = this.scrollDistance == this._getMaxScrollDistance();
-    this._changeDetectorRef.markForCheck();
+    if (this.disablePagination) {
+      this._disableScrollAfter = this._disableScrollBefore = true;
+    } else {
+      // Check if the pagination arrows should be activated.
+      this._disableScrollBefore = this.scrollDistance == 0;
+      this._disableScrollAfter = this.scrollDistance == this._getMaxScrollDistance();
+      this._changeDetectorRef.markForCheck();
+    }
   }
 
   /**
@@ -543,6 +573,10 @@ export abstract class MatPaginatedTabHeader implements AfterContentChecked, Afte
    * @returns Information on the current scroll distance and the maximum.
    */
   private _scrollTo(position: number) {
+    if (this.disablePagination) {
+      return {maxScrollDistance: 0, distance: 0};
+    }
+
     const maxScrollDistance = this._getMaxScrollDistance();
     this._scrollDistance = Math.max(0, Math.min(maxScrollDistance, position));
 

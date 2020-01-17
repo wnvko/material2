@@ -30,8 +30,8 @@ import {OverlayMouseClickDispatcher} from './mouse/overlay-mouse-click-dispatche
 /** Next overlay unique ID. */
 let nextUniqueId = 0;
 
-// Note that Overlay is *not* scoped to the app root because the ComponentFactoryResolver
-// it needs is different based on where OverlayModule is imported.
+// Note that Overlay is *not* scoped to the app root because of the ComponentFactoryResolver
+// which needs to be different depending on where OverlayModule is imported.
 
 /**
  * Service to create Overlays. Overlays are dynamically added pieces of floating UI, meant to be
@@ -125,6 +125,7 @@ export class Overlay {
       this._appRef = this._injector.get<ApplicationRef>(ApplicationRef);
     }
 
-    return new DomPortalOutlet(pane, this._componentFactoryResolver, this._appRef, this._injector);
+    return new DomPortalOutlet(pane, this._componentFactoryResolver, this._appRef, this._injector,
+                               this._document);
   }
 }

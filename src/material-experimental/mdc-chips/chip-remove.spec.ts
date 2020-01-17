@@ -1,10 +1,10 @@
-import {createFakeEvent} from '@angular/cdk/testing';
+import {createFakeEvent} from '@angular/cdk/testing/private';
 import {Component, DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatChip, MatChipsModule} from './index';
 
-describe('Chip Remove', () => {
+describe('MDC-based Chip Remove', () => {
   let fixture: ComponentFixture<TestChip>;
   let testChip: TestChip;
   let chipDebugElement: DebugElement;
@@ -26,15 +26,15 @@ describe('Chip Remove', () => {
     testChip = fixture.debugElement.componentInstance;
     fixture.detectChanges();
 
-    chipDebugElement = fixture.debugElement.query(By.directive(MatChip));
+    chipDebugElement = fixture.debugElement.query(By.directive(MatChip))!;
     chipNativeElement = chipDebugElement.nativeElement;
   }));
 
   describe('basic behavior', () => {
-    it('should apply the `mat-chip-remove` CSS class', () => {
+    it('should apply the `mat-mdc-chip-remove` CSS class', () => {
       let buttonElement = chipNativeElement.querySelector('button')!;
 
-      expect(buttonElement.classList).toContain('mat-chip-remove');
+      expect(buttonElement.classList).toContain('mat-mdc-chip-remove');
     });
 
     it('should start MDC exit animation on click', () => {
@@ -59,7 +59,8 @@ describe('Chip Remove', () => {
       buttonElement.click();
       fixture.detectChanges();
 
-      const fakeEvent = Object.assign(createFakeEvent('transitionend'), {propertyName: 'width'});
+      const fakeEvent = createFakeEvent('transitionend');
+      (fakeEvent as any).propertyName = 'width';
       chipNativeElement.dispatchEvent(fakeEvent);
 
       expect(testChip.didRemove).toHaveBeenCalled();

@@ -22,7 +22,6 @@ export interface DemoColor {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'chips-demo',
   templateUrl: 'chips-demo.html',
   styleUrls: ['chips-demo.css']
@@ -30,7 +29,7 @@ export interface DemoColor {
 export class ChipsDemo {
   tabIndex = 0;
   visible = true;
-  color = '';
+  color: ThemePalette;
   selectable = true;
   removable = true;
   addOnBlur = true;

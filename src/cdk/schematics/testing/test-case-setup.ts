@@ -14,6 +14,7 @@ import {SchematicTestRunner, UnitTestTree} from '@angular-devkit/schematics/test
 import {readFileSync, removeSync} from 'fs-extra';
 import {sync as globSync} from 'glob';
 import {basename, extname, join, relative, sep} from 'path';
+import {EMPTY} from 'rxjs';
 import {createTestApp} from '../testing';
 
 /** Suffix that indicates whether a given file is a test case input. */
@@ -21,6 +22,9 @@ const TEST_CASE_INPUT_SUFFIX = '_input.ts';
 
 /** Suffix that indicates whether a given file is an expected output of a test case. */
 const TEST_CASE_OUTPUT_SUFFIX = '_expected_output.ts';
+
+/** Name of the folder that can contain test case files which should not run automatically. */
+const MISC_FOLDER_NAME = 'misc';
 
 /** Reads the UTF8 content of the specified file. Normalizes the path and ensures that */
 export function readFileContent(filePath: string): string {
@@ -53,7 +57,15 @@ export async function createFileSystemTestApp(runner: SchematicTestRunner) {
   };
 
   function writeFile(filePath: string, content: string) {
+    // Update the temp file system host to reflect the changes in the real file system.
+    // This is still necessary since we depend on the real file system for parsing the
+    // TypeScript project.
     tempFileSystemHost.sync.write(normalize(filePath), virtualFs.stringToFileBuffer(content));
+    if (hostTree.exists(filePath)) {
+      hostTree.overwrite(filePath, content);
+    } else {
+      hostTree.create(filePath, content);
+    }
   }
 }
 
@@ -81,10 +93,25 @@ export async function createTestCaseSetup(migrationName: string, collectionPath:
     writeFile(relativePath, inputContent);
   });
 
+  const testAppTsconfigPath = 'projects/cdk-testing/tsconfig.app.json';
+  const testAppTsconfig = JSON.parse(appTree.readContent(testAppTsconfigPath));
+
+  // include all TypeScript files in the project. Otherwise all test input
+  // files won't be part of the program and cannot be migrated.
+  testAppTsconfig.include.push('src/**/*.ts');
+
+  writeFile(testAppTsconfigPath, JSON.stringify(testAppTsconfig, null, 2));
+
   const runFixers = async function() {
     // Switch to the new temporary directory to simulate that "ng update" is ran
     // from within the project.
     process.chdir(tempPath);
+
+    // Patch "executePostTasks" to do nothing. This is necessary since
+    // we cannot run the node install task in unit tests. Rather we just
+    // assert that certain async post tasks are scheduled.
+    // TODO(devversion): RxJS version conflicts between angular-devkit and our dev deps.
+    runner.engine.executePostTasks = () => EMPTY as any;
 
     await runner.runSchematicAsync(migrationName, {}, appTree).toPromise();
 
@@ -94,7 +121,7 @@ export async function createTestCaseSetup(migrationName: string, collectionPath:
     return {logOutput};
   };
 
-  return {appTree, writeFile, tempPath, removeTempDir, runFixers};
+  return {runner, appTree, writeFile, tempPath, removeTempDir, runFixers};
 }
 
 /**
@@ -111,7 +138,8 @@ export function findBazelVersionTestCases(basePath: string) {
   // test case files by using "glob" and store them in our result map.
   if (!manifestPath) {
     const runfilesBaseDir = join(runfilesDir!, basePath);
-    const inputFiles = globSync(`**/*${TEST_CASE_INPUT_SUFFIX}`, {cwd: runfilesBaseDir});
+    const inputFiles = globSync(`**/!(${MISC_FOLDER_NAME})/*${TEST_CASE_INPUT_SUFFIX}`,
+        {cwd: runfilesBaseDir});
 
     inputFiles.forEach(inputFile => {
       // The target version of an input file will be determined from the first
@@ -134,9 +162,13 @@ export function findBazelVersionTestCases(basePath: string) {
     // In case the mapped runfile starts with the specified base path and ends with "_input.ts",
     // we store it in our result map because we assume that this is a test case.
     if (runfilePath.startsWith(basePath) && runfilePath.endsWith(TEST_CASE_INPUT_SUFFIX)) {
+      const pathSegments = relative(basePath, runfilePath).split(sep);
+      if (pathSegments.includes(MISC_FOLDER_NAME)) {
+        return;
+      }
       // The target version of an input file will be determined from the first
       // path segment. (e.g. "v6/my_rule_input.ts" will be for "v6")
-      const targetVersion = relative(basePath, runfilePath).split(sep)[0];
+      const targetVersion = pathSegments[0];
       testCasesMap.set(targetVersion, (testCasesMap.get(targetVersion) || []).concat(realPath));
     }
   });

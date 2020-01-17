@@ -64,6 +64,7 @@ const _MatSortMixinBase: HasInitializedCtor & CanDisableCtor & typeof MatSortBas
 @Directive({
   selector: '[matSort]',
   exportAs: 'matSort',
+  host: {'class': 'mat-sort'},
   inputs: ['disabled: matSortDisabled']
 })
 export class MatSort extends _MatSortMixinBase
@@ -166,6 +167,9 @@ export class MatSort extends _MatSortMixinBase
   ngOnDestroy() {
     this._stateChanges.complete();
   }
+
+  static ngAcceptInputType_disableClear: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }
 
 /** Returns the sort direction cycle to use given the provided parameters of order and clear. */

@@ -9,7 +9,7 @@ import {
   RIGHT_ARROW,
   UP_ARROW,
 } from '@angular/cdk/keycodes';
-import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing';
+import {dispatchFakeEvent, dispatchKeyboardEvent} from '@angular/cdk/testing/private';
 import {Component, ViewChild} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatNativeDateModule} from '@angular/material/core';
@@ -52,7 +52,7 @@ describe('MatMultiYearView', () => {
       fixture = TestBed.createComponent(StandardMultiYearView);
       fixture.detectChanges();
 
-      let multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView));
+      let multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView))!;
       multiYearViewNativeElement = multiYearViewDebugElement.nativeElement;
       testComponent = fixture.componentInstance;
     });
@@ -238,7 +238,7 @@ describe('MatMultiYearView', () => {
       fixture = TestBed.createComponent(MultiYearViewWithDateFilter);
       fixture.detectChanges();
 
-      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView));
+      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView))!;
       multiYearViewNativeElement = multiYearViewDebugElement.nativeElement;
     });
 
@@ -257,7 +257,7 @@ describe('MatMultiYearView', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MultiYearViewWithMinMaxDate);
 
-      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView));
+      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView))!;
       multiYearViewNativeElement = multiYearViewDebugElement.nativeElement;
       testComponent = fixture.componentInstance;
     });
@@ -280,7 +280,7 @@ describe('MatMultiYearView', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MultiYearViewWithMinMaxDate);
 
-      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView));
+      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView))!;
       multiYearViewNativeElement = multiYearViewDebugElement.nativeElement;
       testComponent = fixture.componentInstance;
     });
@@ -303,7 +303,7 @@ describe('MatMultiYearView', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MultiYearViewWithMinMaxDate);
 
-      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView));
+      const multiYearViewDebugElement = fixture.debugElement.query(By.directive(MatMultiYearView))!;
       multiYearViewNativeElement = multiYearViewDebugElement.nativeElement;
       testComponent = fixture.componentInstance;
     });
@@ -340,7 +340,7 @@ class StandardMultiYearView {
   selected = new Date(2020, JAN, 1);
   selectedYear: Date;
 
-  @ViewChild(MatMultiYearView, {static: false}) multiYearView: MatMultiYearView<Date>;
+  @ViewChild(MatMultiYearView) multiYearView: MatMultiYearView<Date>;
 }
 
 @Component({

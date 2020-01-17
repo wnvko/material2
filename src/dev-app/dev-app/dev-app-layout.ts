@@ -9,12 +9,11 @@
 import {Directionality} from '@angular/cdk/bidi';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {ChangeDetectorRef, Component, ElementRef, Inject, ViewEncapsulation} from '@angular/core';
-import {DevAppRippleOptions} from '../ripple/ripple-options';
+import {DevAppRippleOptions} from './ripple-options';
 import {DevAppDirectionality} from './dev-app-directionality';
 
 /** Root component for the dev-app demos. */
 @Component({
-  moduleId: module.id,
   selector: 'dev-app-layout',
   templateUrl: 'dev-app-layout.html',
   styleUrls: ['dev-app-layout.css'],
@@ -30,17 +29,17 @@ export class DevAppLayout {
     {name: 'Button Toggle', route: '/button-toggle'},
     {name: 'Button', route: '/button'},
     {name: 'Card', route: '/card'},
-    {name: 'Chips', route: '/chips'},
-    {name: 'Connected Overlay', route: '/connected-overlay'},
     {name: 'Checkbox', route: '/checkbox'},
     {name: 'Chips', route: '/chips'},
+    {name: 'Connected Overlay', route: '/connected-overlay'},
     {name: 'Datepicker', route: '/datepicker'},
     {name: 'Dialog', route: '/dialog'},
     {name: 'Drawer', route: '/drawer'},
     {name: 'Drag and Drop', route: '/drag-drop'},
     {name: 'Expansion Panel', route: '/expansion'},
     {name: 'Focus Origin', route: '/focus-origin'},
-    {name: 'Gestures', route: '/gestures'},
+    {name: 'Focus Trap', route: '/focus-trap'},
+    {name: 'Google Map', route: '/google-map'},
     {name: 'Grid List', route: '/grid-list'},
     {name: 'Icon', route: '/icon'},
     {name: 'Input', route: '/input'},
@@ -69,15 +68,17 @@ export class DevAppLayout {
     {name: 'Tree', route: '/tree'},
     {name: 'Typography', route: '/typography'},
     {name: 'Virtual Scrolling', route: '/virtual-scroll'},
+    {name: 'YouTube Player', route: '/youtube-player'},
     {name: 'MDC Button', route: '/mdc-button'},
     {name: 'MDC Card', route: '/mdc-card'},
     {name: 'MDC Checkbox', route: '/mdc-checkbox'},
     {name: 'MDC Chips', route: '/mdc-chips'},
     {name: 'MDC Menu', route: '/mdc-menu'},
     {name: 'MDC Radio', route: '/mdc-radio'},
+    {name: 'MDC Progress Bar', route: '/mdc-progress-bar'},
     {name: 'MDC Tabs', route: '/mdc-tabs'},
     {name: 'MDC Slide Toggle', route: '/mdc-slide-toggle'},
-
+    {name: 'MDC Slider', route: '/mdc-slider'},
   ];
 
   constructor(

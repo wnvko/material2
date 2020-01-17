@@ -26,7 +26,11 @@ import {Directionality} from '@angular/cdk/bidi';
 import {CdkDialogContainer} from './dialog-container';
 import {OverlayContainer} from '@angular/cdk/overlay';
 import {A, ESCAPE} from '@angular/cdk/keycodes';
-import {dispatchKeyboardEvent, createKeyboardEvent, dispatchEvent} from '@angular/cdk/testing';
+import {
+  dispatchKeyboardEvent,
+  createKeyboardEvent,
+  dispatchEvent,
+} from '@angular/cdk/testing/private';
 import {DIALOG_DATA, Dialog, DialogModule, DialogRef} from './index';
 
 describe('Dialog', () => {
@@ -308,8 +312,8 @@ describe('Dialog', () => {
     let backdrop = overlayContainerElement.querySelector('.cdk-overlay-backdrop') as HTMLElement;
     let container = overlayContainerElement.querySelector('cdk-dialog-container') as HTMLElement;
     dispatchKeyboardEvent(document.body, 'keydown', A);
-    dispatchKeyboardEvent(document.body, 'keydown', A, backdrop);
-    dispatchKeyboardEvent(document.body, 'keydown', A, container);
+    dispatchKeyboardEvent(document.body, 'keydown', A, undefined, backdrop);
+    dispatchKeyboardEvent(document.body, 'keydown', A, undefined, container);
 
     expect(spy).toHaveBeenCalledTimes(3);
   }));
@@ -574,7 +578,8 @@ describe('Dialog', () => {
   it('should set the proper animation states', () => {
     let dialogRef = dialog.openFromComponent(PizzaMsg, { viewContainerRef: testViewContainerRef });
     let dialogContainer: CdkDialogContainer =
-        viewContainerFixture.debugElement.query(By.directive(CdkDialogContainer)).componentInstance;
+        viewContainerFixture.debugElement.query(By.directive(CdkDialogContainer))!
+        .componentInstance;
 
     expect(dialogContainer._state).toBe('enter');
 
@@ -909,6 +914,46 @@ describe('Dialog', () => {
       document.body.removeChild(button);
     }));
 
+    it('should not move focus if it was moved outside the dialog while animating', fakeAsync(() => {
+      // Create a element that has focus before the dialog is opened.
+      const button = document.createElement('button');
+      const otherButton = document.createElement('button');
+      const body = document.body;
+      button.id = 'dialog-trigger';
+      otherButton.id = 'other-button';
+      body.appendChild(button);
+      body.appendChild(otherButton);
+      button.focus();
+
+      const dialogRef = dialog.openFromComponent(PizzaMsg, {
+        viewContainerRef: testViewContainerRef
+      });
+
+      flushMicrotasks();
+      viewContainerFixture.detectChanges();
+      flushMicrotasks();
+
+      expect(document.activeElement!.id)
+          .not.toBe('dialog-trigger', 'Expected the focus to change when dialog was opened.');
+
+      // Start the closing sequence and move focus out of dialog.
+      dialogRef.close();
+      otherButton.focus();
+
+      expect(document.activeElement!.id)
+          .toBe('other-button', 'Expected focus to be on the alternate button.');
+
+      flushMicrotasks();
+      viewContainerFixture.detectChanges();
+      flush();
+
+      expect(document.activeElement!.id)
+          .toBe('other-button', 'Expected focus to stay on the alternate button.');
+
+      body.removeChild(button);
+      body.removeChild(otherButton);
+    }));
+
     it('should allow the consumer to shift focus in afterClosed', fakeAsync(() => {
       // Create a element that has focus before the dialog is opened.
       let button = document.createElement('button');
@@ -1096,9 +1141,7 @@ class ComponentWithOnPushViewContainer {
   template: `<dir-with-view-container></dir-with-view-container>`,
 })
 class ComponentWithChildViewContainer {
-  @ViewChild(DirectiveWithViewContainer, {
-    static: false
-  }) childWithViewContainer: DirectiveWithViewContainer;
+  @ViewChild(DirectiveWithViewContainer) childWithViewContainer: DirectiveWithViewContainer;
 
   get childViewContainer() {
     return this.childWithViewContainer.viewContainerRef;
@@ -1114,7 +1157,7 @@ class ComponentWithTemplateRef {
   localValue: string;
   dialogRef: DialogRef<any>;
 
-  @ViewChild(TemplateRef, {static: false}) templateRef: TemplateRef<any>;
+  @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
 
   setDialogRef(dialogRef: DialogRef<any>): string {
     this.dialogRef = dialogRef;

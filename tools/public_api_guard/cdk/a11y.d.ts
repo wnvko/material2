@@ -1,4 +1,7 @@
 export declare class A11yModule {
+    constructor(highContrastModeDetector: HighContrastModeDetector);
+    static ɵinj: i0.ɵɵInjectorDef<A11yModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<A11yModule, [typeof i1.CdkAriaLive, typeof i2.CdkTrapFocus, typeof i3.CdkMonitorFocus], [typeof i4.CommonModule, typeof i5.PlatformModule, typeof i6.ObserversModule], [typeof i1.CdkAriaLive, typeof i2.CdkTrapFocus, typeof i3.CdkMonitorFocus]>;
 }
 
 export declare class ActiveDescendantKeyManager<T> extends ListKeyManager<Highlightable & T> {
@@ -6,19 +9,13 @@ export declare class ActiveDescendantKeyManager<T> extends ListKeyManager<Highli
     setActiveItem(item: T): void;
 }
 
-export declare const ARIA_DESCRIBER_PROVIDER: {
-    provide: typeof AriaDescriber;
-    deps: (Optional[] | InjectionToken<any>)[];
-    useFactory: typeof ARIA_DESCRIBER_PROVIDER_FACTORY;
-};
-
-export declare function ARIA_DESCRIBER_PROVIDER_FACTORY(parentDispatcher: AriaDescriber, _document: any): AriaDescriber;
-
 export declare class AriaDescriber implements OnDestroy {
     constructor(_document: any);
     describe(hostElement: Element, message: string | HTMLElement): void;
     ngOnDestroy(): void;
     removeDescription(hostElement: Element, message: string | HTMLElement): void;
+    static ɵfac: i0.ɵɵFactoryDef<AriaDescriber>;
+    static ɵprov: i0.ɵɵInjectableDef<AriaDescriber>;
 }
 
 export declare type AriaLivePoliteness = 'off' | 'polite' | 'assertive';
@@ -31,12 +28,16 @@ export declare class CdkAriaLive implements OnDestroy {
     politeness: AriaLivePoliteness;
     constructor(_elementRef: ElementRef, _liveAnnouncer: LiveAnnouncer, _contentObserver: ContentObserver, _ngZone: NgZone);
     ngOnDestroy(): void;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkAriaLive, "[cdkAriaLive]", ["cdkAriaLive"], { 'politeness': "cdkAriaLive" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkAriaLive>;
 }
 
 export declare class CdkMonitorFocus implements OnDestroy {
     cdkFocusChange: EventEmitter<FocusOrigin>;
     constructor(_elementRef: ElementRef<HTMLElement>, _focusMonitor: FocusMonitor);
     ngOnDestroy(): void;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkMonitorFocus, "[cdkMonitorElementFocus], [cdkMonitorSubtreeFocus]", never, {}, { 'cdkFocusChange': "cdkFocusChange" }, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkMonitorFocus>;
 }
 
 export declare class CdkTrapFocus implements OnDestroy, AfterContentInit, DoCheck {
@@ -47,15 +48,11 @@ export declare class CdkTrapFocus implements OnDestroy, AfterContentInit, DoChec
     ngAfterContentInit(): void;
     ngDoCheck(): void;
     ngOnDestroy(): void;
+    static ngAcceptInputType_autoCapture: boolean | string | null | undefined;
+    static ngAcceptInputType_enabled: boolean | string | null | undefined;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkTrapFocus, "[cdkTrapFocus]", ["cdkTrapFocus"], { 'enabled': "cdkTrapFocus", 'autoCapture': "cdkTrapFocusAutoCapture" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkTrapFocus>;
 }
-
-export declare const FOCUS_MONITOR_PROVIDER: {
-    provide: typeof FocusMonitor;
-    deps: (Optional[] | typeof NgZone | typeof Platform)[];
-    useFactory: typeof FOCUS_MONITOR_PROVIDER_FACTORY;
-};
-
-export declare function FOCUS_MONITOR_PROVIDER_FACTORY(parentDispatcher: FocusMonitor, ngZone: NgZone, platform: Platform): FocusMonitor;
 
 export interface FocusableOption extends ListKeyManagerOption {
     focus(origin?: FocusOrigin): void;
@@ -70,13 +67,15 @@ export declare class FocusKeyManager<T> extends ListKeyManager<FocusableOption &
 export declare class FocusMonitor implements OnDestroy {
     constructor(_ngZone: NgZone, _platform: Platform);
     _onBlur(event: FocusEvent, element: HTMLElement): void;
-    focusVia(element: ElementRef<HTMLElement>, origin: FocusOrigin, options?: FocusOptions): void;
     focusVia(element: HTMLElement, origin: FocusOrigin, options?: FocusOptions): void;
-    monitor(element: ElementRef<HTMLElement>, checkChildren?: boolean): Observable<FocusOrigin>;
+    focusVia(element: ElementRef<HTMLElement>, origin: FocusOrigin, options?: FocusOptions): void;
     monitor(element: HTMLElement, checkChildren?: boolean): Observable<FocusOrigin>;
+    monitor(element: ElementRef<HTMLElement>, checkChildren?: boolean): Observable<FocusOrigin>;
     ngOnDestroy(): void;
-    stopMonitoring(element: ElementRef<HTMLElement>): void;
     stopMonitoring(element: HTMLElement): void;
+    stopMonitoring(element: ElementRef<HTMLElement>): void;
+    static ɵfac: i0.ɵɵFactoryDef<FocusMonitor>;
+    static ɵprov: i0.ɵɵInjectableDef<FocusMonitor>;
 }
 
 export interface FocusOptions {
@@ -104,6 +103,22 @@ export declare class FocusTrap {
 export declare class FocusTrapFactory {
     constructor(_checker: InteractivityChecker, _ngZone: NgZone, _document: any);
     create(element: HTMLElement, deferCaptureElements?: boolean): FocusTrap;
+    static ɵfac: i0.ɵɵFactoryDef<FocusTrapFactory>;
+    static ɵprov: i0.ɵɵInjectableDef<FocusTrapFactory>;
+}
+
+export declare const enum HighContrastMode {
+    NONE = 0,
+    BLACK_ON_WHITE = 1,
+    WHITE_ON_BLACK = 2
+}
+
+export declare class HighContrastModeDetector {
+    constructor(_platform: Platform, document: any);
+    _applyBodyHighContrastModeCssClasses(): void;
+    getHighContrastMode(): HighContrastMode;
+    static ɵfac: i0.ɵɵFactoryDef<HighContrastModeDetector>;
+    static ɵprov: i0.ɵɵInjectableDef<HighContrastModeDetector>;
 }
 
 export interface Highlightable extends ListKeyManagerOption {
@@ -117,6 +132,8 @@ export declare class InteractivityChecker {
     isFocusable(element: HTMLElement): boolean;
     isTabbable(element: HTMLElement): boolean;
     isVisible(element: HTMLElement): boolean;
+    static ɵfac: i0.ɵɵFactoryDef<InteractivityChecker>;
+    static ɵprov: i0.ɵɵInjectableDef<InteractivityChecker>;
 }
 
 export declare function isFakeMousedownFromScreenReader(event: MouseEvent): boolean;
@@ -127,6 +144,7 @@ export declare class ListKeyManager<T extends ListKeyManagerOption> {
     change: Subject<number>;
     tabOut: Subject<void>;
     constructor(_items: QueryList<T> | T[]);
+    isTyping(): boolean;
     onKeydown(event: KeyboardEvent): void;
     setActiveItem(index: number): void;
     setActiveItem(item: T): void;
@@ -135,9 +153,8 @@ export declare class ListKeyManager<T extends ListKeyManagerOption> {
     setNextItemActive(): void;
     setPreviousItemActive(): void;
     skipPredicate(predicate: (item: T) => boolean): this;
-    updateActiveItem(item: T): void;
     updateActiveItem(index: number): void;
-    updateActiveItemIndex(index: number): void;
+    updateActiveItem(item: T): void;
     withAllowedModifierKeys(keys: ListKeyManagerModifierKey[]): this;
     withHorizontalOrientation(direction: 'ltr' | 'rtl' | null): this;
     withTypeAhead(debounceInterval?: number): this;
@@ -158,18 +175,16 @@ export declare const LIVE_ANNOUNCER_ELEMENT_TOKEN: InjectionToken<HTMLElement | 
 
 export declare function LIVE_ANNOUNCER_ELEMENT_TOKEN_FACTORY(): null;
 
-export declare const LIVE_ANNOUNCER_PROVIDER: Provider;
-
-export declare function LIVE_ANNOUNCER_PROVIDER_FACTORY(parentAnnouncer: LiveAnnouncer, liveElement: any, _document: any, ngZone: NgZone): LiveAnnouncer;
-
 export declare class LiveAnnouncer implements OnDestroy {
     constructor(elementToken: any, _ngZone: NgZone, _document: any, _defaultOptions?: LiveAnnouncerDefaultOptions | undefined);
+    announce(message: string): Promise<void>;
     announce(message: string, politeness?: AriaLivePoliteness): Promise<void>;
     announce(message: string, duration?: number): Promise<void>;
     announce(message: string, politeness?: AriaLivePoliteness, duration?: number): Promise<void>;
-    announce(message: string): Promise<void>;
     clear(): void;
     ngOnDestroy(): void;
+    static ɵfac: i0.ɵɵFactoryDef<LiveAnnouncer>;
+    static ɵprov: i0.ɵɵInjectableDef<LiveAnnouncer>;
 }
 
 export interface LiveAnnouncerDefaultOptions {

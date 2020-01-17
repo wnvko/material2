@@ -28,6 +28,7 @@ import {
 import {AnimationEvent} from '@angular/animations';
 import {TemplatePortal, CdkPortalOutlet, PortalHostDirective} from '@angular/cdk/portal';
 import {Directionality, Direction} from '@angular/cdk/bidi';
+import {DOCUMENT} from '@angular/common';
 import {Subscription, Subject} from 'rxjs';
 import {matTabsAnimations} from './tabs-animations';
 import {startWith, distinctUntilChanged} from 'rxjs/operators';
@@ -69,8 +70,13 @@ export class MatTabBodyPortal extends CdkPortalOutlet implements OnInit, OnDestr
   constructor(
     componentFactoryResolver: ComponentFactoryResolver,
     viewContainerRef: ViewContainerRef,
-    @Inject(forwardRef(() => MatTabBody)) private _host: MatTabBody) {
-      super(componentFactoryResolver, viewContainerRef);
+    @Inject(forwardRef(() => MatTabBody)) private _host: MatTabBody,
+    /**
+     * @deprecated `_document` parameter to be made required.
+     * @breaking-change 9.0.0
+     */
+    @Inject(DOCUMENT) _document?: any) {
+    super(componentFactoryResolver, viewContainerRef, _document);
   }
 
   /** Set initial visibility or set up subscription for changing visibility. */
@@ -99,23 +105,12 @@ export class MatTabBodyPortal extends CdkPortalOutlet implements OnInit, OnDestr
 }
 
 /**
- * Wrapper for the contents of a tab.
+ * Base class with all of the `MatTabBody` functionality.
  * @docs-private
  */
-@Component({
-  moduleId: module.id,
-  selector: 'mat-tab-body',
-  templateUrl: 'tab-body.html',
-  styleUrls: ['tab-body.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [matTabsAnimations.translateTab],
-  host: {
-    'class': 'mat-tab-body',
-  },
-})
-export class MatTabBody implements OnInit, OnDestroy {
-
+@Directive()
+// tslint:disable-next-line:class-name
+export abstract class _MatTabBodyBase implements OnInit, OnDestroy {
   /** Current position of the tab-body in the tab-group. Zero means that the tab is visible. */
   private _positionIndex: number;
 
@@ -141,13 +136,13 @@ export class MatTabBody implements OnInit, OnDestroy {
   @Output() readonly _onCentered: EventEmitter<void> = new EventEmitter<void>(true);
 
    /** The portal host inside of this container into which the tab body content will be loaded. */
-  @ViewChild(PortalHostDirective, {static: false}) _portalHost: PortalHostDirective;
+  abstract _portalHost: PortalHostDirective;
 
   /** The tab body content to display. */
   @Input('content') _content: TemplatePortal;
 
   /** Position that will be used when the tab is immediately becoming visible after creation. */
-  @Input() origin: number;
+  @Input() origin: number | null;
 
   // Note that the default value will always be overwritten by `MatTabBody`, but we need one
   // anyway to prevent the animations module from throwing an error if the body is used on its own.
@@ -194,7 +189,7 @@ export class MatTabBody implements OnInit, OnDestroy {
    */
   ngOnInit() {
     if (this._position == 'center' && this.origin != null) {
-      this._position = this._computePositionFromOrigin();
+      this._position = this._computePositionFromOrigin(this.origin);
     }
   }
 
@@ -238,13 +233,39 @@ export class MatTabBody implements OnInit, OnDestroy {
    * Computes the position state based on the specified origin position. This is used if the
    * tab is becoming visible immediately after creation.
    */
-  private _computePositionFromOrigin(): MatTabBodyPositionState {
+  private _computePositionFromOrigin(origin: number): MatTabBodyPositionState {
     const dir = this._getLayoutDirection();
 
-    if ((dir == 'ltr' && this.origin <= 0) || (dir == 'rtl' && this.origin > 0)) {
+    if ((dir == 'ltr' && origin <= 0) || (dir == 'rtl' && origin > 0)) {
       return 'left-origin-center';
     }
 
     return 'right-origin-center';
+  }
+}
+
+/**
+ * Wrapper for the contents of a tab.
+ * @docs-private
+ */
+@Component({
+  selector: 'mat-tab-body',
+  templateUrl: 'tab-body.html',
+  styleUrls: ['tab-body.css'],
+  encapsulation: ViewEncapsulation.None,
+  // tslint:disable-next-line:validate-decorators
+  changeDetection: ChangeDetectionStrategy.Default,
+  animations: [matTabsAnimations.translateTab],
+  host: {
+    'class': 'mat-tab-body',
+  }
+})
+export class MatTabBody extends _MatTabBodyBase {
+  @ViewChild(PortalHostDirective) _portalHost: PortalHostDirective;
+
+  constructor(elementRef: ElementRef<HTMLElement>,
+              @Optional() dir: Directionality,
+              changeDetectorRef: ChangeDetectorRef) {
+    super(elementRef, dir, changeDetectorRef);
   }
 }

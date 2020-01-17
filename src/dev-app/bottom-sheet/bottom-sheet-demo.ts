@@ -17,7 +17,6 @@ import {
 const defaultConfig = new MatBottomSheetConfig();
 
 @Component({
-  moduleId: module.id,
   selector: 'bottom-sheet-demo',
   styleUrls: ['bottom-sheet-demo.css'],
   templateUrl: 'bottom-sheet-demo.html',
@@ -30,7 +29,7 @@ export class BottomSheetDemo {
     direction: 'ltr'
   };
 
-  @ViewChild(TemplateRef, {static: false}) template: TemplateRef<any>;
+  @ViewChild(TemplateRef) template: TemplateRef<any>;
 
   constructor(private _bottomSheet: MatBottomSheet) {}
 

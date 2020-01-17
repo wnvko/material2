@@ -1,7 +1,7 @@
 import {TestBed, async, ComponentFixture} from '@angular/core/testing';
 import {Component, DebugElement, Type} from '@angular/core';
 import {By} from '@angular/platform-browser';
-import {dispatchFakeEvent} from '@angular/cdk/testing';
+import {dispatchFakeEvent} from '@angular/cdk/testing/private';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatProgressBarModule, MAT_PROGRESS_BAR_LOCATION} from './index';
 import {MatProgressBar} from './progress-bar';
@@ -31,14 +31,14 @@ describe('MatProgressBar', () => {
       it('should apply a mode of "determinate" if no mode is provided.', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         expect(progressElement.componentInstance.mode).toBe('determinate');
       });
 
       it('should define default values for value and bufferValue attributes', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         expect(progressElement.componentInstance.value).toBe(0);
         expect(progressElement.componentInstance.bufferValue).toBe(0);
       });
@@ -47,7 +47,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         const progressComponent = progressElement.componentInstance;
 
         progressComponent.value = 50;
@@ -73,20 +73,20 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         const progressComponent = progressElement.componentInstance;
 
         expect(progressComponent._primaryTransform()).toEqual({transform: 'scaleX(0)'});
-        expect(progressComponent._bufferTransform()).toBe(undefined);
+        expect(progressComponent._bufferTransform()).toBe(null);
 
         progressComponent.value = 40;
         expect(progressComponent._primaryTransform()).toEqual({transform: 'scaleX(0.4)'});
-        expect(progressComponent._bufferTransform()).toBe(undefined);
+        expect(progressComponent._bufferTransform()).toBe(null);
 
         progressComponent.value = 35;
         progressComponent.bufferValue = 55;
         expect(progressComponent._primaryTransform()).toEqual({transform: 'scaleX(0.35)'});
-        expect(progressComponent._bufferTransform()).toBe(undefined);
+        expect(progressComponent._bufferTransform()).toBe(null);
 
         progressComponent.mode = 'buffer';
         expect(progressComponent._primaryTransform()).toEqual({transform: 'scaleX(0.35)'});
@@ -103,7 +103,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const rect = fixture.debugElement.query(By.css('rect')).nativeElement;
+        const rect = fixture.debugElement.query(By.css('rect'))!.nativeElement;
         expect(rect.getAttribute('fill')).toMatch(/^url\(['"]?\/fake-path#.*['"]?\)$/);
       });
 
@@ -113,7 +113,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const rect = fixture.debugElement.query(By.css('rect')).nativeElement;
+        const rect = fixture.debugElement.query(By.css('rect'))!.nativeElement;
         expect(rect.getAttribute('fill')).not.toContain('#anchor#');
       });
 
@@ -121,7 +121,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const svg = fixture.debugElement.query(By.css('svg')).nativeElement;
+        const svg = fixture.debugElement.query(By.css('svg'))!.nativeElement;
         expect(svg.getAttribute('focusable')).toBe('false');
       });
 
@@ -129,7 +129,7 @@ describe('MatProgressBar', () => {
         let fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        let rect = fixture.debugElement.query(By.css('rect')).nativeElement;
+        let rect = fixture.debugElement.query(By.css('rect'))!.nativeElement;
         expect(rect.getAttribute('fill')).toMatch(/^url\(['"]?\/fake-path#.*['"]?\)$/);
 
         fixture.destroy();
@@ -137,7 +137,7 @@ describe('MatProgressBar', () => {
 
         fixture = TestBed.createComponent(BasicProgressBar);
         fixture.detectChanges();
-        rect = fixture.debugElement.query(By.css('rect')).nativeElement;
+        rect = fixture.debugElement.query(By.css('rect'))!.nativeElement;
 
         expect(rect.getAttribute('fill')).toMatch(/^url\(['"]?\/another-fake-path#.*['"]?\)$/);
       });
@@ -146,7 +146,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         const progressComponent = progressElement.componentInstance;
 
         progressComponent.mode = 'determinate';
@@ -167,7 +167,7 @@ describe('MatProgressBar', () => {
         const fixture = createComponent(BasicProgressBar);
         fixture.detectChanges();
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         const progressComponent = progressElement.componentInstance;
 
         progressComponent.mode = 'determinate';
@@ -194,9 +194,9 @@ describe('MatProgressBar', () => {
       beforeEach(() => {
         fixture = createComponent(BasicProgressBar);
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         progressComponent = progressElement.componentInstance;
-        primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'));
+        primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'))!;
       });
 
       it('should trigger output event on primary value bar animation end', () => {
@@ -220,9 +220,9 @@ describe('MatProgressBar', () => {
       beforeEach(() => {
         fixture = createComponent(BufferProgressBar);
 
-        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+        const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
         progressComponent = progressElement.componentInstance;
-        primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'));
+        primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'))!;
       });
 
       it('should bind on transitionend eventListener on primaryBarValue', () => {
@@ -268,9 +268,9 @@ describe('MatProgressBar', () => {
 
     beforeEach(async(() => {
       fixture = createComponent(BasicProgressBar, [MatProgressBarModule, NoopAnimationsModule]);
-      const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'));
+      const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
       progressComponent = progressElement.componentInstance;
-      primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'));
+      primaryValueBar = progressElement.query(By.css('.mat-progress-bar-primary'))!;
     }));
 
     it('should not bind transition end listener', () => {

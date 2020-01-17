@@ -3,13 +3,12 @@ import {MatDialog, MatDialogRef, MatDialogConfig} from '@angular/material/dialog
 
 @Component({
   selector: 'dialog-e2e',
-  moduleId: module.id,
   templateUrl: 'dialog-e2e.html'
 })
 export class DialogE2E {
   dialogRef: MatDialogRef<TestDialog> | null;
 
-  @ViewChild(TemplateRef, {static: false}) templateRef: TemplateRef<any>;
+  @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
 
   constructor (private _dialog: MatDialog) { }
 

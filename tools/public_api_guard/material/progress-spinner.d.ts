@@ -2,7 +2,7 @@ export declare const MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS: InjectionToken<MatPro
 
 export declare function MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS_FACTORY(): MatProgressSpinnerDefaultOptions;
 
-export declare class MatProgressSpinner extends _MatProgressSpinnerMixinBase implements CanColor {
+export declare class MatProgressSpinner extends _MatProgressSpinnerMixinBase implements OnInit, CanColor {
     readonly _circleRadius: number;
     readonly _circleStrokeWidth: number;
     _elementRef: ElementRef<HTMLElement>;
@@ -15,6 +15,12 @@ export declare class MatProgressSpinner extends _MatProgressSpinnerMixinBase imp
     strokeWidth: number;
     value: number;
     constructor(_elementRef: ElementRef<HTMLElement>, platform: Platform, _document: any, animationMode: string, defaults?: MatProgressSpinnerDefaultOptions);
+    ngOnInit(): void;
+    static ngAcceptInputType_diameter: number | string | null | undefined;
+    static ngAcceptInputType_strokeWidth: number | string | null | undefined;
+    static ngAcceptInputType_value: number | string | null | undefined;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatProgressSpinner, "mat-progress-spinner", ["matProgressSpinner"], { 'color': "color", 'diameter': "diameter", 'strokeWidth': "strokeWidth", 'mode': "mode", 'value': "value" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatProgressSpinner>;
 }
 
 export interface MatProgressSpinnerDefaultOptions {
@@ -23,8 +29,18 @@ export interface MatProgressSpinnerDefaultOptions {
     strokeWidth?: number;
 }
 
+export declare class MatProgressSpinnerModule {
+    static ɵinj: i0.ɵɵInjectorDef<MatProgressSpinnerModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatProgressSpinnerModule, [typeof i1.MatProgressSpinner, typeof i1.MatSpinner], [typeof i2.MatCommonModule, typeof i3.CommonModule], [typeof i1.MatProgressSpinner, typeof i1.MatSpinner, typeof i2.MatCommonModule]>;
+}
+
 export declare class MatSpinner extends MatProgressSpinner {
     constructor(elementRef: ElementRef<HTMLElement>, platform: Platform, document: any, animationMode: string, defaults?: MatProgressSpinnerDefaultOptions);
+    static ngAcceptInputType_diameter: number | string | null | undefined;
+    static ngAcceptInputType_strokeWidth: number | string | null | undefined;
+    static ngAcceptInputType_value: number | string | null | undefined;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatSpinner, "mat-spinner", never, { 'color': "color" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<MatSpinner>;
 }
 
 export declare type ProgressSpinnerMode = 'determinate' | 'indeterminate';

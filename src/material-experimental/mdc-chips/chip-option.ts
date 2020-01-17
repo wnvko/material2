@@ -36,7 +36,6 @@ export class MatChipSelectionChange {
  * Used with MatChipListbox.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-basic-chip-option, mat-chip-option',
   templateUrl: 'chip-option.html',
   styleUrls: ['chips.css'],
@@ -57,7 +56,6 @@ export class MatChipSelectionChange {
     '(keydown)': '_keydown($event)',
     '(focus)': 'focus()',
     '(blur)': '_blur()',
-    '(transitionend)': '_chipFoundation.handleTransitionEnd($event)'
   },
   providers: [{provide: MatChip, useExisting: MatChipOption}],
   encapsulation: ViewEncapsulation.None,
@@ -226,4 +224,11 @@ export class MatChipOption extends MatChip {
         this._handleInteraction(event);
     }
   }
+
+  static ngAcceptInputType_selectable: boolean | string | null | undefined;
+  static ngAcceptInputType_selected: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_removable: boolean | string | null | undefined;
+  static ngAcceptInputType_highlighted: boolean | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

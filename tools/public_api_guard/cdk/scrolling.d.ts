@@ -43,6 +43,11 @@ export declare class CdkFixedSizeVirtualScroll implements OnChanges {
     maxBufferPx: number;
     minBufferPx: number;
     ngOnChanges(): void;
+    static ngAcceptInputType_itemSize: string | number | null | undefined;
+    static ngAcceptInputType_maxBufferPx: string | number | null | undefined;
+    static ngAcceptInputType_minBufferPx: string | number | null | undefined;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkFixedSizeVirtualScroll, "cdk-virtual-scroll-viewport[itemSize]", never, { 'itemSize': "itemSize", 'minBufferPx': "minBufferPx", 'maxBufferPx': "maxBufferPx" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkFixedSizeVirtualScroll>;
 }
 
 export declare class CdkScrollable implements OnInit, OnDestroy {
@@ -57,11 +62,13 @@ export declare class CdkScrollable implements OnInit, OnDestroy {
     ngOnDestroy(): void;
     ngOnInit(): void;
     scrollTo(options: ExtendedScrollToOptions): void;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkScrollable, "[cdk-scrollable], [cdkScrollable]", never, {}, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkScrollable>;
 }
 
 export declare class CdkVirtualForOf<T> implements CollectionViewer, DoCheck, OnDestroy {
-    _cdkVirtualForOf: DataSource<T> | Observable<T[]> | NgIterable<T>;
-    cdkVirtualForOf: DataSource<T> | Observable<T[]> | NgIterable<T>;
+    _cdkVirtualForOf: DataSource<T> | Observable<T[]> | NgIterable<T> | null | undefined;
+    cdkVirtualForOf: DataSource<T> | Observable<T[]> | NgIterable<T> | null | undefined;
     cdkVirtualForTemplate: TemplateRef<CdkVirtualForOfContext<T>>;
     cdkVirtualForTemplateCacheSize: number;
     cdkVirtualForTrackBy: TrackByFunction<T> | undefined;
@@ -75,6 +82,8 @@ export declare class CdkVirtualForOf<T> implements CollectionViewer, DoCheck, On
     measureRangeSize(range: ListRange, orientation: 'horizontal' | 'vertical'): number;
     ngDoCheck(): void;
     ngOnDestroy(): void;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkVirtualForOf<any>, "[cdkVirtualFor][cdkVirtualForOf]", never, { 'cdkVirtualForOf': "cdkVirtualForOf", 'cdkVirtualForTrackBy': "cdkVirtualForTrackBy", 'cdkVirtualForTemplate': "cdkVirtualForTemplate", 'cdkVirtualForTemplateCacheSize': "cdkVirtualForTemplateCacheSize" }, {}, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkVirtualForOf<any>>;
 }
 
 export declare type CdkVirtualForOfContext<T> = {
@@ -90,7 +99,8 @@ export declare type CdkVirtualForOfContext<T> = {
 
 export declare class CdkVirtualScrollViewport extends CdkScrollable implements OnInit, OnDestroy {
     _contentWrapper: ElementRef<HTMLElement>;
-    _totalContentSizeTransform: string;
+    _totalContentHeight: string;
+    _totalContentWidth: string;
     elementRef: ElementRef<HTMLElement>;
     orientation: 'horizontal' | 'vertical';
     renderedRangeStream: Observable<ListRange>;
@@ -113,6 +123,8 @@ export declare class CdkVirtualScrollViewport extends CdkScrollable implements O
     setRenderedContentOffset(offset: number, to?: 'to-start' | 'to-end'): void;
     setRenderedRange(range: ListRange): void;
     setTotalContentSize(size: number): void;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<CdkVirtualScrollViewport, "cdk-virtual-scroll-viewport", never, { 'orientation': "orientation" }, { 'scrolledIndexChange': "scrolledIndexChange" }, never>;
+    static ɵfac: i0.ɵɵFactoryDef<CdkVirtualScrollViewport>;
 }
 
 export declare const DEFAULT_RESIZE_TIME = 20;
@@ -134,14 +146,6 @@ export declare class FixedSizeVirtualScrollStrategy implements VirtualScrollStra
     updateItemAndBufferSize(itemSize: number, minBufferPx: number, maxBufferPx: number): void;
 }
 
-export declare const SCROLL_DISPATCHER_PROVIDER: {
-    provide: typeof ScrollDispatcher;
-    deps: (Optional[] | typeof NgZone | typeof Platform)[];
-    useFactory: typeof SCROLL_DISPATCHER_PROVIDER_FACTORY;
-};
-
-export declare function SCROLL_DISPATCHER_PROVIDER_FACTORY(parentDispatcher: ScrollDispatcher, ngZone: NgZone, platform: Platform): ScrollDispatcher;
-
 export declare class ScrollDispatcher implements OnDestroy {
     _globalSubscription: Subscription | null;
     scrollContainers: Map<CdkScrollable, Subscription>;
@@ -152,21 +156,14 @@ export declare class ScrollDispatcher implements OnDestroy {
     ngOnDestroy(): void;
     register(scrollable: CdkScrollable): void;
     scrolled(auditTimeInMs?: number): Observable<CdkScrollable | void>;
-}
-
-export declare class ScrollDispatchModule {
+    static ɵfac: i0.ɵɵFactoryDef<ScrollDispatcher>;
+    static ɵprov: i0.ɵɵInjectableDef<ScrollDispatcher>;
 }
 
 export declare class ScrollingModule {
+    static ɵinj: i0.ɵɵInjectorDef<ScrollingModule>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<ScrollingModule, [typeof i1.CdkFixedSizeVirtualScroll, typeof i2.CdkScrollable, typeof i3.CdkVirtualForOf, typeof i4.CdkVirtualScrollViewport], [typeof i5.BidiModule, typeof i6.PlatformModule], [typeof i5.BidiModule, typeof i1.CdkFixedSizeVirtualScroll, typeof i2.CdkScrollable, typeof i3.CdkVirtualForOf, typeof i4.CdkVirtualScrollViewport]>;
 }
-
-export declare const VIEWPORT_RULER_PROVIDER: {
-    provide: typeof ViewportRuler;
-    deps: (Optional[] | typeof NgZone | typeof Platform)[];
-    useFactory: typeof VIEWPORT_RULER_PROVIDER_FACTORY;
-};
-
-export declare function VIEWPORT_RULER_PROVIDER_FACTORY(parentRuler: ViewportRuler, platform: Platform, ngZone: NgZone): ViewportRuler;
 
 export declare class ViewportRuler implements OnDestroy {
     constructor(_platform: Platform, ngZone: NgZone);
@@ -178,6 +175,8 @@ export declare class ViewportRuler implements OnDestroy {
         height: number;
     }>;
     ngOnDestroy(): void;
+    static ɵfac: i0.ɵɵFactoryDef<ViewportRuler>;
+    static ɵprov: i0.ɵɵInjectableDef<ViewportRuler>;
 }
 
 export interface ViewportScrollPosition {

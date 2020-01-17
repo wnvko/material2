@@ -14,17 +14,17 @@ import {
   ChangeDetectorRef,
   Component,
   ContentChildren,
+  Directive,
   ElementRef,
   EventEmitter,
+  Inject,
   Input,
   OnDestroy,
+  Optional,
   Output,
   QueryList,
   ViewChild,
   ViewEncapsulation,
-  Optional,
-  Inject,
-  InjectionToken,
 } from '@angular/core';
 import {
   CanColor,
@@ -35,10 +35,11 @@ import {
   mixinDisableRipple,
   ThemePalette,
 } from '@angular/material/core';
-import {merge, Subscription} from 'rxjs';
-import {MatTab} from './tab';
-import {MatTabHeader} from './tab-header';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
+import {merge, Subscription} from 'rxjs';
+import {startWith} from 'rxjs/operators';
+import {MAT_TAB_GROUP, MatTab} from './tab';
+import {MAT_TABS_CONFIG, MatTabsConfig} from './tab-config';
 
 
 /** Used to generate unique ID's for each tab component */
@@ -55,51 +56,38 @@ export class MatTabChangeEvent {
 /** Possible positions for the tab header. */
 export type MatTabHeaderPosition = 'above' | 'below';
 
-/** Object that can be used to configure the default options for the tabs module. */
-export interface MatTabsConfig {
-  /** Duration for the tab animation. Must be a valid CSS value (e.g. 600ms). */
-  animationDuration?: string;
-}
-
-/** Injection token that can be used to provide the default options the tabs module. */
-export const MAT_TABS_CONFIG = new InjectionToken('MAT_TABS_CONFIG');
-
 // Boilerplate for applying mixins to MatTabGroup.
 /** @docs-private */
-class MatTabGroupBase {
+class MatTabGroupMixinBase {
   constructor(public _elementRef: ElementRef) {}
 }
-const _MatTabGroupMixinBase: CanColorCtor & CanDisableRippleCtor & typeof MatTabGroupBase =
-    mixinColor(mixinDisableRipple(MatTabGroupBase), 'primary');
+const _MatTabGroupMixinBase: CanColorCtor & CanDisableRippleCtor & typeof MatTabGroupMixinBase =
+    mixinColor(mixinDisableRipple(MatTabGroupMixinBase), 'primary');
+
+interface MatTabGroupBaseHeader {
+  _alignInkBarToSelectedTab: () => void;
+  focusIndex: number;
+}
 
 /**
- * Material design tab-group component.  Supports basic tab pairs (label + content) and includes
- * animated ink-bar, keyboard navigation, and screen reader.
- * See: https://material.io/design/components/tabs.html
+ * Base class with all of the `MatTabGroupBase` functionality.
+ * @docs-private
  */
-@Component({
-  moduleId: module.id,
-  selector: 'mat-tab-group',
-  exportAs: 'matTabGroup',
-  templateUrl: 'tab-group.html',
-  styleUrls: ['tab-group.css'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['color', 'disableRipple'],
-  host: {
-    'class': 'mat-tab-group',
-    '[class.mat-tab-group-dynamic-height]': 'dynamicHeight',
-    '[class.mat-tab-group-inverted-header]': 'headerPosition === "below"',
-  },
-})
-export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentInit,
+@Directive()
+// tslint:disable-next-line:class-name
+export abstract class _MatTabGroupBase extends _MatTabGroupMixinBase implements AfterContentInit,
     AfterContentChecked, OnDestroy, CanColor, CanDisableRipple {
 
-  @ContentChildren(MatTab) _tabs: QueryList<MatTab>;
+  /**
+   * All tabs inside the tab group. This includes tabs that belong to groups that are nested
+   * inside the current one. We filter out only the tabs that belong to this group in `_tabs`.
+   */
+  abstract _allTabs: QueryList<MatTab>;
+  abstract _tabBodyWrapper: ElementRef;
+  abstract _tabHeader: MatTabGroupBaseHeader;
 
-  @ViewChild('tabBodyWrapper', {static: false}) _tabBodyWrapper: ElementRef;
-
-  @ViewChild('tabHeader', {static: false}) _tabHeader: MatTabHeader;
+  /** All of the tabs that belong to the group. */
+  _tabs: QueryList<MatTab> = new QueryList<MatTab>();
 
   /** The tab index that should be selected after the content has been checked. */
   private _indexToSelect: number | null = 0;
@@ -138,6 +126,13 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
   }
   private _animationDuration: string;
 
+  /**
+   * Whether pagination should be disabled. This can be used to avoid unnecessary
+   * layout recalculations if it's known that pagination won't be required.
+   */
+  @Input()
+  disablePagination: boolean;
+
   /** Background color of the tab group. */
   @Input()
   get backgroundColor(): ThemePalette { return this._backgroundColor; }
@@ -171,13 +166,15 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
   private _groupId: number;
 
   constructor(elementRef: ElementRef,
-              private _changeDetectorRef: ChangeDetectorRef,
+              protected _changeDetectorRef: ChangeDetectorRef,
               @Inject(MAT_TABS_CONFIG) @Optional() defaultConfig?: MatTabsConfig,
               @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string) {
     super(elementRef);
     this._groupId = nextId++;
     this.animationDuration = defaultConfig && defaultConfig.animationDuration ?
         defaultConfig.animationDuration : '500ms';
+    this.disablePagination = defaultConfig && defaultConfig.disablePagination != null ?
+        defaultConfig.disablePagination : false;
   }
 
   /**
@@ -229,6 +226,7 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
   }
 
   ngAfterContentInit() {
+    this._subscribeToAllTabChanges();
     this._subscribeToTabLabels();
 
     // Subscribe to changes in the amount of tabs, in order to be
@@ -252,12 +250,29 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
         }
       }
 
-      this._subscribeToTabLabels();
       this._changeDetectorRef.markForCheck();
     });
   }
 
+  /** Listens to changes in all of the tabs. */
+  private _subscribeToAllTabChanges() {
+    // Since we use a query with `descendants: true` to pick up the tabs, we may end up catching
+    // some that are inside of nested tab groups. We filter them out manually by checking that
+    // the closest group to the tab is the current one.
+    this._allTabs.changes
+      .pipe(startWith(this._allTabs))
+      .subscribe((tabs: QueryList<MatTab>) => {
+        this._tabs.reset(tabs.filter(tab => {
+          // @breaking-change 10.0.0 Remove null check for `_closestTabGroup`
+          // once it becomes a required parameter in MatTab.
+          return !tab._closestTabGroup || tab._closestTabGroup === this;
+        }));
+        this._tabs.notifyOnChanges();
+      });
+  }
+
   ngOnDestroy() {
+    this._tabs.destroy();
     this._tabsSubscription.unsubscribe();
     this._tabLabelSubscription.unsubscribe();
   }
@@ -342,7 +357,7 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
   }
 
   /** Handle click events, setting new selected index if appropriate. */
-  _handleClick(tab: MatTab, tabHeader: MatTabHeader, index: number) {
+  _handleClick(tab: MatTab, tabHeader: MatTabGroupBaseHeader, index: number) {
     if (!tab.disabled) {
       this.selectedIndex = tabHeader.focusIndex = index;
     }
@@ -355,4 +370,46 @@ export class MatTabGroup extends _MatTabGroupMixinBase implements AfterContentIn
     }
     return this.selectedIndex === idx ? 0 : -1;
   }
+}
+
+/**
+ * Material design tab-group component. Supports basic tab pairs (label + content) and includes
+ * animated ink-bar, keyboard navigation, and screen reader.
+ * See: https://material.io/design/components/tabs.html
+ */
+@Component({
+  selector: 'mat-tab-group',
+  exportAs: 'matTabGroup',
+  templateUrl: 'tab-group.html',
+  styleUrls: ['tab-group.css'],
+  encapsulation: ViewEncapsulation.None,
+  // tslint:disable-next-line:validate-decorators
+  changeDetection: ChangeDetectionStrategy.Default,
+  inputs: ['color', 'disableRipple'],
+  providers: [{
+    provide: MAT_TAB_GROUP,
+    useExisting: MatTabGroup
+  }],
+  host: {
+    'class': 'mat-tab-group',
+    '[class.mat-tab-group-dynamic-height]': 'dynamicHeight',
+    '[class.mat-tab-group-inverted-header]': 'headerPosition === "below"',
+  },
+})
+export class MatTabGroup extends _MatTabGroupBase {
+  @ContentChildren(MatTab, {descendants: true}) _allTabs: QueryList<MatTab>;
+  @ViewChild('tabBodyWrapper') _tabBodyWrapper: ElementRef;
+  @ViewChild('tabHeader') _tabHeader: MatTabGroupBaseHeader;
+
+  constructor(elementRef: ElementRef,
+              changeDetectorRef: ChangeDetectorRef,
+              @Inject(MAT_TABS_CONFIG) @Optional() defaultConfig?: MatTabsConfig,
+              @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
+    super(elementRef, changeDetectorRef, defaultConfig, animationMode);
+  }
+
+  static ngAcceptInputType_dynamicHeight: boolean | string | null | undefined;
+  static ngAcceptInputType_animationDuration: number | string | null | undefined;
+  static ngAcceptInputType_selectedIndex: number | string | null | undefined;
+  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
 }

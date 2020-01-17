@@ -15,7 +15,6 @@ export interface Dog {
 }
 
 @Component({
-  moduleId: module.id,
   selector: 'grid-list-a11y',
   templateUrl: 'grid-list-a11y.html',
   styleUrls: ['grid-list-a11y.css'],
@@ -39,7 +38,7 @@ export class GridListAccessibilityDemo {
 
   fixedCols = 4;
   fixedRowHeight = 100;
-  ratioGutter = 1;
+  ratioGutter = '1px';
   fitListHeight = '400px';
   ratio = '4:1';
 }

@@ -23,7 +23,6 @@ let _uniqueOptgroupIdCounter = 0;
  * Component that is used to group instances of `mat-option`.
  */
 @Component({
-  moduleId: module.id,
   selector: 'mat-optgroup',
   exportAs: 'matOptgroup',
   templateUrl: 'optgroup.html',
@@ -45,4 +44,6 @@ export class MatOptgroup extends _MatOptgroupMixinBase implements CanDisable {
 
   /** Unique id for the underlying label. */
   _labelId: string = `mat-optgroup-label-${_uniqueOptgroupIdCounter++}`;
+
+  static ngAcceptInputType_disabled: boolean | string | null | undefined;
 }

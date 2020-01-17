@@ -19,7 +19,7 @@ import {
   ViewContainerRef,
   HostListener,
 } from '@angular/core';
-import {fromEvent, fromEventPattern, merge, ReplaySubject} from 'rxjs';
+import {fromEvent, fromEventPattern, merge, Subject} from 'rxjs';
 import {
   filter,
   map,
@@ -65,7 +65,7 @@ const MOUSE_MOVE_THROTTLE_TIME_MS = 10;
   providers: [EditEventDispatcher, EditServices],
 })
 export class CdkEditable implements AfterViewInit, OnDestroy {
-  protected readonly destroyed = new ReplaySubject<void>();
+  protected readonly destroyed = new Subject<void>();
 
   constructor(
       protected readonly elementRef: ElementRef,
@@ -82,25 +82,24 @@ export class CdkEditable implements AfterViewInit, OnDestroy {
   }
 
   private _listenForTableEvents(): void {
-    const element = this.elementRef.nativeElement!;
-
+    const element = this.elementRef.nativeElement;
     const toClosest = (selector: string) =>
         map((event: UIEvent) => closest(event.target, selector));
 
     this.ngZone.runOutsideAngular(() => {
       // Track mouse movement over the table to hide/show hover content.
       fromEvent<MouseEvent>(element, 'mouseover').pipe(
-          takeUntil(this.destroyed),
           toClosest(ROW_SELECTOR),
+          takeUntil(this.destroyed),
           ).subscribe(this.editEventDispatcher.hovering);
       fromEvent<MouseEvent>(element, 'mouseleave').pipe(
-          takeUntil(this.destroyed),
           mapTo(null),
+          takeUntil(this.destroyed),
           ).subscribe(this.editEventDispatcher.hovering);
       fromEvent<MouseEvent>(element, 'mousemove').pipe(
-          takeUntil(this.destroyed),
           throttleTime(MOUSE_MOVE_THROTTLE_TIME_MS),
           toClosest(ROW_SELECTOR),
+          takeUntil(this.destroyed),
           ).subscribe(this.editEventDispatcher.mouseMove);
 
       // Track focus within the table to hide/show/make focusable hover content.
@@ -134,10 +133,10 @@ export class CdkEditable implements AfterViewInit, OnDestroy {
           share(),
           ).subscribe(this.editEventDispatcher.allRows);
 
-      fromEvent<KeyboardEvent>(element, 'keyup').pipe(
-          takeUntil(this.destroyed),
+      fromEvent<KeyboardEvent>(element, 'keydown').pipe(
           filter(event => event.key === 'Enter'),
           toClosest(CELL_SELECTOR),
+          takeUntil(this.destroyed),
           ).subscribe(this.editEventDispatcher.editing);
 
       // Keydown must be used here or else key autorepeat does not work properly on some platforms.
@@ -203,7 +202,7 @@ export class CdkPopoverEdit<C> implements AfterViewInit, OnDestroy {
 
   protected focusTrap?: FocusTrap;
   protected overlayRef?: OverlayRef;
-  protected readonly destroyed = new ReplaySubject<void>();
+  protected readonly destroyed = new Subject<void>();
 
   constructor(
       protected readonly services: EditServices, protected readonly elementRef: ElementRef,
@@ -216,6 +215,11 @@ export class CdkPopoverEdit<C> implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed.next();
     this.destroyed.complete();
+
+    if (this.focusTrap) {
+      this.focusTrap.destroy();
+      this.focusTrap = undefined;
+    }
 
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -272,7 +276,14 @@ export class CdkPopoverEdit<C> implements AfterViewInit, OnDestroy {
         this.template!,
         this.viewContainerRef,
         {$implicit: this.context}));
-    this.focusTrap!.focusInitialElement();
+
+    // We have to defer trapping focus, because doing so too early can cause the form inside
+    // the overlay to be submitted immediately if it was opened on an Enter keydown event.
+    this.services.ngZone.runOutsideAngular(() => {
+      setTimeout(() => {
+        this.focusTrap!.focusInitialElement();
+      });
+    });
 
     // Update the size of the popup initially and on subsequent changes to
     // scroll position and viewport size.
@@ -363,7 +374,7 @@ export class CdkPopoverEditTabOut<C> extends CdkPopoverEdit<C> {
   selector: '[cdkRowHoverContent]',
 })
 export class CdkRowHoverContent implements AfterViewInit, OnDestroy {
-  protected readonly destroyed = new ReplaySubject<void>();
+  protected readonly destroyed = new Subject<void>();
   protected viewRef: EmbeddedViewRef<any>|null = null;
 
   private _row?: Element;

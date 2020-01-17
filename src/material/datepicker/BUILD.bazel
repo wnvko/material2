@@ -1,12 +1,13 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@io_bazel_rules_sass//:defs.bzl", "sass_binary", "sass_library")
 load(
     "//tools:defaults.bzl",
     "markdown_to_html",
     "ng_module",
     "ng_test_library",
     "ng_web_test_suite",
+    "sass_binary",
+    "sass_library",
 )
 
 ng_module(
@@ -82,7 +83,7 @@ ng_test_library(
         "//src/cdk/keycodes",
         "//src/cdk/overlay",
         "//src/cdk/scrolling",
-        "//src/cdk/testing",
+        "//src/cdk/testing/private",
         "//src/material/core",
         "//src/material/form-field",
         "//src/material/input",
