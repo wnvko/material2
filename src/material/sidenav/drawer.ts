@@ -8,7 +8,7 @@
 import {AnimationEvent} from '@angular/animations';
 import {FocusMonitor, FocusOrigin, FocusTrap, FocusTrapFactory} from '@angular/cdk/a11y';
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {ESCAPE, hasModifierKey} from '@angular/cdk/keycodes';
 import {Platform} from '@angular/cdk/platform';
 import {CdkScrollable, ScrollDispatcher, ViewportRuler} from '@angular/cdk/scrolling';
@@ -173,11 +173,22 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
   set disableClose(value: boolean) { this._disableClose = coerceBooleanProperty(value); }
   private _disableClose: boolean = false;
 
-  /** Whether the drawer should focus the first focusable element automatically when opened. */
+  /**
+   * Whether the drawer should focus the first focusable element automatically when opened.
+   * Defaults to false in when `mode` is set to `side`, otherwise defaults to `true`. If explicitly
+   * enabled, focus will be moved into the sidenav in `side` mode as well.
+   */
   @Input()
-  get autoFocus(): boolean { return this._autoFocus; }
+  get autoFocus(): boolean {
+    const value = this._autoFocus;
+
+    // Note that usually we disable auto focusing in `side` mode, because we don't know how the
+    // sidenav is being used, but in some cases it still makes sense to do it. If the consumer
+    // explicitly enabled `autoFocus`, we take it as them always wanting to enable it.
+    return value == null ? this.mode !== 'side' : value;
+  }
   set autoFocus(value: boolean) { this._autoFocus = coerceBooleanProperty(value); }
-  private _autoFocus: boolean = true;
+  private _autoFocus: boolean | undefined;
 
   /**
    * Whether the drawer is opened. We overload this because we trigger an event when it
@@ -253,11 +264,6 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
    */
   readonly _modeChanged = new Subject<void>();
 
-  get _isFocusTrapEnabled(): boolean {
-    // The focus trap is only enabled when the drawer is open in any mode other than side.
-    return this.opened && this.mode !== 'side';
-  }
-
   constructor(private _elementRef: ElementRef<HTMLElement>,
               private _focusTrapFactory: FocusTrapFactory,
               private _focusMonitor: FocusMonitor,
@@ -276,9 +282,7 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
           this._elementFocusedBeforeDrawerWasOpened = this._doc.activeElement as HTMLElement;
         }
 
-        if (this._isFocusTrapEnabled && this._focusTrap) {
-          this._trapFocus();
-        }
+        this._takeFocus();
       } else {
         this._restoreFocus();
       }
@@ -316,9 +320,12 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
     });
   }
 
-  /** Traps focus inside the drawer. */
-  private _trapFocus() {
-    if (!this.autoFocus) {
+  /**
+   * Moves focus into the drawer. Note that this works even if
+   * the focus trap is disabled in `side` mode.
+   */
+  private _takeFocus() {
+    if (!this.autoFocus || !this._focusTrap) {
       return;
     }
 
@@ -428,7 +435,8 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
   /** Updates the enabled state of the focus trap. */
   private _updateFocusTrapState() {
     if (this._focusTrap) {
-      this._focusTrap.enabled = this._isFocusTrapEnabled;
+      // The focus trap is only enabled when the drawer is open in any mode other than side.
+      this._focusTrap.enabled = this.opened && this.mode !== 'side';
     }
   }
 
@@ -452,9 +460,9 @@ export class MatDrawer implements AfterContentInit, AfterContentChecked, OnDestr
     this._animationEnd.next(event);
   }
 
-  static ngAcceptInputType_disableClose: boolean | string | null | undefined;
-  static ngAcceptInputType_autoFocus: boolean | string | null | undefined;
-  static ngAcceptInputType_opened: boolean | string | null | undefined;
+  static ngAcceptInputType_disableClose: BooleanInput;
+  static ngAcceptInputType_autoFocus: BooleanInput;
+  static ngAcceptInputType_opened: BooleanInput;
 }
 
 
@@ -832,6 +840,6 @@ export class MatDrawerContainer implements AfterContentInit, DoCheck, OnDestroy 
     return drawer != null && drawer.opened;
   }
 
-  static ngAcceptInputType_autosize: boolean | string | null | undefined;
-  static ngAcceptInputType_hasBackdrop: boolean | string | null | undefined;
+  static ngAcceptInputType_autosize: BooleanInput;
+  static ngAcceptInputType_hasBackdrop: BooleanInput;
 }

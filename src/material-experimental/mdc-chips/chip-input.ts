@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {Directive, ElementRef, EventEmitter, Inject, Input, OnChanges, Output} from '@angular/core';
 import {hasModifierKey, TAB} from '@angular/cdk/keycodes';
 import {MAT_CHIPS_DEFAULT_OPTIONS, MatChipsDefaultOptions} from './chip-default-options';
@@ -43,6 +43,7 @@ let nextUniqueId = 0;
     '[attr.disabled]': 'disabled || null',
     '[attr.placeholder]': 'placeholder || null',
     '[attr.aria-invalid]': '_chipGrid && _chipGrid.ngControl ? _chipGrid.ngControl.invalid : null',
+    '[attr.aria-required]': '_chipGrid && _chipGrid.required || null',
   }
 })
 export class MatChipInput implements MatChipTextControl, OnChanges {
@@ -171,6 +172,6 @@ export class MatChipInput implements MatChipTextControl, OnChanges {
     return Array.isArray(separators) ? separators.indexOf(keyCode) > -1 : separators.has(keyCode);
   }
 
-  static ngAcceptInputType_addOnBlur: boolean | string | null | undefined;
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_addOnBlur: BooleanInput;
+  static ngAcceptInputType_disabled: BooleanInput;
 }

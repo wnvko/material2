@@ -12,7 +12,8 @@ export declare class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDes
     boundaryElement: string | ElementRef<HTMLElement> | HTMLElement;
     constrainPosition?: (point: Point, dragRef: DragRef) => Point;
     data: T;
-    disabled: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
     dragStartDelay: number | {
         touch: number;
         mouse: number;
@@ -46,8 +47,8 @@ export declare class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDes
     ngOnChanges(changes: SimpleChanges): void;
     ngOnDestroy(): void;
     reset(): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDrag<any>, "[cdkDrag]", ["cdkDrag"], { 'data': "cdkDragData", 'lockAxis': "cdkDragLockAxis", 'rootElementSelector': "cdkDragRootElement", 'boundaryElement': "cdkDragBoundary", 'dragStartDelay': "cdkDragStartDelay", 'freeDragPosition': "cdkDragFreeDragPosition", 'disabled': "cdkDragDisabled", 'constrainPosition': "cdkDragConstrainPosition", 'previewClass': "cdkDragPreviewClass" }, { 'started': "cdkDragStarted", 'released': "cdkDragReleased", 'ended': "cdkDragEnded", 'entered': "cdkDragEntered", 'exited': "cdkDragExited", 'dropped': "cdkDragDropped", 'moved': "cdkDragMoved" }, ["_previewTemplate", "_placeholderTemplate", "_handles"]>;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDrag<any>, "[cdkDrag]", ["cdkDrag"], { "data": "cdkDragData"; "lockAxis": "cdkDragLockAxis"; "rootElementSelector": "cdkDragRootElement"; "boundaryElement": "cdkDragBoundary"; "dragStartDelay": "cdkDragStartDelay"; "freeDragPosition": "cdkDragFreeDragPosition"; "disabled": "cdkDragDisabled"; "constrainPosition": "cdkDragConstrainPosition"; "previewClass": "cdkDragPreviewClass"; }, { "started": "cdkDragStarted"; "released": "cdkDragReleased"; "ended": "cdkDragEnded"; "entered": "cdkDragEntered"; "exited": "cdkDragExited"; "dropped": "cdkDragDropped"; "moved": "cdkDragMoved"; }, ["_previewTemplate", "_placeholderTemplate", "_handles"]>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDrag<any>>;
 }
 
@@ -86,12 +87,13 @@ export interface CdkDragExit<T = any, I = T> {
 export declare class CdkDragHandle implements OnDestroy {
     _parentDrag: {} | undefined;
     _stateChanges: Subject<CdkDragHandle>;
-    disabled: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
     element: ElementRef<HTMLElement>;
     constructor(element: ElementRef<HTMLElement>, parentDrag?: any);
     ngOnDestroy(): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragHandle, "[cdkDragHandle]", never, { 'disabled': "cdkDragHandleDisabled" }, {}, never>;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragHandle, "[cdkDragHandle]", never, { "disabled": "cdkDragHandleDisabled"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDragHandle>;
 }
 
@@ -116,7 +118,7 @@ export declare class CdkDragPlaceholder<T = any> {
     data: T;
     templateRef: TemplateRef<T>;
     constructor(templateRef: TemplateRef<T>);
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragPlaceholder<any>, "ng-template[cdkDragPlaceholder]", never, { 'data': "data" }, {}, never>;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragPlaceholder<any>, "ng-template[cdkDragPlaceholder]", never, { "data": "data"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDragPlaceholder<any>>;
 }
 
@@ -124,7 +126,7 @@ export declare class CdkDragPreview<T = any> {
     data: T;
     templateRef: TemplateRef<T>;
     constructor(templateRef: TemplateRef<T>);
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragPreview<any>, "ng-template[cdkDragPreview]", never, { 'data': "data" }, {}, never>;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDragPreview<any>, "ng-template[cdkDragPreview]", never, { "data": "data"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDragPreview<any>>;
 }
 
@@ -149,7 +151,8 @@ export declare class CdkDropList<T = any> implements AfterContentInit, OnDestroy
     autoScrollDisabled: boolean;
     connectedTo: (CdkDropList | string)[] | CdkDropList | string;
     data: T;
-    disabled: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
     dropped: EventEmitter<CdkDragDrop<T, any>>;
     element: ElementRef<HTMLElement>;
     enterPredicate: (drag: CdkDrag, drop: CdkDropList) => boolean;
@@ -169,19 +172,20 @@ export declare class CdkDropList<T = any> implements AfterContentInit, OnDestroy
     ngAfterContentInit(): void;
     ngOnDestroy(): void;
     start(): void;
-    static ngAcceptInputType_autoScrollDisabled: boolean | string | null | undefined;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ngAcceptInputType_sortingDisabled: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDropList<any>, "[cdkDropList], cdk-drop-list", ["cdkDropList"], { 'connectedTo': "cdkDropListConnectedTo", 'data': "cdkDropListData", 'orientation': "cdkDropListOrientation", 'id': "id", 'lockAxis': "cdkDropListLockAxis", 'disabled': "cdkDropListDisabled", 'sortingDisabled': "cdkDropListSortingDisabled", 'enterPredicate': "cdkDropListEnterPredicate", 'autoScrollDisabled': "cdkDropListAutoScrollDisabled" }, { 'dropped': "cdkDropListDropped", 'entered': "cdkDropListEntered", 'exited': "cdkDropListExited", 'sorted': "cdkDropListSorted" }, ["_draggables"]>;
+    static ngAcceptInputType_autoScrollDisabled: BooleanInput;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ngAcceptInputType_sortingDisabled: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDropList<any>, "[cdkDropList], cdk-drop-list", ["cdkDropList"], { "connectedTo": "cdkDropListConnectedTo"; "data": "cdkDropListData"; "orientation": "cdkDropListOrientation"; "id": "id"; "lockAxis": "cdkDropListLockAxis"; "disabled": "cdkDropListDisabled"; "sortingDisabled": "cdkDropListSortingDisabled"; "enterPredicate": "cdkDropListEnterPredicate"; "autoScrollDisabled": "cdkDropListAutoScrollDisabled"; }, { "dropped": "cdkDropListDropped"; "entered": "cdkDropListEntered"; "exited": "cdkDropListExited"; "sorted": "cdkDropListSorted"; }, ["_draggables"]>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDropList<any>>;
 }
 
 export declare class CdkDropListGroup<T> implements OnDestroy {
     readonly _items: Set<T>;
-    disabled: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
     ngOnDestroy(): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDropListGroup<any>, "[cdkDropListGroup]", ["cdkDropListGroup"], { 'disabled': "cdkDropListGroupDisabled" }, {}, never>;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkDropListGroup<any>, "[cdkDropListGroup]", ["cdkDropListGroup"], { "disabled": "cdkDropListGroupDisabled"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkDropListGroup<any>>;
 }
 
@@ -221,7 +225,8 @@ export declare class DragRef<T = any> {
     beforeStarted: Subject<void>;
     constrainPosition?: (point: Point, dragRef: DragRef) => Point;
     data: T;
-    disabled: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
     dragStartDelay: number | {
         touch: number;
         mouse: number;

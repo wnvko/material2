@@ -73,7 +73,7 @@ Consider a reusable dialog-button component that opens a dialog on click, contai
 components, each with a corresponding harness:
 - `MyDialogButton` (composes the `MyButton` and `MyDialog` with a convenient API)
 - `MyButton` (a simple button component)
-- `MyDialog` (a dialog appended to `document.body` by `MyButtonDialog` upon click)
+- `MyDialog` (a dialog appended to `document.body` by `MyDialogButton` upon click)
 
 The following code loads harnesses for each of these components:
 
@@ -374,7 +374,7 @@ When a page contains multiple instances of a particular component, you may want 
 some property of the component to get a particular component instance. For example, you may want
 a button with some specific text, or a menu with a specific ID. The `HarnessPredicate`
 class can capture criteria like this for a `ComponentHarness` subclass. While the
-test author is able to construct `HarnessPredicate` instances manually, its easier when the
+test author is able to construct `HarnessPredicate` instances manually, it's easier when the
 `ComponentHarness` subclass provides a helper method to construct predicates for common filters.
 
 The recommended approach to providing this helper is to create a static `with` method on each
@@ -460,7 +460,7 @@ class MyMenuHarness extends ComponentHarness {
 
   /** Gets a list of items in the menu, optionally filtered based on the given criteria. */
   async getItems(filters: MyMenuItemHarnessFilters = {}): Promise<MyMenuItemHarness[]> {
-    const getFilteredItems = this.locatorFor(MyMenuItemHarness.with(filters));
+    const getFilteredItems = this.locatorForAll(MyMenuItemHarness.with(filters));
     return getFilteredItems();
   }
 

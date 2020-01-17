@@ -1,7 +1,4 @@
 entryPoints = [
-    "form-field/testing",
-    "form-field/testing/control",
-    "input/testing",
     "mdc-autocomplete",
     "mdc-button",
     "mdc-button/testing",
@@ -10,26 +7,32 @@ entryPoints = [
     "mdc-checkbox/testing",
     "mdc-chips",
     "mdc-chips/testing",
+    "mdc-form-field",
     "mdc-helpers",
+    "mdc-input",
+    "mdc-list",
     "mdc-menu",
     "mdc-menu/testing",
     "mdc-progress-bar",
+    "mdc-progress-bar/testing",
     "mdc-radio",
     "mdc-select",
     "mdc-sidenav",
     "mdc-slide-toggle",
     "mdc-slide-toggle/testing",
     "mdc-slider",
+    "mdc-slider/testing",
+    "mdc-snackbar",
+    "mdc-table",
     "mdc-tabs",
     "popover-edit",
-    "select/testing",
 ]
 
 # List of all non-testing entry-points of the Angular material-experimental package.
 MATERIAL_EXPERIMENTAL_ENTRYPOINTS = [
     ep
     for ep in entryPoints
-    if not ep.endswith("/testing")
+    if not "/testing" in ep
 ]
 
 # List of all testing entry-points of the Angular material-experimental package.

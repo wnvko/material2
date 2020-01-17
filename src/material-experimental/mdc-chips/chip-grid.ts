@@ -7,7 +7,7 @@
  */
 
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {BACKSPACE, TAB} from '@angular/cdk/keycodes';
 import {
   AfterContentInit,
@@ -87,7 +87,6 @@ const _MatChipGridMixinBase: CanUpdateErrorStateCtor & typeof MatChipGridBase =
     '[tabIndex]': '_chips && _chips.length === 0 ? -1 : tabIndex',
     // TODO: replace this binding with use of AriaDescriber
     '[attr.aria-describedby]': '_ariaDescribedby || null',
-    '[attr.aria-required]': 'role ? required : null',
     '[attr.aria-disabled]': 'disabled.toString()',
     '[attr.aria-invalid]': 'errorState',
     '[class.mat-mdc-chip-list-disabled]': 'disabled',
@@ -520,6 +519,6 @@ export class MatChipGrid extends _MatChipGridMixinBase implements AfterContentIn
     return false;
   }
 
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
-  static ngAcceptInputType_required: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: BooleanInput;
+  static ngAcceptInputType_required: BooleanInput;
 }

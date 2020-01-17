@@ -79,11 +79,13 @@ export declare class CdkColumnDef extends _CdkColumnDefBase implements CanStick 
     cssClassFriendlyName: string;
     footerCell: CdkFooterCellDef;
     headerCell: CdkHeaderCellDef;
-    name: string;
-    stickyEnd: boolean;
-    static ngAcceptInputType_sticky: boolean | string | null | undefined;
-    static ngAcceptInputType_stickyEnd: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkColumnDef, "[cdkColumnDef]", never, { 'sticky': "sticky", 'name': "cdkColumnDef", 'stickyEnd': "stickyEnd" }, {}, ["cell", "headerCell", "footerCell"]>;
+    get name(): string;
+    set name(name: string);
+    get stickyEnd(): boolean;
+    set stickyEnd(v: boolean);
+    static ngAcceptInputType_sticky: BooleanInput;
+    static ngAcceptInputType_stickyEnd: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkColumnDef, "[cdkColumnDef]", never, { "sticky": "sticky"; "name": "cdkColumnDef"; "stickyEnd": "stickyEnd"; }, {}, ["cell", "headerCell", "footerCell"]>;
     static ɵfac: i0.ɵɵFactoryDef<CdkColumnDef>;
 }
 
@@ -108,8 +110,8 @@ export declare class CdkFooterRow {
 export declare class CdkFooterRowDef extends _CdkFooterRowDefBase implements CanStick, OnChanges {
     constructor(template: TemplateRef<any>, _differs: IterableDiffers);
     ngOnChanges(changes: SimpleChanges): void;
-    static ngAcceptInputType_sticky: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkFooterRowDef, "[cdkFooterRowDef]", never, { 'columns': "cdkFooterRowDef", 'sticky': "cdkFooterRowDefSticky" }, {}, never>;
+    static ngAcceptInputType_sticky: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkFooterRowDef, "[cdkFooterRowDef]", never, { "columns": "cdkFooterRowDef"; "sticky": "cdkFooterRowDefSticky"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkFooterRowDef>;
 }
 
@@ -134,8 +136,8 @@ export declare class CdkHeaderRow {
 export declare class CdkHeaderRowDef extends _CdkHeaderRowDefBase implements CanStick, OnChanges {
     constructor(template: TemplateRef<any>, _differs: IterableDiffers);
     ngOnChanges(changes: SimpleChanges): void;
-    static ngAcceptInputType_sticky: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkHeaderRowDef, "[cdkHeaderRowDef]", never, { 'columns': "cdkHeaderRowDef", 'sticky': "cdkHeaderRowDefSticky" }, {}, never>;
+    static ngAcceptInputType_sticky: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkHeaderRowDef, "[cdkHeaderRowDef]", never, { "columns": "cdkHeaderRowDef"; "sticky": "cdkHeaderRowDefSticky"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkHeaderRowDef>;
 }
 
@@ -147,7 +149,7 @@ export declare class CdkRow {
 export declare class CdkRowDef<T> extends BaseRowDef {
     when: (index: number, rowData: T) => boolean;
     constructor(template: TemplateRef<any>, _differs: IterableDiffers);
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkRowDef<any>, "[cdkRowDef]", never, { 'columns': "cdkRowDefColumns", 'when': "cdkRowDefWhen" }, {}, never>;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<CdkRowDef<any>, "[cdkRowDef]", never, { "columns": "cdkRowDefColumns"; "when": "cdkRowDefWhen"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkRowDef<any>>;
 }
 
@@ -165,10 +167,13 @@ export declare class CdkTable<T> implements AfterContentChecked, CollectionViewe
     _headerRowOutlet: HeaderRowOutlet;
     _multiTemplateDataRows: boolean;
     _rowOutlet: DataRowOutlet;
-    dataSource: CdkTableDataSourceInput<T>;
-    multiTemplateDataRows: boolean;
+    get dataSource(): CdkTableDataSourceInput<T>;
+    set dataSource(dataSource: CdkTableDataSourceInput<T>);
+    get multiTemplateDataRows(): boolean;
+    set multiTemplateDataRows(v: boolean);
     protected stickyCssClass: string;
-    trackBy: TrackByFunction<T>;
+    get trackBy(): TrackByFunction<T>;
+    set trackBy(fn: TrackByFunction<T>);
     viewChange: BehaviorSubject<{
         start: number;
         end: number;
@@ -193,8 +198,8 @@ export declare class CdkTable<T> implements AfterContentChecked, CollectionViewe
     updateStickyColumnStyles(): void;
     updateStickyFooterRowStyles(): void;
     updateStickyHeaderRowStyles(): void;
-    static ngAcceptInputType_multiTemplateDataRows: boolean | string | null | undefined;
-    static ɵcmp: i0.ɵɵComponentDefWithMeta<CdkTable<any>, "cdk-table, table[cdk-table]", ["cdkTable"], { 'trackBy': "trackBy", 'dataSource': "dataSource", 'multiTemplateDataRows': "multiTemplateDataRows" }, {}, ["_contentColumnDefs", "_contentRowDefs", "_contentHeaderRowDefs", "_contentFooterRowDefs"]>;
+    static ngAcceptInputType_multiTemplateDataRows: BooleanInput;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<CdkTable<any>, "cdk-table, table[cdk-table]", ["cdkTable"], { "trackBy": "trackBy"; "dataSource": "dataSource"; "multiTemplateDataRows": "multiTemplateDataRows"; }, {}, ["_contentColumnDefs", "_contentRowDefs", "_contentHeaderRowDefs", "_contentFooterRowDefs"]>;
     static ɵfac: i0.ɵɵFactoryDef<CdkTable<any>>;
 }
 
@@ -211,12 +216,13 @@ export declare class CdkTextColumn<T> implements OnDestroy, OnInit {
     headerCell: CdkHeaderCellDef;
     headerText: string;
     justify: 'start' | 'end';
-    name: string;
+    get name(): string;
+    set name(name: string);
     constructor(_table: CdkTable<T>, _options: TextColumnOptions<T>);
     _createDefaultHeaderText(): string;
     ngOnDestroy(): void;
     ngOnInit(): void;
-    static ɵcmp: i0.ɵɵComponentDefWithMeta<CdkTextColumn<any>, "cdk-text-column", never, { 'name': "name", 'headerText': "headerText", 'dataAccessor': "dataAccessor", 'justify': "justify" }, {}, never>;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<CdkTextColumn<any>, "cdk-text-column", never, { "name": "name"; "headerText": "headerText"; "dataAccessor": "dataAccessor"; "justify": "justify"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<CdkTextColumn<any>>;
 }
 

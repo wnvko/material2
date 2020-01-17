@@ -19,26 +19,32 @@ export declare class MatInput extends _MatInputMixinBase implements MatFormField
     protected _uid: string;
     autofilled: boolean;
     controlType: string;
-    disabled: boolean;
-    readonly empty: boolean;
+    get disabled(): boolean;
+    set disabled(value: boolean);
+    get empty(): boolean;
     errorStateMatcher: ErrorStateMatcher;
     focused: boolean;
-    id: string;
+    get id(): string;
+    set id(value: string);
     ngControl: NgControl;
     placeholder: string;
-    readonly: boolean;
-    required: boolean;
-    readonly shouldLabelFloat: boolean;
+    get readonly(): boolean;
+    set readonly(value: boolean);
+    get required(): boolean;
+    set required(value: boolean);
+    get shouldLabelFloat(): boolean;
     readonly stateChanges: Subject<void>;
-    type: string;
-    value: string;
+    get type(): string;
+    set type(value: string);
+    get value(): string;
+    set value(value: string);
     constructor(_elementRef: ElementRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>, _platform: Platform,
     ngControl: NgControl, _parentForm: NgForm, _parentFormGroup: FormGroupDirective, _defaultErrorStateMatcher: ErrorStateMatcher, inputValueAccessor: any, _autofillMonitor: AutofillMonitor, ngZone: NgZone);
     protected _dirtyCheckNativeValue(): void;
     _focusChanged(isFocused: boolean): void;
     protected _isBadInput(): boolean;
     protected _isNeverEmpty(): boolean;
-    protected _isTextarea(): boolean;
+    _isTextarea(): boolean;
     _onInput(): void;
     protected _validateType(): void;
     focus(options?: FocusOptions): void;
@@ -48,11 +54,11 @@ export declare class MatInput extends _MatInputMixinBase implements MatFormField
     ngOnInit(): void;
     onContainerClick(): void;
     setDescribedByIds(ids: string[]): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ngAcceptInputType_readonly: boolean | string | null | undefined;
-    static ngAcceptInputType_required: boolean | string | null | undefined;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ngAcceptInputType_readonly: BooleanInput;
+    static ngAcceptInputType_required: BooleanInput;
     static ngAcceptInputType_value: any;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatInput, "input[matInput], textarea[matInput], select[matNativeControl],      input[matNativeControl], textarea[matNativeControl]", ["matInput"], { 'disabled': "disabled", 'id': "id", 'placeholder': "placeholder", 'required': "required", 'type': "type", 'errorStateMatcher': "errorStateMatcher", 'value': "value", 'readonly': "readonly" }, {}, never>;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatInput, "input[matInput], textarea[matInput], select[matNativeControl],      input[matNativeControl], textarea[matNativeControl]", ["matInput"], { "disabled": "disabled"; "id": "id"; "placeholder": "placeholder"; "required": "required"; "type": "type"; "errorStateMatcher": "errorStateMatcher"; "value": "value"; "readonly": "readonly"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<MatInput>;
 }
 
@@ -62,13 +68,17 @@ export declare class MatInputModule {
 }
 
 export declare class MatTextareaAutosize extends CdkTextareaAutosize {
-    matAutosize: boolean;
-    matAutosizeMaxRows: number;
-    matAutosizeMinRows: number;
-    matTextareaAutosize: boolean;
-    static ngAcceptInputType_enabled: boolean | string | null | undefined;
-    static ngAcceptInputType_maxRows: number | string | null | undefined;
-    static ngAcceptInputType_minRows: number | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatTextareaAutosize, "textarea[mat-autosize], textarea[matTextareaAutosize]", ["matTextareaAutosize"], { 'cdkAutosizeMinRows': "cdkAutosizeMinRows", 'cdkAutosizeMaxRows': "cdkAutosizeMaxRows", 'matAutosizeMinRows': "matAutosizeMinRows", 'matAutosizeMaxRows': "matAutosizeMaxRows", 'matAutosize': "mat-autosize", 'matTextareaAutosize': "matTextareaAutosize" }, {}, never>;
+    get matAutosize(): boolean;
+    set matAutosize(value: boolean);
+    get matAutosizeMaxRows(): number;
+    set matAutosizeMaxRows(value: number);
+    get matAutosizeMinRows(): number;
+    set matAutosizeMinRows(value: number);
+    get matTextareaAutosize(): boolean;
+    set matTextareaAutosize(value: boolean);
+    static ngAcceptInputType_enabled: BooleanInput;
+    static ngAcceptInputType_maxRows: NumberInput;
+    static ngAcceptInputType_minRows: NumberInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatTextareaAutosize, "textarea[mat-autosize], textarea[matTextareaAutosize]", ["matTextareaAutosize"], { "cdkAutosizeMinRows": "cdkAutosizeMinRows"; "cdkAutosizeMaxRows": "cdkAutosizeMaxRows"; "matAutosizeMinRows": "matAutosizeMinRows"; "matAutosizeMaxRows": "matAutosizeMaxRows"; "matAutosize": "mat-autosize"; "matTextareaAutosize": "matTextareaAutosize"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<MatTextareaAutosize>;
 }

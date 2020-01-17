@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {BooleanInput} from '@angular/cdk/coercion';
 import {
   ChangeDetectorRef,
   Directive,
@@ -83,7 +84,7 @@ const _MatChipRemoveMixinBase:
   CanDisableCtor &
   HasTabIndexCtor &
   typeof MatChipRemoveBase =
-    mixinTabIndex(mixinDisabled(MatChipRemoveBase));
+    mixinTabIndex(mixinDisabled(MatChipRemoveBase), 0);
 
 /**
  * Directive to remove the parent chip when the trailing icon is clicked or
@@ -94,9 +95,11 @@ const _MatChipRemoveMixinBase:
  *
  * Example:
  *
- *     `<mat-chip>
- *       <mat-icon matChipRemove>cancel</mat-icon>
- *     </mat-chip>`
+ * ```
+ * <mat-chip>
+ *   <mat-icon matChipRemove>cancel</mat-icon>
+ * </mat-chip>
+ * ```
  */
 @Directive({
   selector: '[matChipRemove]',
@@ -108,6 +111,12 @@ const _MatChipRemoveMixinBase:
     'role': 'button',
     '(click)': 'interaction.next($event)',
     '(keydown)': 'interaction.next($event)',
+
+    // Prevent accidental form submissions.
+    'type': 'button',
+
+    // We need to remove this explicitly, because it gets inherited from MatChipTrailingIcon.
+    '[attr.aria-hidden]': 'null',
   }
 })
 export class MatChipRemove extends _MatChipRemoveMixinBase implements CanDisable, HasTabIndex {
@@ -121,5 +130,5 @@ export class MatChipRemove extends _MatChipRemoveMixinBase implements CanDisable
     super(_elementRef);
   }
 
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: BooleanInput;
 }

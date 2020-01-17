@@ -7,7 +7,7 @@
  */
 
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {
   AfterContentChecked,
   AfterContentInit,
@@ -30,7 +30,6 @@ import {
 } from '@angular/core';
 import {
   CanColor, CanColorCtor,
-  FloatLabelType,
   LabelOptions,
   MAT_LABEL_GLOBAL_OPTIONS,
   mixinColor,
@@ -78,6 +77,9 @@ const _MatFormFieldMixinBase: CanColorCtor & typeof MatFormFieldBase =
 /** Possible appearance styles for the form field. */
 export type MatFormFieldAppearance = 'legacy' | 'standard' | 'fill' | 'outline';
 
+/** Possible values for the "floatLabel" form-field input. */
+export type FloatLabelType = 'always' | 'never' | 'auto';
+
 /**
  * Represents the default options for the form field that can be configured
  * using the `MAT_FORM_FIELD_DEFAULT_OPTIONS` injection token.
@@ -85,6 +87,11 @@ export type MatFormFieldAppearance = 'legacy' | 'standard' | 'fill' | 'outline';
 export interface MatFormFieldDefaultOptions {
   appearance?: MatFormFieldAppearance;
   hideRequiredMarker?: boolean;
+  /**
+   * Whether the label for form-fields should by default float `always`,
+   * `never`, or `auto` (only when necessary).
+   */
+  floatLabel?: FloatLabelType;
 }
 
 /**
@@ -222,7 +229,7 @@ export class MatFormField extends _MatFormFieldMixinBase
   }
   set floatLabel(value: FloatLabelType) {
     if (value !== this._floatLabel) {
-      this._floatLabel = value || this._labelOptions.float || 'auto';
+      this._floatLabel = value || this._getDefaultFloatLabelState();
       this._changeDetectorRef.markForCheck();
     }
   }
@@ -275,7 +282,7 @@ export class MatFormField extends _MatFormFieldMixinBase
     super(_elementRef);
 
     this._labelOptions = labelOptions ? labelOptions : {};
-    this.floatLabel = this._labelOptions.float || 'auto';
+    this.floatLabel = this._getDefaultFloatLabelState();
     this._animationsEnabled = _animationMode !== 'NoopAnimations';
 
     // Set the default through here so we invoke the setter on the first run.
@@ -468,6 +475,11 @@ export class MatFormField extends _MatFormFieldMixinBase
     }
   }
 
+  /** Gets the default float label state. */
+  private _getDefaultFloatLabelState(): FloatLabelType {
+    return (this._defaults && this._defaults.floatLabel) || this._labelOptions.float || 'auto';
+  }
+
   /**
    * Sets the list of element IDs that describe the child control. This allows the control to update
    * its `aria-describedby` attribute accordingly.
@@ -563,10 +575,10 @@ export class MatFormField extends _MatFormFieldMixinBase
     }
 
     for (let i = 0; i < startEls.length; i++) {
-      startEls.item(i).style.width = `${startWidth}px`;
+      startEls[i].style.width = `${startWidth}px`;
     }
     for (let i = 0; i < gapEls.length; i++) {
-      gapEls.item(i).style.width = `${gapWidth}px`;
+      gapEls[i].style.width = `${gapWidth}px`;
     }
 
     this._outlineGapCalculationNeededOnStable =
@@ -594,5 +606,5 @@ export class MatFormField extends _MatFormFieldMixinBase
     return document.documentElement!.contains(element);
   }
 
-  static ngAcceptInputType_hideRequiredMarker: boolean | string | null | undefined;
+  static ngAcceptInputType_hideRequiredMarker: BooleanInput;
 }

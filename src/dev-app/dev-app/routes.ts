@@ -63,13 +63,19 @@ export const DEV_APP_ROUTES: Routes = [
     loadChildren: 'mdc-progress-bar/mdc-progress-bar-demo-module#MdcProgressBarDemoModule'
   },
   {path: 'mdc-chips', loadChildren: 'mdc-chips/mdc-chips-demo-module#MdcChipsDemoModule'},
+  {path: 'mdc-input', loadChildren: 'mdc-input/mdc-input-demo-module#MdcInputDemoModule'},
   {path: 'mdc-menu', loadChildren: 'mdc-menu/mdc-menu-demo-module#MdcMenuDemoModule'},
   {path: 'mdc-radio', loadChildren: 'mdc-radio/mdc-radio-demo-module#MdcRadioDemoModule'},
+  {
+    path: 'mdc-snackbar',
+    loadChildren: 'mdc-snackbar/mdc-snackbar-demo-module#MdcSnackbarDemoModule'
+  },
   {
     path: 'mdc-slide-toggle',
     loadChildren: 'mdc-slide-toggle/mdc-slide-toggle-demo-module#MdcSlideToggleDemoModule'
   },
   {path: 'mdc-slider', loadChildren: 'mdc-slider/mdc-slider-demo-module#MdcSliderDemoModule'},
+  {path: 'mdc-table', loadChildren: 'mdc-table/mdc-table-demo-module#MdcTableDemoModule'},
   {path: 'mdc-tabs', loadChildren: 'mdc-tabs/mdc-tabs-demo-module#MdcTabsDemoModule'},
   {path: 'menu', loadChildren: 'menu/menu-demo-module#MenuDemoModule'},
   {path: 'paginator', loadChildren: 'paginator/paginator-demo-module#PaginatorDemoModule'},

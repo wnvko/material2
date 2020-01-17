@@ -5,14 +5,17 @@ export declare const MAT_BUTTON_TOGGLE_GROUP_VALUE_ACCESSOR: any;
 export declare class MatButtonToggle extends _MatButtonToggleMixinBase implements OnInit, CanDisableRipple, OnDestroy {
     _buttonElement: ElementRef<HTMLButtonElement>;
     _type: ToggleType;
-    appearance: MatButtonToggleAppearance;
+    get appearance(): MatButtonToggleAppearance;
+    set appearance(value: MatButtonToggleAppearance);
     ariaLabel: string;
     ariaLabelledby: string | null;
-    readonly buttonId: string;
+    get buttonId(): string;
     buttonToggleGroup: MatButtonToggleGroup;
     readonly change: EventEmitter<MatButtonToggleChange>;
-    checked: boolean;
-    disabled: boolean;
+    get checked(): boolean;
+    set checked(value: boolean);
+    get disabled(): boolean;
+    set disabled(value: boolean);
     id: string;
     name: string;
     tabIndex: number | null;
@@ -23,12 +26,12 @@ export declare class MatButtonToggle extends _MatButtonToggleMixinBase implement
     focus(options?: FocusOptions): void;
     ngOnDestroy(): void;
     ngOnInit(): void;
-    static ngAcceptInputType_checked: boolean | string | null | undefined;
-    static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ngAcceptInputType_multiple: boolean | string | null | undefined;
-    static ngAcceptInputType_vertical: boolean | string | null | undefined;
-    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatButtonToggle, "mat-button-toggle", ["matButtonToggle"], { 'disableRipple': "disableRipple", 'ariaLabel': "aria-label", 'ariaLabelledby': "aria-labelledby", 'id': "id", 'name': "name", 'value': "value", 'tabIndex': "tabIndex", 'appearance': "appearance", 'checked': "checked", 'disabled': "disabled" }, { 'change': "change" }, never>;
+    static ngAcceptInputType_checked: BooleanInput;
+    static ngAcceptInputType_disableRipple: BooleanInput;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ngAcceptInputType_multiple: BooleanInput;
+    static ngAcceptInputType_vertical: BooleanInput;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatButtonToggle, "mat-button-toggle", ["matButtonToggle"], { "disableRipple": "disableRipple"; "ariaLabel": "aria-label"; "ariaLabelledby": "aria-labelledby"; "id": "id"; "name": "name"; "value": "value"; "tabIndex": "tabIndex"; "appearance": "appearance"; "checked": "checked"; "disabled": "disabled"; }, { "change": "change"; }, never>;
     static ɵfac: i0.ɵɵFactoryDef<MatButtonToggle>;
 }
 
@@ -52,13 +55,18 @@ export declare class MatButtonToggleGroup implements ControlValueAccessor, OnIni
     _onTouched: () => any;
     appearance: MatButtonToggleAppearance;
     readonly change: EventEmitter<MatButtonToggleChange>;
-    disabled: boolean;
-    multiple: boolean;
-    name: string;
-    readonly selected: MatButtonToggle | MatButtonToggle[];
-    value: any;
+    get disabled(): boolean;
+    set disabled(value: boolean);
+    get multiple(): boolean;
+    set multiple(value: boolean);
+    get name(): string;
+    set name(value: string);
+    get selected(): MatButtonToggle | MatButtonToggle[];
+    get value(): any;
+    set value(newValue: any);
     readonly valueChange: EventEmitter<any>;
-    vertical: boolean;
+    get vertical(): boolean;
+    set vertical(value: boolean);
     constructor(_changeDetector: ChangeDetectorRef, defaultOptions?: MatButtonToggleDefaultOptions);
     _emitChangeEvent(): void;
     _isPrechecked(toggle: MatButtonToggle): boolean;
@@ -70,10 +78,10 @@ export declare class MatButtonToggleGroup implements ControlValueAccessor, OnIni
     registerOnTouched(fn: any): void;
     setDisabledState(isDisabled: boolean): void;
     writeValue(value: any): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ngAcceptInputType_multiple: boolean | string | null | undefined;
-    static ngAcceptInputType_vertical: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatButtonToggleGroup, "mat-button-toggle-group", ["matButtonToggleGroup"], { 'appearance': "appearance", 'name': "name", 'vertical': "vertical", 'value': "value", 'multiple': "multiple", 'disabled': "disabled" }, { 'valueChange': "valueChange", 'change': "change" }, ["_buttonToggles"]>;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ngAcceptInputType_multiple: BooleanInput;
+    static ngAcceptInputType_vertical: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatButtonToggleGroup, "mat-button-toggle-group", ["matButtonToggleGroup"], { "appearance": "appearance"; "name": "name"; "vertical": "vertical"; "value": "value"; "multiple": "multiple"; "disabled": "disabled"; }, { "valueChange": "valueChange"; "change": "change"; }, ["_buttonToggles"]>;
     static ɵfac: i0.ɵɵFactoryDef<MatButtonToggleGroup>;
 }
 

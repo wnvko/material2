@@ -7,7 +7,7 @@
  */
 
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {
   AfterContentInit,
   AfterViewInit,
@@ -294,7 +294,8 @@ export class MatChipSet extends _MatChipSetMixinBase implements AfterContentInit
     let currentElement = event.target as HTMLElement | null;
 
     while (currentElement && currentElement !== this._elementRef.nativeElement) {
-      if (currentElement.classList.contains('mdc-chip')) {
+      // Null check the classList, because IE and Edge don't support it on all elements.
+      if (currentElement.classList && currentElement.classList.contains('mdc-chip')) {
         return true;
       }
 
@@ -304,6 +305,6 @@ export class MatChipSet extends _MatChipSetMixinBase implements AfterContentInit
     return false;
   }
 
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: BooleanInput;
 }
 

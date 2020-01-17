@@ -7,6 +7,7 @@
  */
 
 import {FocusableOption, FocusMonitor, FocusOrigin} from '@angular/cdk/a11y';
+import {BooleanInput} from '@angular/cdk/coercion';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -35,8 +36,7 @@ const _MatMenuItemMixinBase: CanDisableRippleCtor & CanDisableCtor & typeof MatM
     mixinDisableRipple(mixinDisabled(MatMenuItemBase));
 
 /**
- * This directive is intended to be used inside an mat-menu tag.
- * It exists mostly to set the role attribute.
+ * Single item inside of a `mat-menu`. Provides the menu item styling and accessibility treatment.
  */
 @Component({
   selector: '[mat-menu-item]',
@@ -44,7 +44,7 @@ const _MatMenuItemMixinBase: CanDisableRippleCtor & CanDisableCtor & typeof MatM
   inputs: ['disabled', 'disableRipple'],
   host: {
     '[attr.role]': 'role',
-    'class': 'mat-menu-item',
+    '[class.mat-menu-item]': 'true',
     '[class.mat-menu-item-highlighted]': '_highlighted',
     '[class.mat-menu-item-submenu-trigger]': '_triggersSubmenu',
     '[attr.tabindex]': '_getTabIndex()',
@@ -179,6 +179,6 @@ export class MatMenuItem extends _MatMenuItemMixinBase
     return output.trim();
   }
 
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
-  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: BooleanInput;
+  static ngAcceptInputType_disableRipple: BooleanInput;
 }

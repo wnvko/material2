@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {getSupportedInputTypes, Platform} from '@angular/cdk/platform';
 import {AutofillMonitor} from '@angular/cdk/text-field';
 import {
@@ -332,6 +332,11 @@ export class MatInput extends _MatInputMixinBase implements MatFormFieldControl<
     // FormsModule or ReactiveFormsModule, because Angular forms also listens to input events.
   }
 
+  /** Determines if the component host is a textarea. */
+  _isTextarea() {
+    return this._elementRef.nativeElement.nodeName.toLowerCase() === 'textarea';
+  }
+
   /** Does some manual dirty checking on the native input `value` property. */
   protected _dirtyCheckNativeValue() {
     const newValue = this._elementRef.nativeElement.value;
@@ -359,11 +364,6 @@ export class MatInput extends _MatInputMixinBase implements MatFormFieldControl<
     // The `validity` property won't be present on platform-server.
     let validity = (this._elementRef.nativeElement as HTMLInputElement).validity;
     return validity && validity.badInput;
-  }
-
-  /** Determines if the component host is a textarea. */
-  protected _isTextarea() {
-    return this._elementRef.nativeElement.nodeName.toLowerCase() === 'textarea';
   }
 
   /**
@@ -417,9 +417,9 @@ export class MatInput extends _MatInputMixinBase implements MatFormFieldControl<
     }
   }
 
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
-  static ngAcceptInputType_readonly: boolean | string | null | undefined;
-  static ngAcceptInputType_required: boolean | string | null | undefined;
+  static ngAcceptInputType_disabled: BooleanInput;
+  static ngAcceptInputType_readonly: BooleanInput;
+  static ngAcceptInputType_required: BooleanInput;
 
   // Accept `any` to avoid conflicts with other directives on `<input>` that may
   // accept different types.

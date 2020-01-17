@@ -1,11 +1,15 @@
 export declare class MatBadge extends _MatBadgeMixinBase implements OnDestroy, OnChanges, CanDisable {
     _hasContent: boolean;
     _id: number;
-    color: ThemePalette;
+    get color(): ThemePalette;
+    set color(value: ThemePalette);
     content: string;
-    description: string;
-    hidden: boolean;
-    overlap: boolean;
+    get description(): string;
+    set description(newDescription: string);
+    get hidden(): boolean;
+    set hidden(val: boolean);
+    get overlap(): boolean;
+    set overlap(val: boolean);
     position: MatBadgePosition;
     size: MatBadgeSize;
     constructor(_ngZone: NgZone, _elementRef: ElementRef<HTMLElement>, _ariaDescriber: AriaDescriber, _renderer: Renderer2, _animationMode?: string | undefined);
@@ -14,10 +18,10 @@ export declare class MatBadge extends _MatBadgeMixinBase implements OnDestroy, O
     isAfter(): boolean;
     ngOnChanges(changes: SimpleChanges): void;
     ngOnDestroy(): void;
-    static ngAcceptInputType_disabled: boolean | string | null | undefined;
-    static ngAcceptInputType_hidden: boolean | string | null | undefined;
-    static ngAcceptInputType_overlap: boolean | string | null | undefined;
-    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatBadge, "[matBadge]", never, { 'disabled': "matBadgeDisabled", 'color': "matBadgeColor", 'overlap': "matBadgeOverlap", 'position': "matBadgePosition", 'content': "matBadge", 'description': "matBadgeDescription", 'size': "matBadgeSize", 'hidden': "matBadgeHidden" }, {}, never>;
+    static ngAcceptInputType_disabled: BooleanInput;
+    static ngAcceptInputType_hidden: BooleanInput;
+    static ngAcceptInputType_overlap: BooleanInput;
+    static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatBadge, "[matBadge]", never, { "disabled": "matBadgeDisabled"; "color": "matBadgeColor"; "overlap": "matBadgeOverlap"; "position": "matBadgePosition"; "content": "matBadge"; "description": "matBadgeDescription"; "size": "matBadgeSize"; "hidden": "matBadgeHidden"; }, {}, never>;
     static ɵfac: i0.ɵɵFactoryDef<MatBadge>;
 }
 

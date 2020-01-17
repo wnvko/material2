@@ -1,22 +1,22 @@
 # Official components for Angular
-[![npm version](https://badge.fury.io/js/%40angular%2Fcdk.svg)](https://www.npmjs.com/package/%40angular%cdk)
+[![npm version](https://badge.fury.io/js/%40angular%2Fcdk.svg)](https://www.npmjs.com/package/@angular/cdk)
 [![Build status](https://circleci.com/gh/angular/components.svg?style=svg)](https://circleci.com/gh/angular/components)
 [![Gitter](https://badges.gitter.im/angular/components.svg)](https://gitter.im/angular/material2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The Angular team builds and maintains both common UI components and tools to help you build your
 own custom components. The team maintains several npm packages.
 
-| Package                   | Description                                                                        | Docs             |
-|---------------------------|------------------------------------------------------------------------------------|------------------|
-| `@angular/cdk`            | Library that helps you author custom UI components with common interation patterns | [Docs][cdk-docs] |
-| `@angular/material`       | [Material Design][] UI components for Angular applications                         | [Docs][mat-docs] |
-| `@angular/google-maps`    | Angular components built on top of the [Google Maps JavaScript API][]              | [Docs][map-docs] |
-| `@angular/youtube-player` | Angular component built on top of the [YouTube Player API][]                       | [Docs][ytp-docs] |
+| Package                   | Description                                                                         | Docs             |
+| ------------------------- | ----------------------------------------------------------------------------------- | ---------------- |
+| `@angular/cdk`            | Library that helps you author custom UI components with common interaction patterns | [Docs][cdk-docs] |
+| `@angular/material`       | [Material Design][] UI components for Angular applications                          | [Docs][mat-docs] |
+| `@angular/google-maps`    | Angular components built on top of the [Google Maps JavaScript API][]               | [Docs][map-docs] |
+| `@angular/youtube-player` | Angular component built on top of the [YouTube Player API][]                        | [Docs][ytp-docs] |
 
 
 #### Quick links
 [Documentation, demos, and guides][mat-docs] |
-[Frequently Asked Questions][./FAQ] |
+[Frequently Asked Questions](FAQ.md) |
 [Community Google group](https://groups.google.com/forum/#!forum/angular-material2) |
 [Contributing](https://github.com/angular/components/blob/master/CONTRIBUTING.md) |
 [StackBlitz Template](https://stackblitz.com/fork/components-issue)
@@ -33,13 +33,16 @@ If you'd like to contribute, please follow our [contributing guidelines][contrib
 our [`help wanted`][help-wanted] label for a list of issues with good opportunities for
 contribution.
 
-## High level work planned for Q4 2019 (Oct  - Dec):
-* Remove dependency on HammerJS
-* Finish remaining test harnesses for Angular Material components
+## High level work planned for Q1 2020 (Jan - Mar):
+* Date-range picker
+* Finish remaining test harnesses for Angular Material components (four remaining as of January)
 * Continuing to create new, API-compatible versions of the Angular Material components backed by
-[MDC Web][] ([see @jelbourn's ng-conf talk](https://youtu.be/4EXQKP-Sihw?t=891)).
-* New `@angular/google-maps` package
-* New `@angular/cdk/clipboard` subpackage 
+[MDC Web][] ([see @jelbourn's ng-conf talk](https://youtu.be/4EXQKP-Sihw?t=891)). There are five
+remaining components to complete here as of January.
+* Add support for density configuration for the new components based on MDC Web.
+* Authoring benchmarks to collect performance metrics for Angular Material components. These
+benchmarks will live inside Google's internal code repository for the time being, but we should
+be able to publish the results.
 
 
 ## About the team

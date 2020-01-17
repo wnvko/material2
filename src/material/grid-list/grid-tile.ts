@@ -20,7 +20,7 @@ import {
   Inject,
 } from '@angular/core';
 import {MatLine, setLines} from '@angular/material/core';
-import {coerceNumberProperty} from '@angular/cdk/coercion';
+import {coerceNumberProperty, NumberInput} from '@angular/cdk/coercion';
 import {MAT_GRID_LIST, MatGridListBase} from './grid-list-base';
 
 @Component({
@@ -28,6 +28,10 @@ import {MAT_GRID_LIST, MatGridListBase} from './grid-list-base';
   exportAs: 'matGridTile',
   host: {
     'class': 'mat-grid-tile',
+    // Ensures that the "rowspan" and "colspan" input value is reflected in
+    // the DOM. This is needed for the grid-tile harness.
+    '[attr.rowspan]': 'rowspan',
+    '[attr.colspan]': 'colspan'
   },
   templateUrl: 'grid-tile.html',
   styleUrls: ['grid-list.css'],
@@ -60,8 +64,8 @@ export class MatGridTile {
     (this._element.nativeElement.style as any)[property] = value;
   }
 
-  static ngAcceptInputType_rowspan: number | string | null | undefined;
-  static ngAcceptInputType_colspan: number | string | null | undefined;
+  static ngAcceptInputType_rowspan: NumberInput;
+  static ngAcceptInputType_colspan: NumberInput;
 }
 
 @Component({

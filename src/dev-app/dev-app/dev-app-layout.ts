@@ -73,12 +73,15 @@ export class DevAppLayout {
     {name: 'MDC Card', route: '/mdc-card'},
     {name: 'MDC Checkbox', route: '/mdc-checkbox'},
     {name: 'MDC Chips', route: '/mdc-chips'},
+    {name: 'MDC Input', route: '/mdc-input'},
     {name: 'MDC Menu', route: '/mdc-menu'},
     {name: 'MDC Radio', route: '/mdc-radio'},
     {name: 'MDC Progress Bar', route: '/mdc-progress-bar'},
     {name: 'MDC Tabs', route: '/mdc-tabs'},
     {name: 'MDC Slide Toggle', route: '/mdc-slide-toggle'},
     {name: 'MDC Slider', route: '/mdc-slider'},
+    {name: 'MDC Snackbar', route: '/mdc-snackbar'},
+    {name: 'MDC Table', route: '/mdc-table'},
   ];
 
   constructor(

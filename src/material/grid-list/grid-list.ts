@@ -22,7 +22,7 @@ import {MatGridTile} from './grid-tile';
 import {TileCoordinator} from './tile-coordinator';
 import {TileStyler, FitTileStyler, RatioTileStyler, FixedTileStyler} from './tile-styler';
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceNumberProperty} from '@angular/cdk/coercion';
+import {coerceNumberProperty, NumberInput} from '@angular/cdk/coercion';
 import {MAT_GRID_LIST, MatGridListBase} from './grid-list-base';
 
 
@@ -39,6 +39,9 @@ const MAT_FIT_MODE = 'fit';
   styleUrls: ['grid-list.css'],
   host: {
     'class': 'mat-grid-list',
+    // Ensures that the "cols" input value is reflected in the DOM. This is
+    // needed for the grid-list harness.
+    '[attr.cols]': 'cols',
   },
   providers: [{
     provide: MAT_GRID_LIST,
@@ -170,5 +173,5 @@ export class MatGridList implements MatGridListBase, OnInit, AfterContentChecked
     }
   }
 
-  static ngAcceptInputType_cols: number | string | null | undefined;
+  static ngAcceptInputType_cols: NumberInput;
 }

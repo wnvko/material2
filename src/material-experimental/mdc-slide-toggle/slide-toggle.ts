@@ -25,7 +25,12 @@ import {
 } from '@angular/core';
 import {MDCSwitchAdapter, MDCSwitchFoundation} from '@material/switch';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {coerceBooleanProperty, coerceNumberProperty} from '@angular/cdk/coercion';
+import {
+  BooleanInput,
+  coerceBooleanProperty,
+  coerceNumberProperty,
+  NumberInput
+} from '@angular/cdk/coercion';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {ThemePalette, RippleAnimationConfig} from '@angular/material/core';
 import {numbers} from '@material/ripple';
@@ -63,9 +68,9 @@ export class MatSlideToggleChange {
     '[attr.tabindex]': 'null',
     '[attr.aria-label]': 'null',
     '[attr.aria-labelledby]': 'null',
-    '[class.mat-primary]': 'color == "primary"',
-    '[class.mat-accent]': 'color == "accent"',
-    '[class.mat-warn]': 'color == "warn"',
+    '[class.mat-primary]': 'color === "primary"',
+    '[class.mat-accent]': 'color !== "primary" && color !== "warn"',
+    '[class.mat-warn]': 'color === "warn"',
     '[class.mat-mdc-slide-toggle-focused]': '_focused',
     '[class.mat-mdc-slide-toggle-checked]': 'checked',
     '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
@@ -86,25 +91,17 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
   private _checked: boolean = false;
   private _foundation: MDCSwitchFoundation;
   private _adapter: MDCSwitchAdapter = {
-    addClass: (className) => {
-      this._toggleClass(className, true);
-    },
-    removeClass: (className) => {
-      this._toggleClass(className, false);
-    },
-    setNativeControlChecked: (checked) => {
-      this._checked = checked;
-    },
-    setNativeControlDisabled: (disabled) => {
-      this._disabled = disabled;
-    },
+    addClass: className => this._switchElement.nativeElement.classList.add(className),
+    removeClass: className => this._switchElement.nativeElement.classList.remove(className),
+    setNativeControlChecked: checked => this._checked = checked,
+    setNativeControlDisabled: disabled => this._disabled = disabled,
+    setNativeControlAttr: (name, value) => {
+      this._inputElement.nativeElement.setAttribute(name, value);
+    }
   };
 
   /** Whether the slide toggle is currently focused. */
   _focused: boolean;
-
-  /** The set of classes that should be applied to the native input. */
-  _classes: {[key: string]: boolean} = {'mdc-switch': true};
 
   /** Configuration for the underlying ripple. */
   _rippleAnimation: RippleAnimationConfig = {
@@ -200,6 +197,9 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
 
   /** Reference to the underlying input element. */
   @ViewChild('input') _inputElement: ElementRef<HTMLInputElement>;
+
+  /** Reference to the MDC switch element. */
+  @ViewChild('switch') _switchElement: ElementRef<HTMLElement>;
 
   constructor(private _changeDetectorRef: ChangeDetectorRef,
               @Attribute('tabindex') tabIndex: string,
@@ -306,15 +306,9 @@ export class MatSlideToggle implements ControlValueAccessor, AfterViewInit, OnDe
     });
   }
 
-  /** Toggles a class on the switch element. */
-  private _toggleClass(cssClass: string, active: boolean) {
-    this._classes[cssClass] = active;
-    this._changeDetectorRef.markForCheck();
-  }
-
-  static ngAcceptInputType_tabIndex: number | string | null | undefined;
-  static ngAcceptInputType_required: boolean | string | null | undefined;
-  static ngAcceptInputType_checked: boolean | string | null | undefined;
-  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
+  static ngAcceptInputType_tabIndex: NumberInput;
+  static ngAcceptInputType_required: BooleanInput;
+  static ngAcceptInputType_checked: BooleanInput;
+  static ngAcceptInputType_disableRipple: BooleanInput;
+  static ngAcceptInputType_disabled: BooleanInput;
 }

@@ -8,7 +8,12 @@
 
 import {ActiveDescendantKeyManager, LiveAnnouncer} from '@angular/cdk/a11y';
 import {Directionality} from '@angular/cdk/bidi';
-import {coerceBooleanProperty, coerceNumberProperty} from '@angular/cdk/coercion';
+import {
+  BooleanInput,
+  coerceBooleanProperty,
+  coerceNumberProperty,
+  NumberInput
+} from '@angular/cdk/coercion';
 import {SelectionModel} from '@angular/cdk/collections';
 import {
   A,
@@ -145,6 +150,18 @@ export function MAT_SELECT_SCROLL_STRATEGY_PROVIDER_FACTORY(overlay: Overlay):
     () => ScrollStrategy {
   return () => overlay.scrollStrategies.reposition();
 }
+
+/** Object that can be used to configure the default options for the select module. */
+export interface MatSelectConfig {
+  /** Whether option centering should be disabled. */
+  disableOptionCentering?: boolean;
+
+  /** Time to wait in milliseconds after the last keystroke before moving focus to an item. */
+  typeaheadDebounceInterval?: number;
+}
+
+/** Injection token that can be used to provide the default options the select module. */
+export const MAT_SELECT_CONFIG = new InjectionToken<MatSelectConfig>('MAT_SELECT_CONFIG');
 
 /** @docs-private */
 export const MAT_SELECT_SCROLL_STRATEGY_PROVIDER = {
@@ -502,7 +519,8 @@ export class MatSelect extends _MatSelectMixinBase implements AfterContentInit, 
     @Self() @Optional() public ngControl: NgControl,
     @Attribute('tabindex') tabIndex: string,
     @Inject(MAT_SELECT_SCROLL_STRATEGY) scrollStrategyFactory: any,
-    private _liveAnnouncer: LiveAnnouncer) {
+    private _liveAnnouncer: LiveAnnouncer,
+    @Optional() @Inject(MAT_SELECT_CONFIG) defaults?: MatSelectConfig) {
     super(elementRef, _defaultErrorStateMatcher, _parentForm,
           _parentFormGroup, ngControl);
 
@@ -518,6 +536,16 @@ export class MatSelect extends _MatSelectMixinBase implements AfterContentInit, 
 
     // Force setter to be called in case id was not specified.
     this.id = this.id;
+
+    if (defaults) {
+      if (defaults.disableOptionCentering != null) {
+        this.disableOptionCentering = defaults.disableOptionCentering;
+      }
+
+      if (defaults.typeaheadDebounceInterval != null) {
+        this.typeaheadDebounceInterval = defaults.typeaheadDebounceInterval;
+      }
+    }
   }
 
   ngOnInit() {
@@ -1354,10 +1382,10 @@ export class MatSelect extends _MatSelectMixinBase implements AfterContentInit, 
     return this._panelOpen || !this.empty;
   }
 
-  static ngAcceptInputType_required: boolean | string | null | undefined;
-  static ngAcceptInputType_multiple: boolean | string | null | undefined;
-  static ngAcceptInputType_disableOptionCentering: boolean | string | null | undefined;
-  static ngAcceptInputType_typeaheadDebounceInterval: number | string | null | undefined;
-  static ngAcceptInputType_disabled: boolean | string | null | undefined;
-  static ngAcceptInputType_disableRipple: boolean | string | null | undefined;
+  static ngAcceptInputType_required: BooleanInput;
+  static ngAcceptInputType_multiple: BooleanInput;
+  static ngAcceptInputType_disableOptionCentering: BooleanInput;
+  static ngAcceptInputType_typeaheadDebounceInterval: NumberInput;
+  static ngAcceptInputType_disabled: BooleanInput;
+  static ngAcceptInputType_disableRipple: BooleanInput;
 }
