@@ -105,15 +105,12 @@ const _MatChipRemoveMixinBase:
   selector: '[matChipRemove]',
   inputs: ['disabled', 'tabIndex'],
   host: {
-    'class':
-      'mat-mdc-chip-remove mat-mdc-chip-trailing-icon mdc-chip__icon mdc-chip__icon--trailing',
+    'class': `mat-mdc-chip-remove mat-mdc-chip-trailing-icon mat-mdc-focus-indicator
+        mdc-chip__icon mdc-chip__icon--trailing`,
     '[tabIndex]': 'tabIndex',
     'role': 'button',
     '(click)': 'interaction.next($event)',
     '(keydown)': 'interaction.next($event)',
-
-    // Prevent accidental form submissions.
-    'type': 'button',
 
     // We need to remove this explicitly, because it gets inherited from MatChipTrailingIcon.
     '[attr.aria-hidden]': 'null',
@@ -126,8 +123,12 @@ export class MatChipRemove extends _MatChipRemoveMixinBase implements CanDisable
    */
   interaction: Subject<MouseEvent | KeyboardEvent> = new Subject<MouseEvent | KeyboardEvent>();
 
-  constructor(_elementRef: ElementRef) {
-    super(_elementRef);
+  constructor(elementRef: ElementRef) {
+    super(elementRef);
+
+    if (elementRef.nativeElement.nodeName === 'BUTTON') {
+      elementRef.nativeElement.setAttribute('type', 'button');
+    }
   }
 
   static ngAcceptInputType_disabled: BooleanInput;

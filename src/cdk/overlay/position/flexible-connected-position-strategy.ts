@@ -29,6 +29,9 @@ import {OverlayContainer} from '../overlay-container';
 /** Class to be added to the overlay bounding box. */
 const boundingBoxClass = 'cdk-overlay-connected-position-bounding-box';
 
+/** Regex used to split a string on its CSS units. */
+const cssUnitPattern = /([A-Za-z%]+)$/;
+
 /** Possible values that can be set as the origin of a FlexibleConnectedPositionStrategy. */
 export type FlexibleConnectedPositionStrategyOrigin = ElementRef | HTMLElement | Point & {
   width?: number;
@@ -567,8 +570,8 @@ export class FlexibleConnectedPositionStrategy implements PositionStrategy {
     if (this._hasFlexibleDimensions) {
       const availableHeight = viewport.bottom - point.y;
       const availableWidth = viewport.right - point.x;
-      const minHeight = this._overlayRef.getConfig().minHeight;
-      const minWidth = this._overlayRef.getConfig().minWidth;
+      const minHeight = getPixelValue(this._overlayRef.getConfig().minHeight);
+      const minWidth = getPixelValue(this._overlayRef.getConfig().minWidth);
 
       const verticalFit = fit.fitsInViewportVertically ||
           (minHeight != null && minHeight <= availableHeight);
@@ -921,7 +924,7 @@ export class FlexibleConnectedPositionStrategy implements PositionStrategy {
                             scrollPosition: ViewportScrollPosition) {
     // Reset any existing styles. This is necessary in case the
     // preferred position has changed since the last `apply`.
-    let styles = {top: null, bottom: null} as NullableCSSStyleDeclaration;
+    let styles = {top: '', bottom: ''} as CSSStyleDeclaration;
     let overlayPoint = this._getOverlayPoint(originPoint, this._overlayRect, position);
 
     if (this._isPushed) {
@@ -957,7 +960,7 @@ export class FlexibleConnectedPositionStrategy implements PositionStrategy {
                             scrollPosition: ViewportScrollPosition) {
     // Reset any existing styles. This is necessary in case the preferred position has
     // changed since the last `apply`.
-    let styles = {left: null, right: null} as NullableCSSStyleDeclaration;
+    let styles = {left: '', right: ''} as CSSStyleDeclaration;
     let overlayPoint = this._getOverlayPoint(originPoint, this._overlayRect, position);
 
     if (this._isPushed) {
@@ -1107,7 +1110,8 @@ export class FlexibleConnectedPositionStrategy implements PositionStrategy {
       return origin.nativeElement.getBoundingClientRect();
     }
 
-    if (origin instanceof HTMLElement) {
+    // Check for Element so SVG elements are also supported.
+    if (origin instanceof Element) {
       return origin.getBoundingClientRect();
     }
 
@@ -1174,15 +1178,6 @@ interface FlexibleFit {
   boundingBoxRect: BoundingBoxRect;
 }
 
-/**
- * Equivalent of CSSStyleDeclaration, but allows for `null` values. We need to do
- * this while we support TS 3.6 and 3.7 since the built-in types are different.
- * TODO(crisbeto): we can switch back to the regular CSSStyleDeclaration once we're running TS 3.7.
- */
-type NullableCSSStyleDeclaration = {
-  [T in keyof CSSStyleDeclaration]: CSSStyleDeclaration[T] | null;
-};
-
 /** A connected position as specified by the user. */
 export interface ConnectedPosition {
   originX: 'start' | 'center' | 'end';
@@ -1198,8 +1193,8 @@ export interface ConnectedPosition {
 }
 
 /** Shallow-extends a stylesheet object with another stylesheet object. */
-function extendStyles(destination: NullableCSSStyleDeclaration,
-                      source: NullableCSSStyleDeclaration): NullableCSSStyleDeclaration {
+function extendStyles(destination: CSSStyleDeclaration,
+                      source: CSSStyleDeclaration): CSSStyleDeclaration {
   for (let key in source) {
     if (source.hasOwnProperty(key)) {
       destination[key] = source[key];
@@ -1207,4 +1202,18 @@ function extendStyles(destination: NullableCSSStyleDeclaration,
   }
 
   return destination;
+}
+
+
+/**
+ * Extracts the pixel value as a number from a value, if it's a number
+ * or a CSS pixel string (e.g. `1337px`). Otherwise returns null.
+ */
+function getPixelValue(input: number|string|null|undefined): number|null {
+  if (typeof input !== 'number' && input != null) {
+    const [value, units] = input.split(cssUnitPattern);
+    return (!units || units === 'px') ? parseFloat(value) : null;
+  }
+
+  return input || null;
 }

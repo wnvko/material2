@@ -61,13 +61,13 @@ $mat-calendar-body-cell-content-size: 100% - $mat-calendar-body-cell-content-mar
   // Choosing a value clearly larger than the height ensures we get the correct capsule shape.
   border-radius: 999px;
 
-  @include cdk-high-contrast {
+  @include cdk-high-contrast(active, off) {
     border: none;
   }
 }
 
 
-@include cdk-high-contrast {
+@include cdk-high-contrast(active, off) {
   .mat-datepicker-popup:not(:empty),
   .mat-calendar-body-selected {
     outline: solid 1px;
@@ -88,5 +88,16 @@ $mat-calendar-body-cell-content-size: 100% - $mat-calendar-body-cell-content-mar
 [dir='rtl'] {
   .mat-calendar-body-label {
     text-align: right;
+  }
+}
+
+// Disable the hover styles on non-hover devices. Since this is more of a progressive
+// enhancement and not all desktop browsers support this kind of media query, we can't
+// use something like `@media (hover)`.
+@media (hover: none) {
+  .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover {
+    & > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+      background-color: transparent;
+    }
   }
 }

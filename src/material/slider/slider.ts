@@ -57,6 +57,7 @@ import {
 } from '@angular/material/core';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {normalizePassiveListenerOptions} from '@angular/cdk/platform';
+import {DOCUMENT} from '@angular/common';
 import {Subscription} from 'rxjs';
 
 const activeEventOptions = normalizePassiveListenerOptions({passive: false});
@@ -126,7 +127,7 @@ const _MatSliderMixinBase:
     // On Safari starting to slide temporarily triggers text selection mode which
     // show the wrong cursor. We prevent it by stopping the `selectstart` event.
     '(selectstart)': '$event.preventDefault()',
-    'class': 'mat-slider',
+    'class': 'mat-slider mat-focus-indicator',
     'role': 'slider',
     '[tabIndex]': 'tabIndex',
     '[attr.aria-disabled]': 'disabled',
@@ -423,9 +424,14 @@ export class MatSlider extends _MatSliderMixinBase
     };
 
     if (this._isMinValue && this._thumbGap) {
-      let side = this.vertical ?
-          (this._invertAxis ? 'Bottom' : 'Top') :
-          (this._invertAxis ? 'Right' : 'Left');
+      let side: string;
+
+      if (this.vertical) {
+        side = this._invertAxis ? 'Bottom' : 'Top';
+      } else {
+        side = this._invertAxis ? 'Right' : 'Left';
+      }
+
       styles[`padding${side}`] = `${this._thumbGap}px`;
     }
 
@@ -483,6 +489,9 @@ export class MatSlider extends _MatSliderMixinBase
   /** Keeps track of the last pointer event that was captured by the slider. */
   private _lastPointerEvent: MouseEvent | TouchEvent | null;
 
+  /** Used to subscribe to global move and end events */
+  protected _document?: Document;
+
   constructor(elementRef: ElementRef,
               private _focusMonitor: FocusMonitor,
               private _changeDetectorRef: ChangeDetectorRef,
@@ -491,8 +500,12 @@ export class MatSlider extends _MatSliderMixinBase
               // @breaking-change 8.0.0 `_animationMode` parameter to be made required.
               @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string,
               // @breaking-change 9.0.0 `_ngZone` parameter to be made required.
-              private _ngZone?: NgZone) {
+              private _ngZone?: NgZone,
+              /** @breaking-change 11.0.0 make document required */
+              @Optional() @Inject(DOCUMENT) document?: any) {
     super(elementRef);
+
+    this._document = document;
 
     this.tabIndex = parseInt(tabIndex) || 0;
 
@@ -685,24 +698,35 @@ export class MatSlider extends _MatSliderMixinBase
     }
   }
 
+  /** Use defaultView of injected document if available or fallback to global window reference */
+  private _getWindow(): Window {
+    return this._document?.defaultView || window;
+  }
+
   /**
    * Binds our global move and end events. They're bound at the document level and only while
    * dragging so that the user doesn't have to keep their pointer exactly over the slider
    * as they're swiping across the screen.
    */
   private _bindGlobalEvents(triggerEvent: TouchEvent | MouseEvent) {
+    // Note that we bind the events to the `document`, because it allows us to capture
+    // drag cancel events where the user's pointer is outside the browser window.
+    const document = this._document;
+
     if (typeof document !== 'undefined' && document) {
-      const body = document.body;
       const isTouch = isTouchEvent(triggerEvent);
       const moveEventName = isTouch ? 'touchmove' : 'mousemove';
       const endEventName = isTouch ? 'touchend' : 'mouseup';
-      body.addEventListener(moveEventName, this._pointerMove, activeEventOptions);
-      body.addEventListener(endEventName, this._pointerUp, activeEventOptions);
+      document.addEventListener(moveEventName, this._pointerMove, activeEventOptions);
+      document.addEventListener(endEventName, this._pointerUp, activeEventOptions);
 
       if (isTouch) {
-        body.addEventListener('touchcancel', this._pointerUp, activeEventOptions);
+        document.addEventListener('touchcancel', this._pointerUp, activeEventOptions);
       }
     }
+
+    const window = this._getWindow();
+
     if (typeof window !== 'undefined' && window) {
       window.addEventListener('blur', this._windowBlur);
     }
@@ -710,14 +734,18 @@ export class MatSlider extends _MatSliderMixinBase
 
   /** Removes any global event listeners that we may have added. */
   private _removeGlobalEvents() {
+    const document = this._document;
+
     if (typeof document !== 'undefined' && document) {
-      const body = document.body;
-      body.removeEventListener('mousemove', this._pointerMove, activeEventOptions);
-      body.removeEventListener('mouseup', this._pointerUp, activeEventOptions);
-      body.removeEventListener('touchmove', this._pointerMove, activeEventOptions);
-      body.removeEventListener('touchend', this._pointerUp, activeEventOptions);
-      body.removeEventListener('touchcancel', this._pointerUp, activeEventOptions);
+      document.removeEventListener('mousemove', this._pointerMove, activeEventOptions);
+      document.removeEventListener('mouseup', this._pointerUp, activeEventOptions);
+      document.removeEventListener('touchmove', this._pointerMove, activeEventOptions);
+      document.removeEventListener('touchend', this._pointerUp, activeEventOptions);
+      document.removeEventListener('touchcancel', this._pointerUp, activeEventOptions);
     }
+
+    const window = this._getWindow();
+
     if (typeof window !== 'undefined' && window) {
       window.removeEventListener('blur', this._windowBlur);
     }

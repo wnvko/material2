@@ -528,8 +528,11 @@ export class MatChipListbox extends MatChipSet implements AfterContentInit, Cont
   private _listenToChipsSelection(): void {
     this._chipSelectionSubscription = this.chipSelectionChanges.subscribe(
       (chipSelectionChange: MatChipSelectionChange) => {
-        this._chipSetFoundation.handleChipSelection(
-          chipSelectionChange.source.id, chipSelectionChange.selected, false);
+        this._chipSetFoundation.handleChipSelection({
+          chipId: chipSelectionChange.source.id,
+          selected: chipSelectionChange.selected,
+          shouldIgnore: false
+        });
         if (chipSelectionChange.isUserInput) {
           this._propagateChanges();
         }
@@ -557,6 +560,4 @@ export class MatChipListbox extends MatChipSet implements AfterContentInit, Cont
   static ngAcceptInputType_multiple: BooleanInput;
   static ngAcceptInputType_selectable: BooleanInput;
   static ngAcceptInputType_required: BooleanInput;
-  static ngAcceptInputType_disabled: BooleanInput;
 }
-

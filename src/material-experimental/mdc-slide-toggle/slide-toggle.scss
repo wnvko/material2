@@ -1,8 +1,8 @@
-@import '@material/switch/functions';
-@import '@material/switch/mixins';
-@import '@material/switch/variables';
-@import '@material/form-field/mixins';
-@import '@material/ripple/variables';
+@import '@material/switch/functions.import';
+@import '@material/switch/mixins.import';
+@import '@material/switch/variables.import';
+@import '@material/form-field/mixins.import';
+@import '@material/ripple/variables.import';
 @import '../mdc-helpers/mdc-helpers';
 @import '../../material/core/style/layout-common';
 @import '../../cdk/a11y/a11y';
@@ -16,6 +16,11 @@
   // The ripple needs extra specificity so the base ripple styling doesn't override its `position`.
   .mat-mdc-slide-toggle-ripple, .mdc-switch__thumb-underlay::before {
     @include mat-fill;
+
+    // Disable pointer events for the ripple container so that it doesn't eat the mouse events meant
+    // for the input. Pointer events can be safely disabled because the ripple trigger element is
+    // the host element.
+    pointer-events: none;
   }
 
   // The MDC switch styles related to the hover state are intertwined with the MDC ripple styles.
@@ -43,6 +48,10 @@
     opacity: map-get($mdc-ripple-dark-ink-opacities, press);
   }
 
+  .mat-ripple {
+    border-radius: 50%;
+  }
+
   // Angular Material supports disabling all animations when NoopAnimationsModule is imported.
   // TODO(mmalerba): Look into using MDC's Sass queries to separate the animation styles and
   //  conditionally add them. Consider the size cost when deciding whether to switch.
@@ -55,7 +64,7 @@
 }
 
 
-@include cdk-high-contrast {
+@include cdk-high-contrast(active, off) {
   .mat-mdc-slide-toggle-focused {
     .mdc-switch__track {
       // Usually 1px would be enough, but MDC reduces the opacity on the

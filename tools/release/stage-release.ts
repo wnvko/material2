@@ -1,4 +1,4 @@
-import * as OctokitApi from '@octokit/rest';
+import * as Octokit from '@octokit/rest';
 import chalk from 'chalk';
 import {existsSync, readFileSync, writeFileSync} from 'fs';
 import {join} from 'path';
@@ -50,7 +50,7 @@ class StageReleaseTask extends BaseReleaseTask {
   git: GitClient;
 
   /** Octokit API instance that can be used to make Github API calls. */
-  githubApi: OctokitApi;
+  githubApi: Octokit;
 
   constructor(
       public projectDir: string, public packagesDir: string, public repositoryOwner: string,
@@ -68,7 +68,7 @@ class StageReleaseTask extends BaseReleaseTask {
       process.exit(1);
     }
 
-    this.githubApi = new OctokitApi();
+    this.githubApi = new Octokit();
   }
 
   async run() {
@@ -92,7 +92,7 @@ class StageReleaseTask extends BaseReleaseTask {
     this.verifyNoUncommittedChanges();
 
     // Branch that will be used to stage the release for the new selected version.
-    const publishBranch = this.switchToPublishBranch(newVersion);
+    const publishBranch = await this.assertValidPublishBranch(newVersion);
 
     this.verifyLocalCommitsMatchUpstream(publishBranch);
     this._verifyAngularPeerDependencyVersion(newVersion);

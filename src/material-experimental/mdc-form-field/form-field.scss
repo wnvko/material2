@@ -1,18 +1,24 @@
-// TODO(devversion): do not import all text-field styles. Use feature targeting once available.
-@import '@material/textfield/mdc-text-field';
+@import '@material/textfield/mixins.import';
+
 @import 'form-field-sizing';
 @import 'form-field-subscript';
-@import 'form-field-bottom-line';
+@import 'form-field-focus-overlay';
 @import 'mdc-text-field-textarea-overrides';
 @import 'mdc-text-field-structure-overrides';
+
+// Base styles for MDC text-field, notched-outline, floating label and line-ripple.
+@include mdc-text-field-without-ripple($query: $mat-base-styles-without-animation-query);
+@include mdc-floating-label-core-styles($query: $mat-base-styles-without-animation-query);
+@include mdc-notched-outline-core-styles($query: $mat-base-styles-without-animation-query);
+@include mdc-line-ripple-core-styles($query: $mat-base-styles-without-animation-query);
 
 // MDC text-field overwrites.
 @include _mat-mdc-text-field-textarea-overrides();
 @include _mat-mdc-text-field-structure-overrides();
 
-// Include the subscript and bottom-line styles.
+// Include the subscript and focus-overlay styles.
 @include _mat-form-field-subscript();
-@include _mat-form-field-bottom-line();
+@include _mat-form-field-focus-overlay();
 
 // Host element of the form-field. It contains the mdc-text-field wrapper
 // and the subscript wrapper.
@@ -32,6 +38,12 @@
   width: 100%;
 }
 
+// The MDC text-field should stretch to the width of the host `<mat-form-field>` element.
+// This allows developers to control the width without needing custom CSS overrides.
+.mat-mdc-text-field-wrapper {
+  width: 100%;
+}
+
 // Infix that contains the projected content (usually an input or a textarea). We ensure
 // that the projected form-field control and content can stretch as needed, but we also
 // apply a default infix width to make the form-field's look natural.
@@ -46,4 +58,13 @@
   // default vertical space as text-field inputs (with respect to the vertical padding).
   min-height: $mdc-text-field-height;
   box-sizing: border-box;
+}
+
+// In order to make it possible for developers to disable animations for form-fields,
+// we only activate the animation styles if animations are not explicitly disabled.
+.mat-mdc-form-field:not(.mat-form-field-no-animations) {
+  @include mdc-text-field-without-ripple($query: animation);
+  @include mdc-floating-label-core-styles($query: animation);
+  @include mdc-notched-outline-core-styles($query: animation);
+  @include mdc-line-ripple-core-styles($query: animation);
 }

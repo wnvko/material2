@@ -6,6 +6,7 @@ export declare const MAT_RADIO_GROUP_CONTROL_VALUE_ACCESSOR: any;
 
 export declare class MatRadioButton extends _MatRadioButtonMixinBase implements OnInit, AfterViewInit, OnDestroy, CanDisableRipple, HasTabIndex {
     _animationMode?: string | undefined;
+    protected _changeDetector: ChangeDetectorRef;
     _inputElement: ElementRef<HTMLInputElement>;
     ariaDescribedby: string;
     ariaLabel: string;
@@ -32,6 +33,7 @@ export declare class MatRadioButton extends _MatRadioButtonMixinBase implements 
     _markForCheck(): void;
     _onInputChange(event: Event): void;
     _onInputClick(event: Event): void;
+    protected _setDisabled(value: boolean): void;
     focus(options?: FocusOptions): void;
     ngAfterViewInit(): void;
     ngOnDestroy(): void;
@@ -40,8 +42,8 @@ export declare class MatRadioButton extends _MatRadioButtonMixinBase implements 
     static ngAcceptInputType_disableRipple: BooleanInput;
     static ngAcceptInputType_disabled: BooleanInput;
     static ngAcceptInputType_required: BooleanInput;
-    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatRadioButton, "mat-radio-button", ["matRadioButton"], { "disableRipple": "disableRipple"; "tabIndex": "tabIndex"; "id": "id"; "name": "name"; "ariaLabel": "aria-label"; "ariaLabelledby": "aria-labelledby"; "ariaDescribedby": "aria-describedby"; "checked": "checked"; "value": "value"; "labelPosition": "labelPosition"; "disabled": "disabled"; "required": "required"; "color": "color"; }, { "change": "change"; }, never>;
-    static ɵfac: i0.ɵɵFactoryDef<MatRadioButton>;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatRadioButton, "mat-radio-button", ["matRadioButton"], { "disableRipple": "disableRipple"; "tabIndex": "tabIndex"; "id": "id"; "name": "name"; "ariaLabel": "aria-label"; "ariaLabelledby": "aria-labelledby"; "ariaDescribedby": "aria-describedby"; "checked": "checked"; "value": "value"; "labelPosition": "labelPosition"; "disabled": "disabled"; "required": "required"; "color": "color"; }, { "change": "change"; }, never, ["*"]>;
+    static ɵfac: i0.ɵɵFactoryDef<MatRadioButton, [{ optional: true; }, null, null, null, null, { optional: true; }, { optional: true; }]>;
 }
 
 export declare class MatRadioChange {
@@ -87,10 +89,10 @@ export declare class MatRadioGroup implements AfterContentInit, ControlValueAcce
     static ngAcceptInputType_disabled: BooleanInput;
     static ngAcceptInputType_required: BooleanInput;
     static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatRadioGroup, "mat-radio-group", ["matRadioGroup"], { "color": "color"; "name": "name"; "labelPosition": "labelPosition"; "value": "value"; "selected": "selected"; "disabled": "disabled"; "required": "required"; }, { "change": "change"; }, ["_radios"]>;
-    static ɵfac: i0.ɵɵFactoryDef<MatRadioGroup>;
+    static ɵfac: i0.ɵɵFactoryDef<MatRadioGroup, never>;
 }
 
 export declare class MatRadioModule {
     static ɵinj: i0.ɵɵInjectorDef<MatRadioModule>;
-    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatRadioModule, [typeof i1.MatRadioGroup, typeof i1.MatRadioButton], [typeof i2.CommonModule, typeof i3.MatRippleModule, typeof i3.MatCommonModule], [typeof i1.MatRadioGroup, typeof i1.MatRadioButton, typeof i3.MatCommonModule]>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatRadioModule, [typeof i1.MatRadioGroup, typeof i1.MatRadioButton], [typeof i2.MatRippleModule, typeof i2.MatCommonModule], [typeof i1.MatRadioGroup, typeof i1.MatRadioButton, typeof i2.MatCommonModule]>;
 }

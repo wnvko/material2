@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -26,11 +27,14 @@ const EXAMPLES = [
   imports: [
     MatButtonModule,
     MatDatepickerModule,
+    MatNativeDateModule,
     MatExpansionModule,
     MatIconModule,
     MatInputModule,
   ],
   declarations: EXAMPLES,
+  exports: EXAMPLES,
+  entryComponents: EXAMPLES,
 })
 export class ExpansionExamplesModule {
 }

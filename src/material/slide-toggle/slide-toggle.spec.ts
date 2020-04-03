@@ -9,9 +9,11 @@ import {
   flushMicrotasks,
   TestBed,
   tick,
+  inject,
 } from '@angular/core/testing';
 import {FormControl, FormsModule, NgModel, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
+import {FocusMonitor} from '@angular/cdk/a11y';
 import {MatSlideToggle, MatSlideToggleChange, MatSlideToggleModule} from './index';
 import {MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS} from './slide-toggle-config';
 
@@ -310,6 +312,19 @@ describe('MatSlideToggle without forms', () => {
       expect(document.activeElement).toBe(inputElement);
     });
 
+    it('should not manually move focus to underlying input when focus comes from mouse or touch',
+      inject([FocusMonitor], (focusMonitor: FocusMonitor) => {
+        expect(document.activeElement).not.toBe(inputElement);
+
+        focusMonitor.focusVia(slideToggleElement, 'mouse');
+        fixture.detectChanges();
+        expect(document.activeElement).not.toBe(inputElement);
+
+        focusMonitor.focusVia(slideToggleElement, 'touch');
+        fixture.detectChanges();
+        expect(document.activeElement).not.toBe(inputElement);
+      }));
+
     it('should set a element class if labelPosition is set to before', () => {
       expect(slideToggleElement.classList).not.toContain('mat-slide-toggle-label-before');
 
@@ -341,6 +356,13 @@ describe('MatSlideToggle without forms', () => {
       dispatchFakeEvent(labelElement, 'mouseup');
 
       expect(slideToggleElement.querySelectorAll(rippleSelector).length).toBe(0);
+    });
+
+    it('should have a focus indicator', () => {
+      const slideToggleRippleNativeElement =
+          slideToggleElement.querySelector('.mat-slide-toggle-ripple')!;
+
+      expect(slideToggleRippleNativeElement.classList.contains('mat-focus-indicator')).toBe(true);
     });
   });
 

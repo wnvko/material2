@@ -31,6 +31,7 @@ var nodeModulesPath = '$NODE_MODULES_BASE_PATH';
 var pathMapping = {
   'tslib': 'node:tslib/tslib.js',
   'moment': 'node:moment/min/moment-with-locales.min.js',
+  'kagekiri': 'node:kagekiri/dist/kagekiri.umd.min.js',
 
   'rxjs': 'node:rxjs/bundles/rxjs.umd.min.js',
   'rxjs/operators': 'tools/system-rxjs-operators.js',
@@ -46,7 +47,6 @@ var pathMapping = {
   '@material/drawer': 'node:@material/drawer/dist/mdc.drawer.js',
   '@material/floating-label': 'node:@material/floating-label/dist/mdc.floatingLabel.js',
   '@material/form-field': 'node:@material/form-field/dist/mdc.formField.js',
-  '@material/grid-list': '@material/grid-list/dist/mdc.gridList.js',
   '@material/icon-button': 'node:@material/icon-button/dist/mdc.iconButton.js',
   '@material/line-ripple': 'node:@material/line-ripple/dist/mdc.lineRipple.js',
   '@material/linear-progress': 'node:@material/linear-progress/dist/mdc.linearProgress.js',
@@ -122,9 +122,10 @@ function setupFrameworkPackages() {
       var entryPointName = segments.length ? moduleName + '/' + segments.join('/') : moduleName;
       var bundlePath = 'bundles/' + bundleName;
       // When running with Ivy, we need to load the ngcc processed UMD bundles.
-      // These are stored in the "__ivy_ngcc_" folder that has been generated
-      // since we run ngcc with "--create-ivy-entry-points".
-      if (isRunningWithIvy) {
+      // These are stored in the `__ivy_ngcc_` folder that has been generated
+      // since we run ngcc with `--create-ivy-entry-points`. Filter out the compiler
+      // package because it won't be processed by ngcc.
+      if (isRunningWithIvy && entryPointName !== '@angular/compiler') {
         bundlePath = '__ivy_ngcc__/' + bundlePath;
       }
       packagesConfig[entryPointName] = {
@@ -148,6 +149,8 @@ function setupLocalReleasePackages() {
   configureEntryPoint('material');
   configureEntryPoint('material-experimental');
   configureEntryPoint('material-moment-adapter');
+  configureEntryPoint('google-maps');
+  configureEntryPoint('youtube-player');
 
   // Configure all secondary entry-points.
   CDK_PACKAGES.forEach(function(pkgName) {
@@ -162,8 +165,9 @@ function setupLocalReleasePackages() {
   MATERIAL_PACKAGES.forEach(function(pkgName) {
     configureEntryPoint('material', pkgName);
   });
-  configureEntryPoint('google-maps');
-  configureEntryPoint('youtube-player');
+
+  // Private secondary entry-points.
+  configureEntryPoint('components-examples', 'private');
 }
 
 /** Configures the specified package, its entry-point and its examples. */

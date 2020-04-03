@@ -59,12 +59,12 @@ export declare class MatInput extends _MatInputMixinBase implements MatFormField
     static ngAcceptInputType_required: BooleanInput;
     static ngAcceptInputType_value: any;
     static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatInput, "input[matInput], textarea[matInput], select[matNativeControl],      input[matNativeControl], textarea[matNativeControl]", ["matInput"], { "disabled": "disabled"; "id": "id"; "placeholder": "placeholder"; "required": "required"; "type": "type"; "errorStateMatcher": "errorStateMatcher"; "value": "value"; "readonly": "readonly"; }, {}, never>;
-    static ɵfac: i0.ɵɵFactoryDef<MatInput>;
+    static ɵfac: i0.ɵɵFactoryDef<MatInput, [null, null, { optional: true; self: true; }, { optional: true; }, { optional: true; }, null, { optional: true; self: true; }, null, null]>;
 }
 
 export declare class MatInputModule {
     static ɵinj: i0.ɵɵInjectorDef<MatInputModule>;
-    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatInputModule, [typeof i1.MatInput, typeof i2.MatTextareaAutosize], [typeof i3.CommonModule, typeof i4.TextFieldModule, typeof i5.MatFormFieldModule], [typeof i4.TextFieldModule, typeof i5.MatFormFieldModule, typeof i1.MatInput, typeof i2.MatTextareaAutosize]>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatInputModule, [typeof i1.MatInput, typeof i2.MatTextareaAutosize], [typeof i3.TextFieldModule, typeof i4.MatFormFieldModule], [typeof i3.TextFieldModule, typeof i4.MatFormFieldModule, typeof i1.MatInput, typeof i2.MatTextareaAutosize]>;
 }
 
 export declare class MatTextareaAutosize extends CdkTextareaAutosize {
@@ -76,9 +76,6 @@ export declare class MatTextareaAutosize extends CdkTextareaAutosize {
     set matAutosizeMinRows(value: number);
     get matTextareaAutosize(): boolean;
     set matTextareaAutosize(value: boolean);
-    static ngAcceptInputType_enabled: BooleanInput;
-    static ngAcceptInputType_maxRows: NumberInput;
-    static ngAcceptInputType_minRows: NumberInput;
     static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatTextareaAutosize, "textarea[mat-autosize], textarea[matTextareaAutosize]", ["matTextareaAutosize"], { "cdkAutosizeMinRows": "cdkAutosizeMinRows"; "cdkAutosizeMaxRows": "cdkAutosizeMaxRows"; "matAutosizeMinRows": "matAutosizeMinRows"; "matAutosizeMaxRows": "matAutosizeMaxRows"; "matAutosize": "mat-autosize"; "matTextareaAutosize": "matTextareaAutosize"; }, {}, never>;
-    static ɵfac: i0.ɵɵFactoryDef<MatTextareaAutosize>;
+    static ɵfac: i0.ɵɵFactoryDef<MatTextareaAutosize, never>;
 }

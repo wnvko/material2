@@ -14,8 +14,10 @@ import {
   EventEmitter,
   Input,
   Output,
-  ViewEncapsulation
+  ViewEncapsulation,
+  AfterContentInit
 } from '@angular/core';
+import {chipCssClasses} from '@material/chips';
 import {take} from 'rxjs/operators';
 import {MatChip} from './chip';
 
@@ -42,6 +44,7 @@ export class MatChipSelectionChange {
   inputs: ['color', 'disableRipple', 'tabIndex'],
   host: {
     'role': 'option',
+    'class': 'mat-mdc-focus-indicator',
     '[class.mat-mdc-chip-disabled]': 'disabled',
     '[class.mat-mdc-chip-highlighted]': 'highlighted',
     '[class.mat-mdc-chip-with-avatar]': 'leadingIcon',
@@ -61,7 +64,7 @@ export class MatChipSelectionChange {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MatChipOption extends MatChip {
+export class MatChipOption extends MatChip implements AfterContentInit {
 
   /** Whether the chip list is selectable. */
   chipListSelectable: boolean = true;
@@ -115,6 +118,14 @@ export class MatChipOption extends MatChip {
   /** Emitted when the chip is selected or deselected. */
   @Output() readonly selectionChange: EventEmitter<MatChipSelectionChange> =
       new EventEmitter<MatChipSelectionChange>();
+
+  ngAfterContentInit() {
+    super.ngAfterContentInit();
+
+    if (this.selected && this.leadingIcon) {
+      this.leadingIcon.setClass(chipCssClasses.HIDDEN_LEADING_ICON, true);
+    }
+  }
 
   /** Selects the chip. */
   select(): void {
@@ -227,8 +238,4 @@ export class MatChipOption extends MatChip {
 
   static ngAcceptInputType_selectable: BooleanInput;
   static ngAcceptInputType_selected: BooleanInput;
-  static ngAcceptInputType_disabled: BooleanInput;
-  static ngAcceptInputType_removable: BooleanInput;
-  static ngAcceptInputType_highlighted: BooleanInput;
-  static ngAcceptInputType_disableRipple: BooleanInput;
 }

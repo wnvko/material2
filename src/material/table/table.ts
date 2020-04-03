@@ -6,8 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {BooleanInput} from '@angular/cdk/coercion';
-import {CDK_TABLE_TEMPLATE, CdkTable} from '@angular/cdk/table';
+import {CDK_TABLE_TEMPLATE, CdkTable, CDK_TABLE} from '@angular/cdk/table';
 import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/core';
 
 /**
@@ -21,7 +20,10 @@ import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/co
   host: {
     'class': 'mat-table',
   },
-  providers: [{provide: CdkTable, useExisting: MatTable}],
+  providers: [
+    {provide: CdkTable, useExisting: MatTable},
+    {provide: CDK_TABLE, useExisting: MatTable}
+  ],
   encapsulation: ViewEncapsulation.None,
   // See note on CdkTable for explanation on why this uses the default change detection strategy.
   // tslint:disable-next-line:validate-decorators
@@ -30,6 +32,4 @@ import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/co
 export class MatTable<T> extends CdkTable<T> {
   /** Overrides the sticky CSS class set by the `CdkTable`. */
   protected stickyCssClass = 'mat-table-sticky';
-
-  static ngAcceptInputType_multiTemplateDataRows: BooleanInput;
 }

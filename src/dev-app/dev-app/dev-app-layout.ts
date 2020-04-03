@@ -7,7 +7,6 @@
  */
 
 import {Directionality} from '@angular/cdk/bidi';
-import {OverlayContainer} from '@angular/cdk/overlay';
 import {ChangeDetectorRef, Component, ElementRef, Inject, ViewEncapsulation} from '@angular/core';
 import {DevAppRippleOptions} from './ripple-options';
 import {DevAppDirectionality} from './dev-app-directionality';
@@ -21,6 +20,7 @@ import {DevAppDirectionality} from './dev-app-directionality';
 })
 export class DevAppLayout {
   dark = false;
+  strongFocus = false;
   navItems = [
     {name: 'Examples', route: '/examples'},
     {name: 'Autocomplete', route: '/autocomplete'},
@@ -31,6 +31,8 @@ export class DevAppLayout {
     {name: 'Card', route: '/card'},
     {name: 'Checkbox', route: '/checkbox'},
     {name: 'Chips', route: '/chips'},
+    {name: 'Clipboard', route: '/clipboard'},
+    {name: 'Column Resize', route: 'column-resize'},
     {name: 'Connected Overlay', route: '/connected-overlay'},
     {name: 'Datepicker', route: '/datepicker'},
     {name: 'Dialog', route: '/dialog'},
@@ -74,6 +76,7 @@ export class DevAppLayout {
     {name: 'MDC Checkbox', route: '/mdc-checkbox'},
     {name: 'MDC Chips', route: '/mdc-chips'},
     {name: 'MDC Input', route: '/mdc-input'},
+    {name: 'MDC List', route: '/mdc-list'},
     {name: 'MDC Menu', route: '/mdc-menu'},
     {name: 'MDC Radio', route: '/mdc-radio'},
     {name: 'MDC Progress Bar', route: '/mdc-progress-bar'},
@@ -85,8 +88,7 @@ export class DevAppLayout {
   ];
 
   constructor(
-      private _element: ElementRef<HTMLElement>, private _overlayContainer: OverlayContainer,
-      public rippleOptions: DevAppRippleOptions,
+      private _element: ElementRef<HTMLElement>, public rippleOptions: DevAppRippleOptions,
       @Inject(Directionality) public dir: DevAppDirectionality, cdr: ChangeDetectorRef) {
     dir.change.subscribe(() => cdr.markForCheck());
   }
@@ -111,11 +113,21 @@ export class DevAppLayout {
     this.dark = !this.dark;
 
     if (this.dark) {
-      this._element.nativeElement.classList.add(darkThemeClass);
-      this._overlayContainer.getContainerElement().classList.add(darkThemeClass);
+      document.body.classList.add(darkThemeClass);
     } else {
-      this._element.nativeElement.classList.remove(darkThemeClass);
-      this._overlayContainer.getContainerElement().classList.remove(darkThemeClass);
+      document.body.classList.remove(darkThemeClass);
+    }
+  }
+
+  toggleStrongFocus() {
+    const strongFocusClass = 'demo-strong-focus';
+
+    this.strongFocus = !this.strongFocus;
+
+    if (this.strongFocus) {
+      document.body.classList.add(strongFocusClass);
+    } else {
+      document.body.classList.remove(strongFocusClass);
     }
   }
 }

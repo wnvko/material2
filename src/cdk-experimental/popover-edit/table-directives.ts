@@ -104,21 +104,25 @@ export class CdkEditable implements AfterViewInit, OnDestroy {
 
       // Track focus within the table to hide/show/make focusable hover content.
       fromEventPattern<FocusEvent>(
-          (handler) => element.addEventListener('focus', handler, true),
-          (handler) => element.removeEventListener('focus', handler, true)
+          handler => element.addEventListener('focus', handler, true),
+          handler => element.removeEventListener('focus', handler, true)
           ).pipe(
               takeUntil(this.destroyed),
               toClosest(ROW_SELECTOR),
               share(),
               ).subscribe(this.editEventDispatcher.focused);
-      fromEventPattern<FocusEvent>(
-          (handler) => element.addEventListener('blur', handler, true),
-          (handler) => element.removeEventListener('blur', handler, true)
-          ).pipe(
-              takeUntil(this.destroyed),
-              mapTo(null),
-              share(),
-              ).subscribe(this.editEventDispatcher.focused);
+
+      merge(
+        fromEventPattern<FocusEvent>(
+          handler => element.addEventListener('blur', handler, true),
+          handler => element.removeEventListener('blur', handler, true)
+        ),
+        fromEvent<KeyboardEvent>(element, 'keydown').pipe(filter(event => event.key === 'Escape'))
+      ).pipe(
+        takeUntil(this.destroyed),
+        mapTo(null),
+        share(),
+      ).subscribe(this.editEventDispatcher.focused);
 
       // Keep track of rows within the table. This is used to know which rows with hover content
       // are first or last in the table. They are kept focusable in case focus enters from above
@@ -148,15 +152,16 @@ export class CdkEditable implements AfterViewInit, OnDestroy {
 }
 
 const POPOVER_EDIT_HOST_BINDINGS = {
-  'tabIndex': '0',
+  '[attr.tabindex]': 'disabled ? null : 0',
   'class': 'cdk-popover-edit-cell',
-  '[attr.aria-haspopup]': 'true',
+  '[attr.aria-haspopup]': '!disabled',
 };
 
 const POPOVER_EDIT_INPUTS = [
   'template: cdkPopoverEdit',
   'context: cdkPopoverEditContext',
   'colspan: cdkPopoverEditColspan',
+  'disabled: cdkPopoverEditDisabled',
 ];
 
 /**
@@ -199,6 +204,22 @@ export class CdkPopoverEdit<C> implements AfterViewInit, OnDestroy {
     }
   }
   private _colspan: CdkPopoverEditColspan = {};
+
+  /** Whether popover edit is disabled for this cell. */
+  get disabled(): boolean {
+    return this._disabled;
+  }
+  set disabled(value: boolean) {
+    this._disabled = value;
+
+    if (value) {
+      this.services.editEventDispatcher.doneEditingCell(this.elementRef.nativeElement!);
+      this.services.editEventDispatcher.disabledCells.set(this.elementRef.nativeElement!, true);
+    } else {
+      this.services.editEventDispatcher.disabledCells.delete(this.elementRef.nativeElement!);
+    }
+  }
+  private _disabled = false;
 
   protected focusTrap?: FocusTrap;
   protected overlayRef?: OverlayRef;
@@ -439,8 +460,10 @@ export class CdkRowHoverContent implements AfterViewInit, OnDestroy {
             if (!this.viewRef) {
               this.viewRef = this.viewContainerRef.createEmbeddedView(this.templateRef, {});
               this.initElement(this.viewRef.rootNodes[0] as HTMLElement);
+              this.viewRef.markForCheck();
             } else if (this.viewContainerRef.indexOf(this.viewRef) === -1) {
               this.viewContainerRef.insert(this.viewRef!);
+              this.viewRef.markForCheck();
             }
 
             if (eventState === HoverContentState.ON) {

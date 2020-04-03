@@ -111,7 +111,9 @@ export class ProtractorElement implements TestElement {
     const modifierKeys = toProtractorModifierKeys(modifiers);
     const keys = rest.map(k => typeof k === 'string' ? k.split('') : [keyMap[k]])
         .reduce((arr, k) => arr.concat(k), [])
-        .map(k => Key.chord(...modifierKeys, k));
+        // Key.chord doesn't work well with geckodriver (mozilla/geckodriver#1502),
+        // so avoid it if no modifier keys are required.
+        .map(k => modifierKeys.length > 0 ? Key.chord(...modifierKeys, k) : k);
 
     return this.element.sendKeys(...keys);
   }
@@ -145,5 +147,9 @@ export class ProtractorElement implements TestElement {
           return (Element.prototype.matches ||
                   Element.prototype.msMatchesSelector).call(arguments[0], arguments[1])
           `, this.element, selector);
+  }
+
+  async isFocused(): Promise<boolean> {
+    return this.element.equals(browser.driver.switchTo().activeElement());
   }
 }

@@ -30,6 +30,11 @@ export const DEV_APP_ROUTES: Routes = [
   {path: 'card', loadChildren: 'card/card-demo-module#CardDemoModule'},
   {path: 'checkbox', loadChildren: 'checkbox/checkbox-demo-module#CheckboxDemoModule'},
   {path: 'chips', loadChildren: 'chips/chips-demo-module#ChipsDemoModule'},
+  {path: 'clipboard', loadChildren: 'clipboard/clipboard-demo-module#ClipboardDemoModule'},
+  {
+    path: 'column-resize',
+    loadChildren: 'column-resize/column-resize-demo-module#ColumnResizeDemoModule'
+  },
   {path: 'datepicker', loadChildren: 'datepicker/datepicker-demo-module#DatepickerDemoModule'},
   {path: 'dialog', loadChildren: 'dialog/dialog-demo-module#DialogDemoModule'},
   {path: 'drawer', loadChildren: 'drawer/drawer-demo-module#DrawerDemoModule'},
@@ -64,6 +69,7 @@ export const DEV_APP_ROUTES: Routes = [
   },
   {path: 'mdc-chips', loadChildren: 'mdc-chips/mdc-chips-demo-module#MdcChipsDemoModule'},
   {path: 'mdc-input', loadChildren: 'mdc-input/mdc-input-demo-module#MdcInputDemoModule'},
+  {path: 'mdc-list', loadChildren: 'mdc-list/mdc-list-demo-module#MdcListDemoModule'},
   {path: 'mdc-menu', loadChildren: 'mdc-menu/mdc-menu-demo-module#MdcMenuDemoModule'},
   {path: 'mdc-radio', loadChildren: 'mdc-radio/mdc-radio-demo-module#MdcRadioDemoModule'},
   {

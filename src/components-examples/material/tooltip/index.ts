@@ -1,6 +1,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatInputModule} from '@angular/material/input';
@@ -51,9 +52,11 @@ const EXAMPLES = [
     MatSelectModule,
     MatTooltipModule,
     ReactiveFormsModule,
+    ScrollingModule, // Required for the auto-scrolling example
   ],
   declarations: EXAMPLES,
   exports: EXAMPLES,
+  entryComponents: EXAMPLES,
 })
 export class TooltipExamplesModule {
 }

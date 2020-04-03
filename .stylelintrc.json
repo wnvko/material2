@@ -1,11 +1,11 @@
 {
   "plugins": [
-    "./tools/stylelint/no-prefixes/no-prefixes.js",
-    "./tools/stylelint/no-ampersand-beyond-selector-start/index.js",
-    "./tools/stylelint/selector-no-deep/index.js",
-    "./tools/stylelint/no-nested-mixin/index.js",
-    "./tools/stylelint/no-concrete-rules/index.js",
-    "./tools/stylelint/no-top-level-ampersand-in-mixin/index.js"
+    "./tools/stylelint/no-prefixes/index.js",
+    "./tools/stylelint/no-ampersand-beyond-selector-start.js",
+    "./tools/stylelint/selector-no-deep.js",
+    "./tools/stylelint/no-nested-mixin.js",
+    "./tools/stylelint/no-concrete-rules.js",
+    "./tools/stylelint/no-top-level-ampersand-in-mixin.js"
   ],
   "rules": {
     "material/no-prefixes": [true, {
@@ -44,7 +44,7 @@
 
     "unit-case": "lower",
     "unit-no-unknown": true,
-    "unit-whitelist": ["px", "%", "deg", "ms", "em", "vh", "vw", "vmin"],
+    "unit-whitelist": ["px", "%", "deg", "s", "ms", "em", "vh", "vw", "vmin"],
 
     "value-list-comma-space-after": "always-single-line",
     "value-list-comma-space-before": "never",
@@ -87,7 +87,9 @@
     "selector-max-id": 0,
     "no-missing-end-of-source-newline": true,
     "no-eol-whitespace": true,
-    "max-line-length": 100,
+    "max-line-length": [100, {
+      "ignorePattern": "/https?://.*/"
+    }],
     "linebreaks": "unix",
     "selector-class-pattern": ["^_?(mat-|cdk-|example-|demo-|ng-|mdc-|map-)", {
       "resolveNestedSelectors": true

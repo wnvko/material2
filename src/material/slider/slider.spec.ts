@@ -216,6 +216,10 @@ describe('MatSlider', () => {
       expect(event.defaultPrevented).toBe(true);
     });
 
+    it('should have a focus indicator', () => {
+      expect(sliderNativeElement.classList.contains('mat-focus-indicator')).toBe(true);
+    });
+
   });
 
   describe('disabled slider', () => {
@@ -1659,7 +1663,7 @@ function dispatchSlideEvent(sliderElement: HTMLElement, percent: number): void {
   const dimensions = trackElement.getBoundingClientRect();
   const x = dimensions.left + (dimensions.width * percent);
   const y = dimensions.top + (dimensions.height * percent);
-  dispatchMouseEvent(document.body, 'mousemove', x, y);
+  dispatchMouseEvent(document, 'mousemove', x, y);
 }
 
 /**
@@ -1686,7 +1690,7 @@ function dispatchSlideEndEvent(sliderElement: HTMLElement, percent: number): voi
   const dimensions = trackElement.getBoundingClientRect();
   const x = dimensions.left + (dimensions.width * percent);
   const y = dimensions.top + (dimensions.height * percent);
-  dispatchMouseEvent(document.body, 'mouseup', x, y);
+  dispatchMouseEvent(document, 'mouseup', x, y);
 }
 
 /**

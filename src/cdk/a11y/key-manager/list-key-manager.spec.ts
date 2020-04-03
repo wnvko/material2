@@ -9,7 +9,6 @@ import {ActiveDescendantKeyManager} from './activedescendant-key-manager';
 import {FocusKeyManager} from './focus-key-manager';
 import {ListKeyManager, ListKeyManagerModifierKey, ListKeyManagerOption} from './list-key-manager';
 
-
 class FakeFocusable {
   /** Whether the item is disabled or not. */
   disabled = false;
@@ -33,7 +32,9 @@ class FakeQueryList<T> extends QueryList<T> {
   set length(_) { /* Empty setter for base class constructor */  }
   get first() { return this.items[0]; }
   toArray() { return this.items; }
-  some() { return this.items.some.apply(this.items, arguments); }
+  some(...args: [(value: T, index: number, array: T[]) => unknown, any?]) {
+    return this.items.some(...args);
+  }
   notifyOnChanges() { this.changes.next(this); }
 }
 
@@ -66,7 +67,14 @@ describe('Key managers', () => {
   });
 
   describe('ListKeyManager', () => {
-    let keyManager: ListKeyManager<FakeFocusable>;
+    // We have a spy on the `setActiveItem` method of the list key manager. That method has
+    // multiple overloads and TypeScript is unable to infer the right parameters when calls are
+    // checked using jasmine's `hasBeenCalledWith` matcher. We work around this by explicitly
+    // specifying the overload signature that should be used.
+    // TODO: remove if https://github.com/DefinitelyTyped/DefinitelyTyped/issues/42455 is solved.
+    let keyManager: Omit<ListKeyManager<FakeFocusable>, 'setActiveItem'> & {
+      setActiveItem(index: number): void;
+    };
 
     beforeEach(() => {
       itemList.items = [

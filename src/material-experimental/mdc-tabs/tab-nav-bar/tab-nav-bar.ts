@@ -36,7 +36,7 @@ import {Directionality} from '@angular/cdk/bidi';
 import {ViewportRuler} from '@angular/cdk/scrolling';
 import {Platform} from '@angular/cdk/platform';
 import {MatInkBar, MatInkBarItem, MatInkBarFoundation} from '../ink-bar';
-import {BooleanInput, coerceBooleanProperty, NumberInput} from '@angular/cdk/coercion';
+import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 
@@ -58,6 +58,7 @@ import {takeUntil} from 'rxjs/operators';
     '[class.mat-primary]': 'color !== "warn" && color !== "accent"',
     '[class.mat-accent]': 'color === "accent"',
     '[class.mat-warn]': 'color === "warn"',
+    '[class._mat-animation-noopable]' : '_animationMode === "NoopAnimations"',
   },
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -104,7 +105,6 @@ export class MatTabNav extends _MatTabNavBase implements AfterContentInit {
 
   static ngAcceptInputType_fitInkBarToContent: BooleanInput;
   static ngAcceptInputType_disableRipple: BooleanInput;
-  static ngAcceptInputType_selectedIndex: NumberInput;
 }
 
 /**
@@ -119,7 +119,7 @@ export class MatTabNav extends _MatTabNavBase implements AfterContentInit {
   templateUrl: 'tab-link.html',
   styleUrls: ['tab-link.css'],
   host: {
-    'class': 'mdc-tab mat-mdc-tab-link',
+    'class': 'mdc-tab mat-mdc-tab-link mat-mdc-focus-indicator',
     '[attr.aria-current]': 'active ? "page" : null',
     '[attr.aria-disabled]': 'disabled',
     '[attr.tabIndex]': 'tabIndex',
@@ -156,7 +156,4 @@ export class MatTabLink extends _MatTabLinkBase implements MatInkBarItem, OnInit
     super.ngOnDestroy();
     this._foundation.destroy();
   }
-
-  static ngAcceptInputType_disabled: BooleanInput;
-  static ngAcceptInputType_disableRipple: BooleanInput;
 }

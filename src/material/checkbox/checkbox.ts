@@ -70,7 +70,7 @@ export const MAT_CHECKBOX_CONTROL_VALUE_ACCESSOR: any = {
  * Represents the different states that require custom transitions between them.
  * @docs-private
  */
-export enum TransitionCheckState {
+export const enum TransitionCheckState {
   /** The initial state of the component before any user interaction. */
   Init,
   /** The state representing the component when it's becoming checked. */
@@ -337,7 +337,11 @@ export class MatCheckbox extends _MatCheckboxMixinBase implements ControlValueAc
   }
 
   _getAriaChecked(): 'true' | 'false' | 'mixed' {
-    return this.checked ? 'true' : (this.indeterminate ? 'mixed' : 'false');
+    if (this.checked) {
+      return 'true';
+    }
+
+    return this.indeterminate ? 'mixed' : 'false';
   }
 
   private _transitionCheckState(newState: TransitionCheckState) {

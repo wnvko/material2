@@ -55,8 +55,8 @@ export declare class MatCheckbox extends _MatCheckboxMixinBase implements Contro
     static ngAcceptInputType_disabled: BooleanInput;
     static ngAcceptInputType_indeterminate: BooleanInput;
     static ngAcceptInputType_required: BooleanInput;
-    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatCheckbox, "mat-checkbox", ["matCheckbox"], { "disableRipple": "disableRipple"; "color": "color"; "tabIndex": "tabIndex"; "ariaLabel": "aria-label"; "ariaLabelledby": "aria-labelledby"; "id": "id"; "required": "required"; "labelPosition": "labelPosition"; "name": "name"; "value": "value"; "checked": "checked"; "disabled": "disabled"; "indeterminate": "indeterminate"; }, { "change": "change"; "indeterminateChange": "indeterminateChange"; }, never>;
-    static ɵfac: i0.ɵɵFactoryDef<MatCheckbox>;
+    static ɵcmp: i0.ɵɵComponentDefWithMeta<MatCheckbox, "mat-checkbox", ["matCheckbox"], { "disableRipple": "disableRipple"; "color": "color"; "tabIndex": "tabIndex"; "ariaLabel": "aria-label"; "ariaLabelledby": "aria-labelledby"; "id": "id"; "required": "required"; "labelPosition": "labelPosition"; "name": "name"; "value": "value"; "checked": "checked"; "disabled": "disabled"; "indeterminate": "indeterminate"; }, { "change": "change"; "indeterminateChange": "indeterminateChange"; }, never, ["*"]>;
+    static ɵfac: i0.ɵɵFactoryDef<MatCheckbox, [null, null, null, null, { attribute: "tabindex"; }, { optional: true; }, { optional: true; }, { optional: true; }]>;
 }
 
 export declare class MatCheckboxChange {
@@ -73,15 +73,15 @@ export interface MatCheckboxDefaultOptions {
 
 export declare class MatCheckboxModule {
     static ɵinj: i0.ɵɵInjectorDef<MatCheckboxModule>;
-    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatCheckboxModule, [typeof i2.MatCheckbox], [typeof i3.CommonModule, typeof i4.MatRippleModule, typeof i4.MatCommonModule, typeof i5.ObserversModule, typeof _MatCheckboxRequiredValidatorModule], [typeof i2.MatCheckbox, typeof i4.MatCommonModule, typeof _MatCheckboxRequiredValidatorModule]>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<MatCheckboxModule, [typeof i2.MatCheckbox], [typeof i3.MatRippleModule, typeof i3.MatCommonModule, typeof i4.ObserversModule, typeof _MatCheckboxRequiredValidatorModule], [typeof i2.MatCheckbox, typeof i3.MatCommonModule, typeof _MatCheckboxRequiredValidatorModule]>;
 }
 
 export declare class MatCheckboxRequiredValidator extends CheckboxRequiredValidator {
     static ɵdir: i0.ɵɵDirectiveDefWithMeta<MatCheckboxRequiredValidator, "mat-checkbox[required][formControlName],             mat-checkbox[required][formControl], mat-checkbox[required][ngModel]", never, {}, {}, never>;
-    static ɵfac: i0.ɵɵFactoryDef<MatCheckboxRequiredValidator>;
+    static ɵfac: i0.ɵɵFactoryDef<MatCheckboxRequiredValidator, never>;
 }
 
-export declare enum TransitionCheckState {
+export declare const enum TransitionCheckState {
     Init = 0,
     Checked = 1,
     Unchecked = 2,

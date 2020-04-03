@@ -767,6 +767,29 @@ describe('FlexibleConnectedPositionStrategy', () => {
 
     });
 
+    it('should position the panel correctly when the origin is an SVG element', () => {
+      document.body.removeChild(originElement);
+      originElement = createBlockElement('svg', 'http://www.w3.org/2000/svg');
+      document.body.appendChild(originElement);
+
+      const originRect = originElement.getBoundingClientRect();
+
+      positionStrategy
+        .setOrigin(originElement)
+        .withPositions([{
+          originX: 'start',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top'
+        }]);
+
+      attachOverlay({positionStrategy});
+
+      const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+      expect(Math.floor(overlayRect.top)).toBe(Math.floor(originRect.bottom));
+      expect(Math.floor(overlayRect.left)).toBe(Math.floor(originRect.left));
+    });
+
     it('should account for the `offsetX` pushing the overlay out of the screen', () => {
       // Position the element so it would have enough space to fit.
       originElement.style.top = '200px';
@@ -2079,6 +2102,100 @@ describe('FlexibleConnectedPositionStrategy', () => {
         expect(boundingBoxStyle.maxHeight).toBeFalsy();
       });
 
+    it('should collapse the overlay vertically if overlay is outside of viewport, but taller ' +
+      'than the minHeight', () => {
+        const bottomOffset = OVERLAY_HEIGHT / 2;
+        originElement.style.bottom = `${bottomOffset}px`;
+        originElement.style.left = '50%';
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPush(true)
+          .withPositions([{
+            overlayY: 'top',
+            overlayX: 'start',
+            originY: 'bottom',
+            originX: 'start',
+          }]);
+
+        attachOverlay({positionStrategy, minHeight: bottomOffset - 1});
+        const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+
+        expect(Math.floor(overlayRect.height)).toBe(bottomOffset);
+      });
+
+    it('should collapse the overlay vertically if overlay is outside of viewport, but taller ' +
+      'than the minHeight that is set as a pixel string', () => {
+        const bottomOffset = OVERLAY_HEIGHT / 2;
+        originElement.style.bottom = `${bottomOffset}px`;
+        originElement.style.left = '50%';
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPush(true)
+          .withPositions([{
+            overlayY: 'top',
+            overlayX: 'start',
+            originY: 'bottom',
+            originX: 'start',
+          }]);
+
+        attachOverlay({positionStrategy, minHeight: `${bottomOffset - 1}px`});
+        const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+
+        expect(Math.floor(overlayRect.height)).toBe(bottomOffset);
+      });
+
+    it('should collapse the overlay horizontally if overlay is outside of viewport, but wider ' +
+      'than the minWidth', () => {
+        const rightOffset = OVERLAY_WIDTH / 2;
+        originElement.style.top = '50%';
+        originElement.style.right = `${rightOffset}px`;
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPush(true)
+          .withPositions([{
+            overlayY: 'top',
+            overlayX: 'start',
+            originY: 'top',
+            originX: 'end',
+          }]);
+
+        attachOverlay({positionStrategy, minWidth: rightOffset});
+        const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+
+        expect(Math.floor(overlayRect.width)).toBe(rightOffset);
+      });
+
+    it('should collapse the overlay horizontally if overlay is outside of viewport, but wider ' +
+      'than the minWidth that is set as a pixel string', () => {
+        const rightOffset = OVERLAY_WIDTH / 2;
+        originElement.style.top = '50%';
+        originElement.style.right = `${rightOffset}px`;
+        originElement.style.position = 'fixed';
+
+        positionStrategy
+          .withFlexibleDimensions()
+          .withPush(true)
+          .withPositions([{
+            overlayY: 'top',
+            overlayX: 'start',
+            originY: 'top',
+            originX: 'end',
+          }]);
+
+        attachOverlay({positionStrategy, minWidth: `${rightOffset}px`});
+        const overlayRect = overlayRef.overlayElement.getBoundingClientRect();
+
+        expect(Math.floor(overlayRect.width)).toBe(rightOffset);
+      });
+
+
+
   });
 
   describe('onPositionChange with scrollable view properties', () => {
@@ -2498,8 +2615,15 @@ function createPositionedBlockElement() {
 }
 
 /** Creates a block element with a default size. */
-function createBlockElement() {
-  const element = document.createElement('div');
+function createBlockElement(tagName = 'div', namespace?: string) {
+  let element;
+
+  if (namespace) {
+    element = document.createElementNS(namespace, tagName) as HTMLElement;
+  } else {
+    element = document.createElement(tagName);
+  }
+
   element.style.width = `${DEFAULT_WIDTH}px`;
   element.style.height = `${DEFAULT_HEIGHT}px`;
   element.style.backgroundColor = 'rebeccapurple';

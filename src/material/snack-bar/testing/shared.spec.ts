@@ -1,5 +1,4 @@
 import {OverlayContainer} from '@angular/cdk/overlay';
-import {expectAsyncError} from '@angular/cdk/testing/private';
 import {HarnessLoader} from '@angular/cdk/testing';
 import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {Component, TemplateRef, ViewChild} from '@angular/core';
@@ -92,7 +91,7 @@ export function runHarnessTests(
     // retrieved. We expect an error to be thrown.
     fixture.componentInstance.openCustom();
     snackBar = await loader.getHarness(snackBarHarness);
-    await expectAsyncError(() => snackBar.getMessage(), /custom content/);
+    await expectAsync(snackBar.getMessage()).toBeRejectedWithError(/custom content/);
   });
 
   it('should be able to get action description of simple snack-bar', async () => {
@@ -104,7 +103,7 @@ export function runHarnessTests(
     // cannot be retrieved. We expect an error to be thrown.
     fixture.componentInstance.openCustom();
     snackBar = await loader.getHarness(snackBarHarness);
-    await expectAsyncError(() => snackBar.getActionDescription(), /custom content/);
+    await expectAsync(snackBar.getActionDescription()).toBeRejectedWithError(/custom content/);
   });
 
   it('should be able to check whether simple snack-bar has action', async () => {
@@ -120,7 +119,7 @@ export function runHarnessTests(
     // be found. We expect an error to be thrown.
     fixture.componentInstance.openCustom();
     snackBar = await loader.getHarness(snackBarHarness);
-    await expectAsyncError(() => snackBar.hasAction(), /custom content/);
+    await expectAsync(snackBar.hasAction()).toBeRejectedWithError(/custom content/);
   });
 
   it('should be able to dismiss simple snack-bar with action', async () => {
@@ -129,12 +128,17 @@ export function runHarnessTests(
     let actionCount = 0;
     snackBarRef.onAction().subscribe(() => actionCount++);
 
+    expect(await snackBar.isDismissed())
+        .toBe(false, 'The snackbar should be present in the DOM before dismiss');
+
     await snackBar.dismissWithAction();
     expect(actionCount).toBe(1);
+    expect(await snackBar.isDismissed())
+        .toBe(true, 'The snackbar should be absent from the DOM after dismiss');
 
     fixture.componentInstance.openSimple('No action');
     snackBar = await loader.getHarness(snackBarHarness);
-    await expectAsyncError(() => snackBar.dismissWithAction(), /without action/);
+    await expectAsync(snackBar.dismissWithAction()).toBeRejectedWithError(/without action/);
   });
 }
 

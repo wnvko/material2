@@ -1,12 +1,13 @@
 <mat-form-field>
-  <mat-select placeholder="Tooltip position" [formControl]="position">
+  <mat-label>Tooltip position</mat-label>
+  <mat-select [formControl]="position">
     <mat-option *ngFor="let positionOption of positionOptions" [value]="positionOption">
       {{positionOption}}
     </mat-option>
   </mat-select>
 </mat-form-field>
 
-<div class="example-container" cdk-scrollable>
+<div class="example-container" cdkScrollable>
   <button mat-raised-button #tooltip="matTooltip"
           matTooltip="Info about the action"
           [matTooltipPosition]="position.value"

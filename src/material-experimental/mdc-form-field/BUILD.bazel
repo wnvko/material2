@@ -18,7 +18,9 @@ ng_module(
     assets = [":form_field_scss"] + glob(["**/*.html"]),
     module_name = "@angular/material-experimental/mdc-form-field",
     deps = [
+        "//src/cdk/bidi",
         "//src/cdk/observers",
+        "//src/cdk/platform",
         "//src/material/core",
         "//src/material/form-field",
         "@npm//@angular/forms",
@@ -31,7 +33,10 @@ ng_module(
 
 sass_library(
     name = "mdc_form_field_scss_lib",
-    srcs = ["_mdc-form-field.scss"],
+    srcs = [
+        "_form-field-theme.scss",
+        "_mdc-text-field-theme-variable-refresh.scss",
+    ],
     deps = [
         ":form_field_partials",
         "//src/cdk/a11y:a11y_scss_lib",
@@ -76,7 +81,7 @@ sass_library(
 sass_library(
     name = "form_field_partials",
     srcs = [
-        "_form-field-bottom-line.scss",
+        "_form-field-focus-overlay.scss",
         "_form-field-sizing.scss",
         "_form-field-subscript.scss",
         "_mdc-text-field-structure-overrides.scss",
@@ -84,6 +89,7 @@ sass_library(
     ],
     deps = [
         "//src/material-experimental/mdc-helpers:mdc_scss_deps_lib",
+        "//src/material/core:core_scss_lib",
     ],
 )
 

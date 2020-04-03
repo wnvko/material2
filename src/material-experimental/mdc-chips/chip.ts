@@ -8,7 +8,6 @@
 
 import {Directionality} from '@angular/cdk/bidi';
 import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
-import {Platform} from '@angular/cdk/platform';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {
   AfterContentInit,
@@ -20,29 +19,28 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
+  HostListener,
   Inject,
   Input,
   NgZone,
   OnDestroy,
   Optional,
   Output,
-  ViewEncapsulation, HostListener
+  ViewEncapsulation,
+  ViewChild,
 } from '@angular/core';
 import {
   CanColor,
   CanColorCtor,
   CanDisableRipple,
   CanDisableRippleCtor,
-  MAT_RIPPLE_GLOBAL_OPTIONS,
   HasTabIndex,
   HasTabIndexCtor,
+  MatRipple,
   mixinColor,
   mixinDisableRipple,
   mixinTabIndex,
-  RippleConfig,
-  RippleGlobalOptions,
-  RippleRenderer,
-  RippleTarget,
+  RippleAnimationConfig,
 } from '@angular/material/core';
 import {MDCChipAdapter, MDCChipFoundation} from '@material/chips';
 import {numbers} from '@material/ripple';
@@ -59,6 +57,12 @@ export interface MatChipEvent {
   /** The chip the event was fired on. */
   chip: MatChip;
 }
+
+/** Configuration for the ripple animation. */
+const RIPPLE_ANIMATION_CONFIG: RippleAnimationConfig = {
+  enterDuration: numbers.DEACTIVATION_TIMEOUT_MS,
+  exitDuration: numbers.FG_DEACTIVATION_MS
+};
 
 /**
  * Directive to add MDC CSS to non-basic chips.
@@ -103,8 +107,8 @@ const _MatChipMixinBase:
     '[class.mat-mdc-chip-highlighted]': 'highlighted',
     '[class.mat-mdc-chip-with-avatar]': 'leadingIcon',
     '[class.mat-mdc-chip-with-trailing-icon]': 'trailingIcon || removeIcon',
-    '[class.mat-mdc-basic-chip]': '_isBasicChip()',
-    '[class.mat-mdc-standard-chip]': '!_isBasicChip()',
+    '[class.mat-mdc-basic-chip]': '_isBasicChip',
+    '[class.mat-mdc-standard-chip]': '!_isBasicChip',
     '[class._mat-animation-noopable]': '_animationsDisabled',
     '[id]': 'id',
     '[attr.disabled]': 'disabled || null',
@@ -114,7 +118,13 @@ const _MatChipMixinBase:
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatChip extends _MatChipMixinBase implements AfterContentInit, AfterViewInit,
-  CanColor, CanDisableRipple, HasTabIndex, RippleTarget, OnDestroy {
+  CanColor, CanDisableRipple, HasTabIndex, OnDestroy {
+  /** The ripple animation configuration to use for the chip. */
+  readonly _rippleAnimation: RippleAnimationConfig = RIPPLE_ANIMATION_CONFIG;
+
+  /** Whether the ripple is centered on the chip. */
+  readonly _isRippleCentered = false;
+
   /** Emits when the chip is focused. */
   readonly _onFocus = new Subject<MatChipEvent>();
 
@@ -122,6 +132,9 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
   readonly _onBlur = new Subject<MatChipEvent>();
 
   readonly HANDLED_KEYS: number[] = [];
+
+  /** Whether this chip is a basic (unstyled) chip. */
+  readonly _isBasicChip: boolean;
 
   /** Whether the chip has focus. */
   protected _hasFocusInternal = false;
@@ -212,25 +225,6 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
   /** Subject that emits when the component has been destroyed. */
   protected _destroyed = new Subject<void>();
 
-  /** The ripple renderer for this chip. */
-  private _rippleRenderer: RippleRenderer;
-
-  /**
-   * Ripple configuration for ripples that are launched on pointer down.
-   * Implemented as part of RippleTarget.
-   * @docs-private
-   */
-  rippleConfig: RippleConfig & RippleGlobalOptions;
-
-  /**
-   * Implemented as part of RippleTarget. Whether ripples are disabled on interaction.
-   * @docs-private
-   */
-  get rippleDisabled(): boolean {
-    return this.disabled || this.disableRipple || !!this.rippleConfig.disabled ||
-      this._isBasicChip();
-  }
-
   /** The chip's leading icon. */
   @ContentChild(MatChipAvatar) leadingIcon: MatChipAvatar;
 
@@ -239,6 +233,9 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
 
   /** The chip's trailing remove icon. */
   @ContentChild(MatChipRemove) removeIcon: MatChipRemove;
+
+  /** Reference to the MatRipple instance of the chip. */
+  @ViewChild(MatRipple) ripple: MatRipple;
 
  /**
   * Implementation of the MDC chip adapter interface.
@@ -309,21 +306,22 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
     // so they will never be called
     getRootBoundingClientRect: () => this._elementRef.nativeElement.getBoundingClientRect(),
     getCheckmarkBoundingClientRect: () => null,
+    getAttribute: (attr) => this._elementRef.nativeElement.getAttribute(attr),
  };
 
  constructor(
     public _changeDetectorRef: ChangeDetectorRef,
     readonly _elementRef: ElementRef,
-    private _platform: Platform,
     protected _ngZone: NgZone,
-    @Optional() @Inject(MAT_RIPPLE_GLOBAL_OPTIONS)
-    private _globalRippleOptions: RippleGlobalOptions | null,
     @Optional() private _dir: Directionality,
     // @breaking-change 8.0.0 `animationMode` parameter to become required.
     @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
     super(_elementRef);
     this._chipFoundation = new MDCChipFoundation(this._chipAdapter);
     this._animationsDisabled = animationMode === 'NoopAnimations';
+    this._isBasicChip = _elementRef.nativeElement.hasAttribute(this.basicChipAttrName) ||
+                        _elementRef.nativeElement.tagName.toLowerCase() === this.basicChipAttrName;
+
   }
 
   ngAfterContentInit() {
@@ -331,7 +329,6 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
   }
 
   ngAfterViewInit() {
-    this._initRipple();
     this._chipFoundation.init();
   }
 
@@ -339,7 +336,6 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
     this.destroyed.emit({chip: this});
     this._destroyed.next();
     this._destroyed.complete();
-    this._rippleRenderer._removeTriggerEvents();
     this._chipFoundation.destroy();
   }
 
@@ -392,13 +388,6 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
     }
   }
 
-  /** Whether this chip is a basic (unstyled) chip. */
-  _isBasicChip() {
-    const element = this._elementRef.nativeElement as HTMLElement;
-    return element.hasAttribute(this.basicChipAttrName) ||
-      element.tagName.toLowerCase() === this.basicChipAttrName;
-  }
-
   /** Sets whether the given CSS class should be applied to the MDC chip. */
   private _setMdcClass(cssClass: string, active: boolean) {
       const classes = this._elementRef.nativeElement.classList;
@@ -406,26 +395,16 @@ export class MatChip extends _MatChipMixinBase implements AfterContentInit, Afte
       this._changeDetectorRef.markForCheck();
   }
 
-  /** Initializes the ripple renderer. */
-  private _initRipple() {
-    this.rippleConfig = this._globalRippleOptions || {};
-
-    // Configure ripple animation to match MDC Ripple.
-    this.rippleConfig.animation = {
-      enterDuration: numbers.DEACTIVATION_TIMEOUT_MS,
-      exitDuration: numbers.FG_DEACTIVATION_MS,
-    };
-
-    this._rippleRenderer =
-      new RippleRenderer(this, this._ngZone, this._elementRef, this._platform);
-    this._rippleRenderer.setupTriggerEvents(this._elementRef);
-  }
-
   /** Forwards interaction events to the MDC chip foundation. */
   _handleInteraction(event: MouseEvent | KeyboardEvent) {
     if (!this.disabled) {
       this._chipFoundation.handleInteraction(event);
     }
+  }
+
+  /** Whether or not the ripple should be disabled. */
+  _isRippleDisabled(): boolean {
+    return this.disabled || this.disableRipple || this._isBasicChip;
   }
 
   static ngAcceptInputType_disabled: BooleanInput;

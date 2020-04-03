@@ -84,7 +84,7 @@ import {
   mixinErrorState,
   mixinTabIndex,
 } from '@angular/material/core';
-import {MatFormField, MatFormFieldControl} from '@angular/material/form-field';
+import {MAT_FORM_FIELD, MatFormField, MatFormFieldControl} from '@angular/material/form-field';
 import {defer, merge, Observable, Subject} from 'rxjs';
 import {
   distinctUntilChanged,
@@ -515,7 +515,7 @@ export class MatSelect extends _MatSelectMixinBase implements AfterContentInit, 
     @Optional() private _dir: Directionality,
     @Optional() _parentForm: NgForm,
     @Optional() _parentFormGroup: FormGroupDirective,
-    @Optional() private _parentFormField: MatFormField,
+    @Optional() @Inject(MAT_FORM_FIELD) private _parentFormField: MatFormField,
     @Self() @Optional() public ngControl: NgControl,
     @Attribute('tabindex') tabIndex: string,
     @Inject(MAT_SELECT_SCROLL_STRATEGY) scrollStrategyFactory: any,
@@ -1091,7 +1091,11 @@ export class MatSelect extends _MatSelectMixinBase implements AfterContentInit, 
   /** Gets the index of the provided option in the option list. */
   private _getOptionIndex(option: MatOption): number | undefined {
     return this.options.reduce((result: number | undefined, current: MatOption, index: number) => {
-      return result === undefined ? (option === current ? index : undefined) : result;
+      if (result !== undefined) {
+        return result;
+      }
+
+      return option === current ? index : undefined;
     }, undefined);
   }
 

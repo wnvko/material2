@@ -53,7 +53,7 @@ import {
 } from '@angular/material/core';
 
 import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {startWith, takeUntil} from 'rxjs/operators';
 
 import {MatListAvatarCssMatStyler, MatListIconCssMatStyler} from './list';
 
@@ -95,11 +95,10 @@ export class MatSelectionListChange {
   inputs: ['disableRipple'],
   host: {
     'role': 'option',
-    'class': 'mat-list-item mat-list-option',
+    'class': 'mat-list-item mat-list-option mat-focus-indicator',
     '(focus)': '_handleFocus()',
     '(blur)': '_handleBlur()',
     '(click)': '_handleClick()',
-    'tabindex': '-1',
     '[class.mat-list-item-disabled]': 'disabled',
     '[class.mat-list-item-with-avatar]': '_avatar || _icon',
     // Manually set the "primary" or "warn" class if the color has been explicitly
@@ -113,6 +112,7 @@ export class MatSelectionListChange {
     '[class.mat-list-single-selected-option]': 'selected && !selectionList.multiple',
     '[attr.aria-selected]': 'selected',
     '[attr.aria-disabled]': 'disabled',
+    '[attr.tabindex]': '-1',
   },
   templateUrl: 'list-option.html',
   encapsulation: ViewEncapsulation.None,
@@ -323,12 +323,13 @@ export class MatListOption extends _MatListOptionMixinBase implements AfterConte
   inputs: ['disableRipple'],
   host: {
     'role': 'listbox',
-    '[tabIndex]': 'tabIndex',
     'class': 'mat-selection-list mat-list-base',
+    '(focus)': '_onFocus()',
     '(blur)': '_onTouched()',
     '(keydown)': '_keydown($event)',
     '[attr.aria-multiselectable]': 'multiple',
     '[attr.aria-disabled]': 'disabled.toString()',
+    '[attr.tabindex]': '_tabIndex',
   },
   template: '<ng-content></ng-content>',
   styleUrls: ['list.css'],
@@ -351,7 +352,10 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
   @Output() readonly selectionChange: EventEmitter<MatSelectionListChange> =
       new EventEmitter<MatSelectionListChange>();
 
-  /** Tabindex of the selection list. */
+  /**
+   * Tabindex of the selection list.
+   * @breaking-change 11.0.0 Remove `tabIndex` input.
+   */
   @Input() tabIndex: number = 0;
 
   /** Theme color of the selection list. This sets the checkbox color for all list options. */
@@ -398,6 +402,9 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
   /** The currently selected options. */
   selectedOptions = new SelectionModel<MatListOption>(this._multiple);
 
+  /** The tabindex of the selection list. */
+  _tabIndex = -1;
+
   /** View to model callback that should be called whenever the selected options change. */
   private _onChange: (value: any) => void = (_: any) => {};
 
@@ -413,9 +420,11 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
   /** Whether the list has been destroyed. */
   private _isDestroyed: boolean;
 
-  constructor(private _element: ElementRef<HTMLElement>, @Attribute('tabindex') tabIndex: string) {
+  constructor(private _element: ElementRef<HTMLElement>,
+    // @breaking-change 11.0.0 Remove `tabIndex` parameter.
+    @Attribute('tabindex') tabIndex: string,
+    private _changeDetector: ChangeDetectorRef) {
     super();
-    this.tabIndex = parseInt(tabIndex) || 0;
   }
 
   ngAfterContentInit(): void {
@@ -432,6 +441,16 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
     if (this._value) {
       this._setOptionsFromValues(this._value);
     }
+
+    // If the user attempts to tab out of the selection list, allow focus to escape.
+    this._keyManager.tabOut.pipe(takeUntil(this._destroyed)).subscribe(() => {
+      this._allowFocusEscape();
+    });
+
+    // When the number of options change, update the tabindex of the selection list.
+    this.options.changes.pipe(startWith(null), takeUntil(this._destroyed)).subscribe(() => {
+      this._updateTabIndex();
+    });
 
     // Sync external changes to the model back to the options.
     this.selectedOptions.changed.pipe(takeUntil(this._destroyed)).subscribe(event => {
@@ -527,17 +546,18 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
           event.preventDefault();
         }
         break;
-      case A:
-        if (hasModifierKey(event, 'ctrlKey') && !manager.isTyping()) {
+      default:
+        // The "A" key gets special treatment, because it's used for the "select all" functionality.
+        if (keyCode === A && this.multiple && hasModifierKey(event, 'ctrlKey') &&
+            !manager.isTyping()) {
           this.options.find(option => !option.selected) ? this.selectAll() : this.deselectAll();
           event.preventDefault();
+        } else {
+          manager.onKeydown(event);
         }
-        break;
-      default:
-        manager.onKeydown(event);
     }
 
-    if ((keyCode === UP_ARROW || keyCode === DOWN_ARROW) && event.shiftKey &&
+    if (this.multiple && (keyCode === UP_ARROW || keyCode === DOWN_ARROW) && event.shiftKey &&
         manager.activeItemIndex !== previousFocusIndex) {
       this._toggleFocusedOption();
     }
@@ -558,6 +578,22 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
   /** Emits a change event if the selected state of an option changed. */
   _emitChangeEvent(option: MatListOption) {
     this.selectionChange.emit(new MatSelectionListChange(this, option));
+  }
+
+  /**
+   * When the selection list is focused, we want to move focus to an option within the list. Do this
+   * by setting the appropriate option to be active.
+   */
+  _onFocus(): void {
+    const activeIndex = this._keyManager.activeItemIndex;
+
+    if (!activeIndex || (activeIndex === -1)) {
+      // If there is no active index, set focus to the first option.
+      this._keyManager.setFirstItemActive();
+    } else {
+      // Otherwise, set focus to the active option.
+      this._keyManager.setActiveItem(activeIndex);
+    }
   }
 
   /** Implemented as part of ControlValueAccessor. */
@@ -662,6 +698,25 @@ export class MatSelectionList extends _MatSelectionListMixinBase implements CanD
     if (this.options) {
       this.options.forEach(option => option._markForCheck());
     }
+  }
+
+  /**
+   * Removes the tabindex from the selection list and resets it back afterwards, allowing the user
+   * to tab out of it. This prevents the list from capturing focus and redirecting it back within
+   * the list, creating a focus trap if it user tries to tab away.
+   */
+  private _allowFocusEscape() {
+    this._tabIndex = -1;
+
+    setTimeout(() => {
+      this._tabIndex = 0;
+      this._changeDetector.markForCheck();
+    });
+  }
+
+  /** Updates the tabindex based upon if the selection list is empty. */
+  private _updateTabIndex(): void {
+    this._tabIndex = (this.options.length === 0) ? -1 : 0;
   }
 
   static ngAcceptInputType_disabled: BooleanInput;

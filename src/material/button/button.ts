@@ -70,6 +70,7 @@ const _MatButtonMixinBase: CanDisableRippleCtor & CanDisableCtor & CanColorCtor 
   host: {
     '[attr.disabled]': 'disabled || null',
     '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
+    'class': 'mat-focus-indicator',
   },
   templateUrl: 'button.html',
   styleUrls: ['button.css'],
@@ -156,6 +157,7 @@ export class MatButton extends _MatButtonMixinBase
     '[attr.aria-disabled]': 'disabled.toString()',
     '(click)': '_haltDisabledEvents($event)',
     '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
+    'class': 'mat-focus-indicator',
   },
   inputs: ['disabled', 'disableRipple', 'color'],
   templateUrl: 'button.html',
@@ -181,7 +183,4 @@ export class MatAnchor extends MatButton {
       event.stopImmediatePropagation();
     }
   }
-
-  static ngAcceptInputType_disabled: BooleanInput;
-  static ngAcceptInputType_disableRipple: BooleanInput;
 }

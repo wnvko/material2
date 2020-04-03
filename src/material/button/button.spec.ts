@@ -270,6 +270,15 @@ describe('MatButton', () => {
       );
     });
   });
+
+  it('should have a focus indicator', () => {
+    const fixture = TestBed.createComponent(TestApp);
+    const buttonNativeElements =
+        [...fixture.debugElement.nativeElement.querySelectorAll('a, button')];
+
+    expect(buttonNativeElements.every(element => element.classList.contains('mat-focus-indicator')))
+        .toBe(true);
+  });
 });
 
 /** Test component that contains an MatButton. */

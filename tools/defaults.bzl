@@ -44,7 +44,7 @@ def ts_library(tsconfig = None, deps = [], testonly = False, **kwargs):
         # The default "ts_library" compiler does not come with "tsickle" available. Since
         # we have targets that use "tsickle" decorator processing, we need to ensure that
         # the compiler could load "tsickle" if needed.
-        compiler = "//tools/bazel:tsc_wrapped_with_tsickle",
+        compiler = "//tools:tsc_wrapped_with_tsickle",
         deps = local_deps,
         **kwargs
     )
@@ -100,7 +100,7 @@ def ng_module(
         **kwargs
     )
 
-def ng_package(name, data = [], globals = ROLLUP_GLOBALS, readme_md = None, **kwargs):
+def ng_package(name, data = [], deps = [], globals = ROLLUP_GLOBALS, readme_md = None, **kwargs):
     # If no readme file has been specified explicitly, use the default readme for
     # release packages from "src/README.md".
     if not readme_md:
@@ -119,6 +119,10 @@ def ng_package(name, data = [], globals = ROLLUP_GLOBALS, readme_md = None, **kw
         name = name,
         globals = globals,
         data = data + [":license_copied"],
+        # Tslib needs to be explicitly specified as dependency here, so that the `ng_package`
+        # rollup bundling action can include tslib. Tslib is usually a transitive dependency of
+        # entry-points passed to `ng_package`, but the rule does not collect transitive deps.
+        deps = deps + ["@npm//tslib"],
         readme_md = readme_md,
         substitutions = VERSION_PLACEHOLDER_REPLACEMENTS,
         **kwargs
@@ -175,10 +179,9 @@ def karma_web_test_suite(name, **kwargs):
     )
 
     # Workaround for: https://github.com/bazelbuild/rules_nodejs/issues/1429
-    native.sh_binary(
+    native.sh_test(
         name = "%s_local" % name,
         srcs = ["%s_local_bin" % name],
-        data = [":%s_local_bin" % name],
         tags = ["manual", "local", "ibazel_notify_changes"],
         testonly = True,
     )
@@ -243,6 +246,8 @@ def ng_web_test_suite(deps = [], static_css = [], bootstrap = [], tags = [], **k
             "//test:angular_test_init",
         ] + deps,
         browsers = [
+            # Note: when changing the browser names here, also update the "yarn test"
+            # script to reflect the new browser names.
             "@io_bazel_rules_webtesting//browsers:chromium-local",
             "@io_bazel_rules_webtesting//browsers:firefox-local",
         ],

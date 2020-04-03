@@ -10,6 +10,7 @@ import {
 } from '@angular/cdk/schematics';
 import {createTestApp, getFileContent} from '@angular/cdk/schematics/testing';
 import {getWorkspace} from '@schematics/angular/utility/config';
+import {addPackageToPackageJson} from './package-config';
 
 describe('ng-add schematic', () => {
   let runner: SchematicTestRunner;
@@ -77,6 +78,19 @@ describe('ng-add schematic', () => {
       'Expected the package manager to be scheduled in order to update lock files.');
     expect(runner.tasks.some(task => task.name === 'run-schematic')).toBe(true,
       'Expected the setup-project schematic to be scheduled.');
+  });
+
+  it('should respect version range from CLI ng-add command', async () => {
+    // Simulates the behavior of the CLI `ng add` command. The command inserts the
+    // requested package version into the `package.json` before the actual schematic runs.
+    addPackageToPackageJson(appTree, '@angular/material', '^9.0.0');
+
+    const tree = await runner.runSchematicAsync('ng-add', {}, appTree).toPromise();
+    const packageJson = JSON.parse(getFileContent(tree, '/package.json'));
+    const dependencies = packageJson.dependencies;
+
+    expect(dependencies['@angular/material']).toBe('^9.0.0');
+    expect(dependencies['@angular/cdk']).toBe('^9.0.0');
   });
 
   it('should add default theme', async () => {
@@ -230,15 +244,8 @@ describe('ng-add schematic', () => {
     it('should throw an error if the "build" target has been changed', async () => {
       overwriteTargetBuilder(appTree, 'build', 'thirdparty-builder');
 
-      let message: string|null = null;
-
-      try {
-        await runner.runSchematicAsync('ng-add-setup-project', {}, appTree).toPromise();
-      } catch (e) {
-        message = e.message;
-      }
-
-      expect(message).toMatch(/not using the default builders.*build/);
+      await expectAsync(runner.runSchematicAsync('ng-add-setup-project', {}, appTree).toPromise())
+        .toBeRejectedWithError(/not using the default builders.*build/);
     });
 
     it('should warn if the "test" target has been changed', async () => {
@@ -385,6 +392,29 @@ describe('ng-add schematic', () => {
     indexFiles.forEach(indexPath => {
       const buffer = tree.read(indexPath)!;
       expect(buffer.toString()).toContain('<body class="one mat-typography two">');
+    });
+  });
+
+  it('should not add the global typography class if the user did not opt into it', async () => {
+    appTree.overwrite('projects/material/src/index.html', `
+      <html>
+        <head></head>
+        <body class="one two"></body>
+      </html>
+    `);
+
+    const tree = await runner.runSchematicAsync('ng-add-setup-project', {
+      typography: false
+    }, appTree).toPromise();
+
+    const workspace = getWorkspace(tree);
+    const project = getProjectFromWorkspace(workspace);
+    const indexFiles = getProjectIndexFiles(project);
+    expect(indexFiles.length).toBe(1);
+
+    indexFiles.forEach(indexPath => {
+      const buffer = tree.read(indexPath)!;
+      expect(buffer.toString()).toContain('<body class="one two">');
     });
   });
 });

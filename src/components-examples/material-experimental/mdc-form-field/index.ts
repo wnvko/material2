@@ -25,7 +25,8 @@ const EXAMPLES = [
     ReactiveFormsModule,
   ],
   declarations: [...EXAMPLES, MyTelInput],
-  exports: EXAMPLES,
+  exports: [...EXAMPLES, MyTelInput],
+  entryComponents: EXAMPLES,
 })
 export class MdcFormFieldExamplesModule {
 }

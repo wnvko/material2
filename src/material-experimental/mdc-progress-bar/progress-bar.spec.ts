@@ -1,8 +1,7 @@
-import {TestBed, async, ComponentFixture} from '@angular/core/testing';
+import {TestBed, ComponentFixture} from '@angular/core/testing';
 import {Component, DebugElement, Type} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {dispatchFakeEvent} from '@angular/cdk/testing/private';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {MatProgressBarModule} from './index';
 import {MatProgressBar} from './progress-bar';
 
@@ -70,28 +69,32 @@ describe('MDC-based MatProgressBar', () => {
         const primaryStyles =
             progressElement.nativeElement.querySelector('.mdc-linear-progress__primary-bar').style;
         const bufferStyles =
-          progressElement.nativeElement.querySelector('.mdc-linear-progress__buffer').style;
+          progressElement.nativeElement.querySelector('.mdc-linear-progress__buffer-bar').style;
+
+        // Parse out and round the value since different
+        // browsers return the value with a different precision.
+        const getBufferValue = () => Math.floor(parseInt(bufferStyles.flexBasis));
 
         expect(primaryStyles.transform).toBe('scaleX(0)');
-        expect(bufferStyles.transform).toBe('scaleX(1)');
+        expect(getBufferValue()).toBe(100);
 
         progressComponent.value = 40;
         expect(primaryStyles.transform).toBe('scaleX(0.4)');
-        expect(bufferStyles.transform).toBe('scaleX(1)');
+        expect(getBufferValue()).toBe(100);
 
         progressComponent.value = 35;
         progressComponent.bufferValue = 55;
         expect(primaryStyles.transform).toBe('scaleX(0.35)');
-        expect(bufferStyles.transform).toBe('scaleX(1)');
+        expect(getBufferValue()).toBe(100);
 
         progressComponent.mode = 'buffer';
         expect(primaryStyles.transform).toBe('scaleX(0.35)');
-        expect(bufferStyles.transform).toEqual('scaleX(0.55)');
+        expect(getBufferValue()).toEqual(55);
 
         progressComponent.value = 60;
         progressComponent.bufferValue = 60;
         expect(primaryStyles.transform).toBe('scaleX(0.6)');
-        expect(bufferStyles.transform).toEqual('scaleX(0.6)');
+        expect(getBufferValue()).toEqual(60);
       });
 
       it('should remove the `aria-valuenow` attribute in indeterminate mode', () => {
@@ -213,33 +216,6 @@ describe('MDC-based MatProgressBar', () => {
     });
   });
 
-  describe('With NoopAnimations', () => {
-    let progressComponent: MatProgressBar;
-    let primaryValueBar: DebugElement;
-    let fixture: ComponentFixture<BasicProgressBar>;
-
-    beforeEach(async(() => {
-      fixture = createComponent(BasicProgressBar, [MatProgressBarModule, NoopAnimationsModule]);
-      const progressElement = fixture.debugElement.query(By.css('mat-progress-bar'))!;
-      progressComponent = progressElement.componentInstance;
-      primaryValueBar = progressElement.query(By.css('.mdc-linear-progress__primary-bar'))!;
-    }));
-
-    it('should not bind transition end listener', () => {
-      spyOn(primaryValueBar.nativeElement, 'addEventListener');
-      fixture.detectChanges();
-
-      expect(primaryValueBar.nativeElement.addEventListener).not.toHaveBeenCalled();
-    });
-
-    it('should trigger the animationEnd output on value set', () => {
-      fixture.detectChanges();
-      spyOn(progressComponent.animationEnd, 'next');
-
-      progressComponent.value = 40;
-      expect(progressComponent.animationEnd.next).toHaveBeenCalledWith({ value: 40 });
-    });
-  });
 });
 
 @Component({template: '<mat-progress-bar></mat-progress-bar>'})

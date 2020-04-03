@@ -22,6 +22,7 @@ export interface ModifierKeys {
 // dependency on any particular testing framework here. Instead we'll just maintain this supported
 // list of keys and let individual concrete `HarnessEnvironment` classes map them to whatever key
 // representation is used in its respective testing framework.
+// tslint:disable-next-line:prefer-const-enum Seems like this causes some issues with System.js
 export enum TestKey {
   BACKSPACE,
   TAB,
@@ -111,4 +112,7 @@ export interface TestElement {
 
   /** Checks whether this element matches the given selector. */
   matchesSelector(selector: string): Promise<boolean>;
+
+  /** Checks whether the element is focused. */
+  isFocused(): Promise<boolean>;
 }
