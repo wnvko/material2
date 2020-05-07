@@ -221,7 +221,7 @@ export interface DragDropConfig extends Partial<DragRefConfig> {
 
 export declare class DragDropModule {
     static ɵinj: i0.ɵɵInjectorDef<DragDropModule>;
-    static ɵmod: i0.ɵɵNgModuleDefWithMeta<DragDropModule, [typeof i1.CdkDropList, typeof i2.CdkDropListGroup, typeof i3.CdkDrag, typeof i4.CdkDragHandle, typeof i5.CdkDragPreview, typeof i6.CdkDragPlaceholder], never, [typeof i1.CdkDropList, typeof i2.CdkDropListGroup, typeof i3.CdkDrag, typeof i4.CdkDragHandle, typeof i5.CdkDragPreview, typeof i6.CdkDragPlaceholder]>;
+    static ɵmod: i0.ɵɵNgModuleDefWithMeta<DragDropModule, [typeof i1.CdkDropList, typeof i2.CdkDropListGroup, typeof i3.CdkDrag, typeof i4.CdkDragHandle, typeof i5.CdkDragPreview, typeof i6.CdkDragPlaceholder], never, [typeof i7.CdkScrollableModule, typeof i1.CdkDropList, typeof i2.CdkDropListGroup, typeof i3.CdkDrag, typeof i4.CdkDragHandle, typeof i5.CdkDragPreview, typeof i6.CdkDragPlaceholder]>;
 }
 
 export declare class DragDropRegistry<I, C> implements OnDestroy {
@@ -379,6 +379,7 @@ export declare class DropListRef<T = any> {
     enter(item: DragRef, pointerX: number, pointerY: number, index?: number): void;
     exit(item: DragRef): void;
     getItemIndex(item: DragRef): number;
+    getScrollableParents(): ReadonlyArray<HTMLElement>;
     isDragging(): boolean;
     isReceiving(): boolean;
     start(): void;
@@ -389,5 +390,10 @@ export declare class DropListRef<T = any> {
 }
 
 export declare function moveItemInArray<T = any>(array: T[], fromIndex: number, toIndex: number): void;
+
+export interface Point {
+    x: number;
+    y: number;
+}
 
 export declare function transferArrayItem<T = any>(currentArray: T[], targetArray: T[], currentIndex: number, targetIndex: number): void;
